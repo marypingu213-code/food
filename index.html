@@ -124,10 +124,11 @@
         setIsParsingMenu(true);
         setMenuError('');
 
-        try {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = async () => {
+        const reader = new FileReader();
+        
+        reader.onload = async () => {
+          // 將 try-catch 移到非同步函數內部，才能正確捕捉 Promise Error
+          try {
             const base64Image = reader.result.split(',')[1];
             
             const prompt = `你是一個專業的資料擷取助理。請從這張菜單圖片中，擷取所有的「餐點名稱」、「價格」以及它們所屬的「大分類」。
@@ -149,7 +150,7 @@
               }
             };
 
-            // 使用 gemini-2.5-flash 模型
+            // 使用穩定的正式版模型 (gemini-2.5-flash)
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -178,15 +179,29 @@
                 console.error("JSON 解析失敗:", text);
                 setMenuError("無法解析菜單內容，請確認圖片是否清晰或嘗試手動輸入。");
               }
+            } else {
+              setMenuError("AI 未回傳任何內容，請再試一次。");
             }
+          } catch (error) {
+            console.error("處理圖片時發生錯誤:", error);
+            
+            // 針對 GCP API 未啟用的錯誤提供明確的中文提示
+            if (error.message.includes("has not been used in project") || error.message.includes("is disabled")) {
+              setMenuError("您的 API Key 尚未啟用 Generative Language API。請至 Google Cloud Console 啟用，或直接到 Google AI Studio 免費申請一把新的 Key。");
+            } else {
+              setMenuError(error.message || "處理圖片時發生錯誤，請稍後再試。");
+            }
+          } finally {
             setIsParsingMenu(false);
-          };
-        } catch (error) {
-          console.error("處理圖片時發生錯誤:", error);
-          setMenuError(error.message || "處理圖片時發生錯誤，請稍後再試。");
+          }
+        };
+
+        reader.onerror = () => {
+          setMenuError("圖片讀取失敗，請再試一次。");
           setIsParsingMenu(false);
-        }
+        };
         
+        reader.readAsDataURL(file);
         e.target.value = null; // 清空選擇檔案，允許重複上傳同一張
       };
 
