@@ -54,9 +54,21 @@
       const [activeTab, setActiveTab] = useState('setup');
       const [apiKey, setApiKey] = useState(localStorage.getItem('geminiApiKey') || '');
       
-      // State: Setup (預設假資料供參考)
-      const [studentInput, setStudentInput] = useState('王小明\n陳小華\n林小美');
-      const [students, setStudents] = useState(['王小明', '陳小華', '林小美']);
+      // --- 產生預設的班級名單 (101~608) ---
+      const generateClassList = () => {
+        const list = [];
+        for (let grade = 1; grade <= 6; grade++) {
+          for (let cls = 1; cls <= 8; cls++) {
+            list.push(`${grade}0${cls}`);
+          }
+        }
+        return list;
+      };
+      const defaultClasses = generateClassList();
+      
+      // State: Setup (預設帶入 101~608 班級名單)
+      const [studentInput, setStudentInput] = useState(defaultClasses.join('\n'));
+      const [students, setStudents] = useState(defaultClasses);
       const [menuItems, setMenuItems] = useState([
         { id: '1', category: '麵食類', name: '肉麻麵 (細麵)', price: 65 },
         { id: '2', category: '麵食類', name: '肉麻麵 (意麵)', price: 65 },
@@ -357,18 +369,18 @@
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                   <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                     <span className="bg-indigo-100 text-indigo-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">A</span>
-                    建立學生名單
+                    建立班級/學生名單
                   </h2>
-                  <p className="text-sm text-slate-500 mb-3">請在下方輸入學生姓名，每行一位。系統會自動將這些名字轉換為點餐時的下拉式選單。</p>
+                  <p className="text-sm text-slate-500 mb-3">系統已自動為您產生 101~608 的班級名單。您也可以在下方自由修改或自訂，每行一筆。</p>
                   <textarea 
                     className="w-full h-32 p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none resize-y"
                     value={studentInput}
                     onChange={handleStudentInputChange}
-                    placeholder="王小明&#10;陳小華&#10;林小美"
+                    placeholder="101&#10;102&#10;103"
                   />
                   <div className="mt-2 text-sm text-emerald-600 flex items-center gap-1">
                     <Check className="w-4 h-4" />
-                    已成功載入 {students.length} 位學生
+                    已成功載入 {students.length} 筆名單
                   </div>
                 </div>
 
@@ -496,13 +508,13 @@
                   <>
                     {/* 步驟 1：選擇學生 */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                      <h2 className="text-lg font-bold mb-4">1. 選擇點餐學生</h2>
+                      <h2 className="text-lg font-bold mb-4">1. 選擇點餐班級/學生</h2>
                       <select 
                         className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 text-lg"
                         value={currentStudent}
                         onChange={(e) => handleSelectStudent(e.target.value)}
                       >
-                        <option value="" disabled>-- 請選擇您的名字 --</option>
+                        <option value="" disabled>-- 請選擇班級/名字 --</option>
                         {students.map(student => (
                           <option key={student} value={student}>
                             {student} {orders[student] ? ' (已點餐 ✅)' : ''}
@@ -635,7 +647,7 @@
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                   <div className="bg-indigo-50 p-4 border-b border-indigo-100 flex items-center gap-2">
                     <PieChart className="w-5 h-5 text-indigo-600" />
-                    <h2 className="text-lg font-bold text-indigo-800">學生帳單（方便收錢）</h2>
+                    <h2 className="text-lg font-bold text-indigo-800">各班/個人帳單（方便收錢）</h2>
                   </div>
                   <div className="p-0">
                      {Object.keys(orders).length === 0 ? (
@@ -644,7 +656,7 @@
                       <table className="w-full text-left">
                         <thead className="bg-slate-50 text-slate-500 text-sm">
                           <tr>
-                            <th className="p-4 font-medium">學生姓名</th>
+                            <th className="p-4 font-medium">班級/姓名</th>
                             <th className="p-4 font-medium">點餐內容</th>
                             <th className="p-4 font-medium text-right">應收金額</th>
                           </tr>
