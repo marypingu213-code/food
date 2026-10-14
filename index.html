@@ -49,6 +49,66 @@
     const AlertCircle = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>;
     const Loader2 = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>;
     const Utensils = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>;
+    const GripVertical = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>;
+    const ImageIcon = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>;
+    const LinkIcon = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>;
+    const MapPin = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
+
+    // --- 餐點圖片 (載入失敗時顯示預設圖示) ---
+    const ItemImage = ({ src, className }) => {
+      const [failed, setFailed] = useState(false);
+      useEffect(() => setFailed(false), [src]);
+      if (!src || failed) {
+        return (
+          <div className={`${className} bg-slate-100 flex items-center justify-center text-slate-300`}>
+            <ImageIcon className="w-1/2 h-1/2" />
+          </div>
+        );
+      }
+      return <img src={src} alt="" referrerPolicy="no-referrer" className={`${className} object-cover`} onError={() => setFailed(true)} />;
+    };
+
+    // 測試圖片網址是否真的能載入 (避免 AI 給出失效連結)
+    const canLoadImage = (url) => new Promise(resolve => {
+      const img = new Image();
+      const timer = setTimeout(() => resolve(false), 8000);
+      img.referrerPolicy = 'no-referrer';
+      img.onload = () => { clearTimeout(timer); resolve(img.naturalWidth > 0); };
+      img.onerror = () => { clearTimeout(timer); resolve(false); };
+      img.src = url;
+    });
+
+    // 從 AI 回覆中取出 JSON 物件 (使用搜尋功能時無法強制 JSON 格式)
+    const extractJson = (text) => {
+      const start = text.indexOf('{');
+      const end = text.lastIndexOf('}');
+      if (start === -1 || end <= start) return null;
+      try {
+        return JSON.parse(text.slice(start, end + 1));
+      } catch {
+        return null;
+      }
+    };
+
+    // 將上傳的圖片縮小，避免佔用太多記憶體
+    const resizeImageFile = (file, maxSize = 256) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
 
     function App() {
       const [activeTab, setActiveTab] = useState('setup');
@@ -76,6 +136,14 @@
       ]);
       const [isParsingMenu, setIsParsingMenu] = useState(false);
       const [menuError, setMenuError] = useState('');
+      const [dragState, setDragState] = useState(null); // { id, name, x, y, target }
+
+      // State: 餐點圖片搜尋
+      const [plusCode, setPlusCode] = useState('');
+      const [restaurantInfo, setRestaurantInfo] = useState(null);
+      const [isFindingImages, setIsFindingImages] = useState(false);
+      const [imageStatus, setImageStatus] = useState('');
+      const [imageError, setImageError] = useState('');
 
       // State: Ordering
       const [currentStudent, setCurrentStudent] = useState('');
@@ -113,9 +181,186 @@
 
       // 更新單一菜單品項
       const updateMenuItem = (id, field, value) => {
-        setMenuItems(menuItems.map(item =>
+        setMenuItems(prev => prev.map(item =>
           item.id === id ? { ...item, [field]: field === 'price' ? Number(value) : value } : item
         ));
+      };
+
+      // 移動菜單品項 (拖曳排序，也可移到其他分類)
+      const moveMenuItem = (dragId, target) => {
+        setMenuItems(prev => {
+          const dragged = prev.find(m => m.id === dragId);
+          if (!dragged || target.itemId === dragId) return prev;
+          const moved = { ...dragged, category: target.category };
+          const rest = prev.filter(m => m.id !== dragId);
+          let index;
+          if (target.itemId) {
+            index = rest.findIndex(m => m.id === target.itemId) + (target.after ? 1 : 0);
+          } else {
+            // 放在分類空白處：排到該分類最後一項
+            const last = rest.map(m => m.category || '未分類').lastIndexOf(target.category);
+            index = last === -1 ? rest.length : last + 1;
+          }
+          rest.splice(index, 0, moved);
+          return rest;
+        });
+      };
+
+      // 開始拖曳 (用 pointer 事件，滑鼠與手機觸控都能用)
+      const startDrag = (e, item) => {
+        e.preventDefault();
+        setDragState({ id: item.id, name: item.name || '(未命名)', x: e.clientX, y: e.clientY, target: null });
+      };
+
+      useEffect(() => {
+        if (!dragState) return;
+        const dragId = dragState.id;
+
+        const findTarget = (x, y) => {
+          const el = document.elementFromPoint(x, y);
+          const itemEl = el?.closest('[data-drop-item]');
+          if (itemEl) {
+            const rect = itemEl.getBoundingClientRect();
+            return { itemId: itemEl.dataset.dropItem, category: itemEl.dataset.category, after: y > rect.top + rect.height / 2 };
+          }
+          const categoryEl = el?.closest('[data-drop-category]');
+          return categoryEl ? { category: categoryEl.dataset.dropCategory } : null;
+        };
+
+        const onMove = (e) => {
+          // 拖到畫面邊緣時自動捲動
+          if (e.clientY < 80) window.scrollBy(0, -12);
+          else if (e.clientY > window.innerHeight - 80) window.scrollBy(0, 12);
+          setDragState(s => s && { ...s, x: e.clientX, y: e.clientY, target: findTarget(e.clientX, e.clientY) });
+        };
+        const onUp = (e) => {
+          const target = findTarget(e.clientX, e.clientY);
+          if (target) moveMenuItem(dragId, target);
+          setDragState(null);
+        };
+        const onCancel = () => setDragState(null);
+
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onCancel);
+        return () => {
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('pointercancel', onCancel);
+        };
+      }, [dragState?.id]);
+
+      // 手動上傳單一品項圖片
+      const handleItemImageUpload = async (id, e) => {
+        const file = e.target.files[0];
+        e.target.value = null;
+        if (!file) return;
+        try {
+          updateMenuItem(id, 'image', await resizeImageFile(file));
+        } catch {
+          alert('圖片讀取失敗，請再試一次。');
+        }
+      };
+
+      // 手動貼上單一品項圖片網址
+      const promptItemImageUrl = (id) => {
+        const url = window.prompt('請貼上圖片網址（留空則移除圖片）：', '');
+        if (url === null) return;
+        const trimmed = url.trim();
+        if (trimmed && !/^https?:\/\//.test(trimmed)) {
+          alert('圖片網址必須以 http:// 或 https:// 開頭');
+          return;
+        }
+        updateMenuItem(id, 'image', trimmed);
+      };
+
+      // 呼叫 Gemini API，回傳文字內容
+      const callGemini = async (parts, { json = false, search = false } = {}) => {
+        const payload = { contents: [{ role: "user", parts }] };
+        if (json) payload.generationConfig = { responseMimeType: "application/json" };
+        if (search) payload.tools = [{ google_search: {} }];
+
+        // 使用穩定的正式版模型 (gemini-2.5-flash)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.error) {
+          throw new Error(result.error.message || 'API 呼叫失敗，請檢查 API Key 是否正確。');
+        }
+
+        return (result.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
+      };
+
+      // 針對 GCP API 未啟用的錯誤提供明確的中文提示
+      const friendlyError = (error, fallback) => {
+        const message = error?.message || '';
+        if (message.includes("has not been used in project") || message.includes("is disabled")) {
+          return "您的 API Key 尚未啟用 Generative Language API。請至 Google Cloud Console 啟用，或直接到 Google AI Studio 免費申請一把新的 Key。";
+        }
+        return message || fallback;
+      };
+
+      // 依 Plus Code 找出餐廳，並搜尋各品項的餐點圖片
+      const handleFindImages = async () => {
+        if (!apiKey) {
+          setImageError("請先在上方填寫 Gemini API Key 才能使用 AI 搜尋功能！");
+          return;
+        }
+        if (!plusCode.trim()) {
+          setImageError("請先輸入餐廳的 Plus Code。");
+          return;
+        }
+        const namedItems = menuItems.filter(m => m.name.trim() !== '');
+        if (namedItems.length === 0) {
+          setImageError("請先建立菜單品項，再搜尋圖片。");
+          return;
+        }
+
+        setIsFindingImages(true);
+        setImageError('');
+        setImageStatus('');
+
+        try {
+          const itemList = namedItems.map(m => `- id: ${m.id}，名稱：${m.name}`).join('\n');
+          const prompt = `以下是一間餐廳在 Google 地圖上的 Plus Code：「${plusCode.trim()}」。
+請使用 Google 搜尋找出位於這個位置的餐廳，以及它的官方網站、Google 地圖、外送平台 (Uber Eats、foodpanda) 或社群網站上的餐點照片。
+接著為下列每個菜單品項，找出最符合的餐點照片「直接圖片網址」(必須是可直接開啟的圖片連結，例如 .jpg、.png、.webp 結尾或圖片 CDN 網址，不能是網頁連結)。
+找不到的品項 imageUrl 請填空字串，不要自行編造網址。
+菜單品項：
+${itemList}
+
+只回傳下列格式的 JSON，不要任何其他文字：
+{"restaurant": {"name": "餐廳名稱", "address": "地址", "website": "網址"}, "images": [{"id": "品項 id", "imageUrl": "圖片網址"}]}`;
+
+          const text = await callGemini([{ text: prompt }], { search: true });
+          const data = extractJson(text);
+          if (!data) throw new Error("無法解析 AI 回傳的內容，請再試一次。");
+
+          setRestaurantInfo(data.restaurant || null);
+
+          // 只保留真的能載入的圖片
+          const candidates = (data.images || []).filter(i => i && i.id && /^https?:\/\//.test(i.imageUrl || ''));
+          const checked = await Promise.all(candidates.map(async c => (await canLoadImage(c.imageUrl)) ? c : null));
+          const found = Object.fromEntries(checked.filter(Boolean).map(c => [String(c.id), c.imageUrl]));
+
+          // 已經有圖片的品項不覆蓋
+          setMenuItems(prev => prev.map(item => (!item.image && found[item.id]) ? { ...item, image: found[item.id] } : item));
+
+          const count = Object.keys(found).length;
+          setImageStatus(count > 0
+            ? `已為 ${count} / ${namedItems.length} 個品項找到圖片。找不到的品項可以點縮圖手動上傳。`
+            : "沒有找到可用的餐點圖片，可以點各品項前的縮圖手動上傳，或貼上圖片網址。");
+        } catch (error) {
+          console.error("搜尋餐點圖片時發生錯誤:", error);
+          setImageError(friendlyError(error, "搜尋圖片時發生錯誤，請稍後再試。"));
+        } finally {
+          setIsFindingImages(false);
+        }
       };
 
       // 刪除菜單品項
@@ -149,33 +394,10 @@
             不要包含任何其他解釋文字或 Markdown 標記，只要純 JSON。
             範例：[{"category": "飯麵類", "name": "排骨飯", "price": 90}, {"category": "飲品", "name": "珍奶", "price": 50}]`;
 
-            const payload = {
-              contents: [{
-                role: "user",
-                parts: [
-                  { text: prompt },
-                  { inlineData: { mimeType: file.type, data: base64Image } }
-                ]
-              }],
-              generationConfig: {
-                responseMimeType: "application/json"
-              }
-            };
-
-            // 使用穩定的正式版模型 (gemini-2.5-flash)
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-
-            if (result.error) {
-              throw new Error(result.error.message || 'API 呼叫失敗，請檢查 API Key 是否正確。');
-            }
-
-            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            const text = await callGemini([
+              { text: prompt },
+              { inlineData: { mimeType: file.type, data: base64Image } }
+            ], { json: true });
 
             if (text) {
               try {
@@ -196,13 +418,7 @@
             }
           } catch (error) {
             console.error("處理圖片時發生錯誤:", error);
-
-            // 針對 GCP API 未啟用的錯誤提供明確的中文提示
-            if (error.message.includes("has not been used in project") || error.message.includes("is disabled")) {
-              setMenuError("您的 API Key 尚未啟用 Generative Language API。請至 Google Cloud Console 啟用，或直接到 Google AI Studio 免費申請一把新的 Key。");
-            } else {
-              setMenuError(error.message || "處理圖片時發生錯誤，請稍後再試。");
-            }
+            setMenuError(friendlyError(error, "處理圖片時發生錯誤，請稍後再試。"));
           } finally {
             setIsParsingMenu(false);
           }
@@ -410,10 +626,15 @@
                     )}
                   </div>
 
-                  {/* 手動編輯區塊 (依照分類渲染外框) */}
-                  <div className="space-y-4">
+                  {/* 手動編輯區塊 (依照分類渲染外框，可拖曳 ⠿ 排序或移到其他分類) */}
+                  <p className="text-xs text-slate-500 mb-3">💡 按住品項左側的 ⠿ 拖曳即可調整順序，也能拖到其他分類；點縮圖可上傳餐點圖片。</p>
+                  <div className={`space-y-4 ${dragState ? 'select-none' : ''}`}>
                     {Object.entries(setupGroupedMenu).map(([category, items]) => (
-                      <div key={category} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                      <div
+                        key={category}
+                        data-drop-category={category}
+                        className={`border rounded-xl overflow-hidden bg-white shadow-sm transition-colors ${dragState?.target?.category === category ? 'border-indigo-400 ring-2 ring-indigo-200' : 'border-slate-200'}`}
+                      >
 
                         {/* 分類標頭 - 可直接編輯更改分類名稱 */}
                         <div className="bg-indigo-50/50 p-3 border-b border-slate-200 flex items-center gap-3">
@@ -430,37 +651,68 @@
 
                         {/* 該分類底下的所有品項 */}
                         <div className="p-3 space-y-3">
-                          <div className="flex font-semibold text-slate-500 text-sm px-1">
+                          <div className="hidden sm:flex gap-1.5 font-semibold text-slate-500 text-sm px-1">
+                            <div className="w-6"></div>
+                            <div className="w-12 text-center">圖片</div>
                             <div className="flex-1">餐點名稱</div>
-                            <div className="w-24 text-right pr-4">價格 ($)</div>
-                            <div className="w-10"></div>
+                            <div className="w-20 sm:w-24 text-right pr-4">價格 ($)</div>
+                            <div className="w-[4.5rem]"></div>
                           </div>
 
-                          {items.map((item) => (
-                            <div key={item.id} className="flex items-center gap-2 group">
-                              <input
-                                type="text"
-                                value={item.name}
-                                onChange={(e) => updateMenuItem(item.id, 'name', e.target.value)}
-                                placeholder="例如：滷肉飯"
-                                className="flex-1 p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                              />
-                              <input
-                                type="number"
-                                value={item.price}
-                                onChange={(e) => updateMenuItem(item.id, 'price', e.target.value)}
-                                min="0"
-                                className="w-24 p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-right"
-                              />
-                              <button
-                                onClick={() => removeMenuItem(item.id)}
-                                className="p-2 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
-                                title="刪除品項"
+                          {items.map((item) => {
+                            const isTarget = dragState?.target?.itemId === item.id;
+                            const dropLine = isTarget ? (dragState.target.after ? 'shadow-[0_3px_0_0_#6366f1]' : 'shadow-[0_-3px_0_0_#6366f1]') : '';
+                            return (
+                              <div
+                                key={item.id}
+                                data-drop-item={item.id}
+                                data-category={category}
+                                className={`flex flex-wrap sm:flex-nowrap items-center gap-1.5 rounded-lg ${dropLine} ${dragState?.id === item.id ? 'opacity-40' : ''}`}
                               >
-                                <Trash2 className="w-5 h-5" />
-                              </button>
-                            </div>
-                          ))}
+                                <button
+                                  onPointerDown={(e) => startDrag(e, item)}
+                                  className="w-6 h-10 flex items-center justify-center text-slate-400 hover:text-indigo-600 cursor-grab active:cursor-grabbing touch-none"
+                                  title="按住拖曳排序"
+                                >
+                                  <GripVertical className="w-5 h-5" />
+                                </button>
+                                <label className="cursor-pointer shrink-0" title="點擊上傳餐點圖片">
+                                  <ItemImage src={item.image} className="w-12 h-12 rounded-lg border border-slate-200" />
+                                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleItemImageUpload(item.id, e)} />
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.name}
+                                  onChange={(e) => updateMenuItem(item.id, 'name', e.target.value)}
+                                  placeholder="例如：滷肉飯"
+                                  className="flex-1 min-w-[8rem] p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                                />
+                                <div className="ml-auto flex items-center gap-1.5">
+                                  <input
+                                    type="number"
+                                    value={item.price}
+                                    onChange={(e) => updateMenuItem(item.id, 'price', e.target.value)}
+                                    min="0"
+                                    className="w-20 sm:w-24 p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-right"
+                                  />
+                                  <button
+                                    onClick={() => promptItemImageUrl(item.id)}
+                                    className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors rounded-lg hover:bg-indigo-50"
+                                    title="貼上圖片網址"
+                                  >
+                                    <LinkIcon className="w-5 h-5" />
+                                  </button>
+                                  <button
+                                    onClick={() => removeMenuItem(item.id)}
+                                    className="p-1.5 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                                    title="刪除品項"
+                                  >
+                                    <Trash2 className="w-5 h-5" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
 
                           {/* 新增項目按鈕，會自動歸類到此分類 */}
                           <button
@@ -481,6 +733,64 @@
                       <Plus className="w-5 h-5" /> 建立新分類
                     </button>
                   </div>
+                </div>
+
+                {/* 餐點圖片搜尋 (Plus Code) */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                  <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span className="bg-indigo-100 text-indigo-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">C</span>
+                    餐點圖片 (用 Plus Code 搜尋)
+                  </h2>
+                  <p className="text-sm text-slate-500 mb-3">輸入餐廳在 Google 地圖上的 Plus Code（例如：7QQ32GJP+XX 或 2GJP+XX 台北市），AI 會用 Google 搜尋找出這間餐廳，並為上方菜單品項配上餐點照片，讓學生點餐時更好辨識。</p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      value={plusCode}
+                      onChange={(e) => setPlusCode(e.target.value)}
+                      placeholder="在此貼上 Plus Code..."
+                      className="flex-1 p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                    />
+                    <button
+                      onClick={handleFindImages}
+                      disabled={isFindingImages}
+                      className={`px-5 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors ${isFindingImages ? 'bg-slate-200 text-slate-500 cursor-wait' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                    >
+                      {isFindingImages ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" /> 搜尋中...</>
+                      ) : (
+                        <><ImageIcon className="w-5 h-5" /> 搜尋餐點圖片</>
+                      )}
+                    </button>
+                  </div>
+                  {plusCode.trim() && (
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(plusCode.trim())}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-2 inline-flex items-center gap-1 text-xs text-indigo-500 hover:underline"
+                    >
+                      <MapPin className="w-3.5 h-3.5" /> 在 Google 地圖確認位置
+                    </a>
+                  )}
+                  {restaurantInfo?.name && (
+                    <div className="mt-3 p-3 bg-slate-50 rounded-xl text-sm">
+                      <div className="font-bold text-slate-700">🍽️ {restaurantInfo.name}</div>
+                      {restaurantInfo.address && <div className="text-slate-500">{restaurantInfo.address}</div>}
+                      {/^https?:\/\//.test(restaurantInfo.website || '') && (
+                        <a href={restaurantInfo.website} target="_blank" rel="noreferrer" className="text-indigo-500 hover:underline break-all">{restaurantInfo.website}</a>
+                      )}
+                    </div>
+                  )}
+                  {imageStatus && (
+                    <div className="mt-3 text-sm text-emerald-600 flex items-center gap-1">
+                      <Check className="w-4 h-4 shrink-0" /> {imageStatus}
+                    </div>
+                  )}
+                  {imageError && (
+                    <div className="mt-3 text-sm text-red-500 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4 shrink-0" /> {imageError}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -545,12 +855,15 @@
                                   const qty = currentCart[item.id] || 0;
                                   return (
                                     <div key={item.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${qty > 0 ? 'border-indigo-400 bg-indigo-50/30' : 'border-slate-100 bg-slate-50'}`}>
-                                      <div>
-                                        <div className="font-semibold text-slate-800 text-lg">{item.name}</div>
-                                        <div className="text-slate-500">${item.price}</div>
+                                      <div className="flex-1 flex items-center gap-3 min-w-0">
+                                        <ItemImage src={item.image} className="w-16 h-16 rounded-lg shrink-0" />
+                                        <div className="min-w-0">
+                                          <div className="font-semibold text-slate-800 text-lg">{item.name}</div>
+                                          <div className="text-slate-500">${item.price}</div>
+                                        </div>
                                       </div>
 
-                                      <div className="flex items-center gap-3 bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                                      <div className="flex items-center gap-3 bg-white p-1 rounded-lg border border-slate-200 shadow-sm shrink-0">
                                         <button
                                           onClick={() => updateCart(item.id, -1)}
                                           className={`w-10 h-10 flex items-center justify-center rounded-md transition-colors ${qty > 0 ? 'text-slate-700 hover:bg-slate-100' : 'text-slate-300 cursor-not-allowed'}`}
@@ -693,6 +1006,16 @@
             )}
 
           </main>
+
+          {/* 拖曳中跟著手指/滑鼠移動的品項名稱 */}
+          {dragState && (
+            <div
+              className="fixed z-50 pointer-events-none px-3 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg shadow-lg"
+              style={{ left: dragState.x + 12, top: dragState.y + 12 }}
+            >
+              {dragState.name}
+            </div>
+          )}
         </div>
       );
     }
