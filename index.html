@@ -110,8 +110,26 @@
       reader.readAsDataURL(file);
     });
 
+    // --- 暫存資料 (存在這台電腦的瀏覽器中，下次開啟可接續點餐) ---
+    const STORAGE_KEY = 'classOrderData';
+    const loadSavedData = () => {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
+      } catch {
+        return null;
+      }
+    };
+    const parseStudentList = (text) => text.split('\n').map(s => s.trim()).filter(s => s !== '');
+
     function App() {
-      const [activeTab, setActiveTab] = useState('setup');
+      // 只在第一次開啟時讀取暫存資料
+      const [saved] = useState(loadSavedData);
+      const savedOrderCount = Object.keys(saved?.orders || {}).length;
+      const [showRestoredNotice, setShowRestoredNotice] = useState(!!saved);
+      const [saveError, setSaveError] = useState('');
+
+      // 已經有人點過餐就直接打開「進行點餐」
+      const [activeTab, setActiveTab] = useState(savedOrderCount > 0 ? 'order' : 'setup');
       const [apiKey, setApiKey] = useState((localStorage.getItem('geminiApiKey') || '').trim());
 
       // --- 產生預設的班級名單 (101~608) ---
@@ -127,9 +145,9 @@
       const defaultClasses = generateClassList();
 
       // State: Setup (預設帶入 101~608 班級名單)
-      const [studentInput, setStudentInput] = useState(defaultClasses.join('\n'));
-      const [students, setStudents] = useState(defaultClasses);
-      const [menuItems, setMenuItems] = useState([
+      const [studentInput, setStudentInput] = useState(saved?.studentInput ?? defaultClasses.join('\n'));
+      const [students, setStudents] = useState(() => parseStudentList(saved?.studentInput ?? defaultClasses.join('\n')));
+      const [menuItems, setMenuItems] = useState(saved?.menuItems ?? [
         { id: '1', category: '麵食類', name: '肉麻麵 (細麵)', price: 65 },
         { id: '2', category: '麵食類', name: '肉麻麵 (意麵)', price: 65 },
         { id: '3', category: '飲品', name: '紅茶', price: 25 }
@@ -139,8 +157,8 @@
       const [dragState, setDragState] = useState(null); // { id, name, x, y, target }
 
       // State: 餐點圖片搜尋
-      const [plusCode, setPlusCode] = useState('');
-      const [restaurantInfo, setRestaurantInfo] = useState(null);
+      const [plusCode, setPlusCode] = useState(saved?.plusCode ?? '');
+      const [restaurantInfo, setRestaurantInfo] = useState(saved?.restaurantInfo ?? null);
       const [isFindingImages, setIsFindingImages] = useState(false);
       const [imageStatus, setImageStatus] = useState('');
       const [imageError, setImageError] = useState('');
@@ -150,8 +168,33 @@
 
       // State: Ordering
       const [currentStudent, setCurrentStudent] = useState('');
-      const [orders, setOrders] = useState({}); // { studentName: { itemId: quantity } }
+      const [orders, setOrders] = useState(saved?.orders ?? {}); // { studentName: { itemId: quantity } }
       const [currentCart, setCurrentCart] = useState({});
+
+      // 資料有變動就自動暫存
+      useEffect(() => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ studentInput, menuItems, orders, plusCode, restaurantInfo }));
+          setSaveError('');
+        } catch {
+          setSaveError('瀏覽器儲存空間已滿，最新的變更沒有暫存成功。可以刪除部分品項的圖片後再試。');
+        }
+      }, [studentInput, menuItems, orders, plusCode, restaurantInfo]);
+
+      // 清除點餐紀錄 (保留名單與菜單，開始新一輪點餐)
+      const clearOrders = () => {
+        if (!window.confirm('確定要清除所有點餐紀錄嗎？名單與菜單會保留。')) return;
+        setOrders({});
+        setCurrentStudent('');
+        setCurrentCart({});
+      };
+
+      // 全部重設 (名單、菜單、點餐紀錄都回到預設；API Key 保留)
+      const resetAllData = () => {
+        if (!window.confirm('確定要清除所有暫存資料嗎？名單、菜單與點餐紀錄都會回到預設值。')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        window.location.reload();
+      };
 
       const handleApiKeyChange = (e) => {
         // 去掉複製貼上時多出的空白
@@ -163,11 +206,7 @@
       // 處理學生名單輸入
       const handleStudentInputChange = (e) => {
         setStudentInput(e.target.value);
-        const parsedStudents = e.target.value
-          .split('\n')
-          .map(s => s.trim())
-          .filter(s => s !== '');
-        setStudents(parsedStudents);
+        setStudents(parseStudentList(e.target.value));
       };
 
       // 手動新增菜單品項
@@ -774,11 +813,34 @@ ${itemList}
 
           <main className="max-w-3xl mx-auto px-4 py-6">
 
+            {/* 暫存狀態提示 */}
+            {showRestoredNotice && (
+              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-start gap-2">
+                <Check className="w-4 h-4 mt-0.5 shrink-0" />
+                <div className="flex-1">已載入上次暫存的名單與菜單{savedOrderCount > 0 ? `，以及 ${savedOrderCount} 筆點餐紀錄，可以直接接續點餐` : ''}。</div>
+                <button onClick={() => setShowRestoredNotice(false)} className="text-emerald-500 hover:text-emerald-700" title="關閉">✕</button>
+              </div>
+            )}
+            {saveError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" /> {saveError}
+              </div>
+            )}
+
             {/* =========================================
                 Tab 1: 系統設定
                ========================================= */}
             {activeTab === 'setup' && (
               <div className="space-y-6 animate-fade-in">
+
+                {/* 暫存資料管理 */}
+                <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center gap-3">
+                  <p className="flex-1 text-sm text-slate-500">💾 名單、菜單與點餐紀錄會自動暫存在這台電腦的瀏覽器，下次開啟可直接接續點餐。</p>
+                  <div className="flex gap-2 shrink-0">
+                    <button onClick={clearOrders} className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">清除點餐紀錄</button>
+                    <button onClick={resetAllData} className="px-3 py-2 text-sm rounded-lg border border-red-200 text-red-500 hover:bg-red-50">全部重設</button>
+                  </div>
+                </div>
 
                 {/* API Key 設定 (獨立版專屬) */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
