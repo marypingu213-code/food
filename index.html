@@ -52,6 +52,7 @@
     const GripVertical = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>;
     const ImageIcon = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>;
     const LinkIcon = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>;
+    const Search = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>;
     const MapPin = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
 
     // --- 餐點圖片 (載入失敗時顯示預設圖示) ---
@@ -67,6 +68,56 @@
       }
       return <img src={src} alt="" referrerPolicy="no-referrer" className={`${className} object-cover`} onError={() => setFailed(true)} />;
     };
+
+    // 品項圖片 + 「示意圖」標記 (圖片不是這家店的實際餐點時顯示)
+    const MenuItemImage = ({ item, className, small }) => (
+      <div className="relative shrink-0">
+        <ItemImage src={item.image} className={className} />
+        {item.image && item.imageGeneric && (
+          <span className={`absolute bottom-0 inset-x-0 text-center bg-black/55 text-white rounded-b-lg ${small ? 'text-[9px]' : 'text-[11px]'}`}>示意圖</span>
+        )}
+      </div>
+    );
+
+    // --- 維基百科 / 維基共享資源：免費、免金鑰的通用餐點圖片 ---
+    const wikipediaImage = async (lang, title) => {
+      if (!title) return null;
+      const url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&converttitles=1&prop=pageimages&piprop=thumbnail&pithumbsize=400&titles=${encodeURIComponent(title)}`;
+      const data = await (await fetch(url)).json();
+      const page = Object.values(data.query?.pages || {})[0];
+      return page?.thumbnail?.source || null;
+    };
+
+    const commonsImage = async (term) => {
+      if (!term) return null;
+      const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=8&gsrsearch=${encodeURIComponent(term)}&prop=imageinfo&iiprop=url|mime&iiurlwidth=400`;
+      const data = await (await fetch(url)).json();
+      const pages = Object.values(data.query?.pages || {}).sort((a, b) => a.index - b.index);
+      const hit = pages.find(p => /^image\/(jpeg|png|webp)$/.test(p.imageinfo?.[0]?.mime || ''));
+      return hit?.imageinfo[0].thumburl || null;
+    };
+
+    // 依序嘗試：中文維基 → 英文維基 → 維基共享資源
+    const findGenericDishImage = async ({ zh, en }) => {
+      const attempts = [
+        () => wikipediaImage('zh', zh),
+        () => wikipediaImage('en', en),
+        () => commonsImage(en ? `${en} food` : ''),
+        () => commonsImage(zh)
+      ];
+      for (const attempt of attempts) {
+        try {
+          const url = await attempt();
+          if (url && await canLoadImage(url)) return url;
+        } catch {
+          // 這個來源失敗就換下一個
+        }
+      }
+      return null;
+    };
+
+    // 去掉「(細麵)」這類括號說明，留下主要菜名
+    const simplifyDishName = (name) => name.replace(/[（(][^）)]*[）)]/g, '').trim() || name.trim();
 
     // 測試圖片網址是否真的能載入 (避免 AI 給出失效連結)
     const canLoadImage = (url) => new Promise(resolve => {
@@ -165,6 +216,7 @@
       const [mapsApiKey, setMapsApiKey] = useState((localStorage.getItem('mapsApiKey') || '').trim());
       const [placePhotos, setPlacePhotos] = useState([]); // [{ uri, label, authors }]
       const [isReadingScreenshot, setIsReadingScreenshot] = useState(false);
+      const [isFindingGeneric, setIsFindingGeneric] = useState(false);
 
       // State: Ordering
       const [currentStudent, setCurrentStudent] = useState('');
@@ -226,7 +278,9 @@
       // 更新單一菜單品項
       const updateMenuItem = (id, field, value) => {
         setMenuItems(prev => prev.map(item =>
-          item.id === id ? { ...item, [field]: field === 'price' ? Number(value) : value } : item
+          item.id !== id ? item
+            : field === 'image' ? { ...item, image: value, imageGeneric: false } // 手動設定的圖片不是示意圖
+            : { ...item, [field]: field === 'price' ? Number(value) : value }
         ));
       };
 
@@ -588,6 +642,62 @@ ${itemList}
         }
       };
 
+      // 店家找不到的品項：用菜名找維基百科上的通用示意圖
+      const handleFindGenericImages = async () => {
+        const targets = menuItems.filter(m => m.name.trim() !== '' && !m.image);
+        if (targets.length === 0) {
+          setImageError('');
+          setImageStatus("所有品項都已經有圖片了。若想換成示意圖，請先移除該品項的圖片（點 🔗 後留空）。");
+          return;
+        }
+
+        setIsFindingGeneric(true);
+        setImageError('');
+        setImageStatus('');
+
+        try {
+          // 有 Gemini Key 時，先請 AI 把店家菜名轉成通用菜名 (例如「招牌乾拌麵」→「乾麵」/ Dry noodles)
+          let keywords = Object.fromEntries(targets.map(m => [m.id, { zh: simplifyDishName(m.name), en: '' }]));
+          if (apiKey) {
+            try {
+              const itemList = targets.map(m => `- id: ${m.id}，名稱：${m.name}`).join('\n');
+              const text = await callGemini([{ text: `請把下列台灣餐廳的菜單品項，轉換成適合在維基百科查詢的「通用菜名」，用來找外觀接近的示意圖。
+zh 請填最常見的繁體中文通用菜名（例如「肉麻麵 (細麵)」→「麻醬麵」、「招牌乾拌麵」→「乾麵」、「紫菜蛋花湯」→「紫菜湯」），en 請填對應的英文菜名。
+菜單品項：
+${itemList}
+
+只回傳 JSON 陣列，格式：[{"id": "品項 id", "zh": "通用中文菜名", "en": "English dish name"}]` }], { json: true });
+              const parsed = JSON.parse(text);
+              (Array.isArray(parsed) ? parsed : []).forEach(k => {
+                if (keywords[k?.id]) keywords[k.id] = { zh: String(k.zh || keywords[k.id].zh), en: String(k.en || '') };
+              });
+            } catch (error) {
+              console.warn("AI 轉換菜名失敗，改用原本的菜名搜尋:", error);
+            }
+          }
+
+          // 每次查 4 個品項，避免同時送出太多請求
+          const found = {};
+          for (let i = 0; i < targets.length; i += 4) {
+            await Promise.all(targets.slice(i, i + 4).map(async m => {
+              const url = await findGenericDishImage(keywords[m.id]);
+              if (url) found[m.id] = url;
+            }));
+          }
+
+          setMenuItems(prev => prev.map(item => (!item.image && found[item.id]) ? { ...item, image: found[item.id], imageGeneric: true } : item));
+          const count = Object.keys(found).length;
+          setImageStatus(count > 0
+            ? `已為 ${count} / ${targets.length} 個沒有圖片的品項找到示意圖（圖片會標示「示意圖」）。找不到的可以點品項旁的 🔍 用 Google 圖片搜尋。`
+            : "維基百科上找不到這些菜名的圖片，可以點品項旁的 🔍 用 Google 圖片搜尋後手動加入。");
+        } catch (error) {
+          console.error("搜尋示意圖時發生錯誤:", error);
+          setImageError(friendlyError(error, "搜尋示意圖時發生錯誤，請稍後再試。"));
+        } finally {
+          setIsFindingGeneric(false);
+        }
+      };
+
       // 依 Plus Code 找出餐廳，並為各品項配上餐點圖片
       const handleFindImages = async () => {
         if (!mapsApiKey && !apiKey) {
@@ -936,7 +1046,7 @@ ${itemList}
                             <div className="w-12 text-center">圖片</div>
                             <div className="flex-1">餐點名稱</div>
                             <div className="w-20 sm:w-24 text-right pr-4">價格 ($)</div>
-                            <div className="w-[4.5rem]"></div>
+                            <div className="w-[6.75rem]"></div>
                           </div>
 
                           {items.map((item) => {
@@ -957,7 +1067,7 @@ ${itemList}
                                   <GripVertical className="w-5 h-5" />
                                 </button>
                                 <label className="cursor-pointer shrink-0" title="點擊上傳餐點圖片">
-                                  <ItemImage src={item.image} className="w-12 h-12 rounded-lg border border-slate-200" />
+                                  <MenuItemImage item={item} small className="w-12 h-12 rounded-lg border border-slate-200" />
                                   <input type="file" accept="image/*" className="hidden" onChange={(e) => handleItemImageUpload(item.id, e)} />
                                 </label>
                                 <input
@@ -975,6 +1085,15 @@ ${itemList}
                                     min="0"
                                     className="w-20 sm:w-24 p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-right"
                                   />
+                                  <a
+                                    href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(item.name.trim())}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className={`p-1.5 text-slate-400 hover:text-indigo-600 transition-colors rounded-lg hover:bg-indigo-50 ${item.name.trim() ? '' : 'pointer-events-none opacity-40'}`}
+                                    title="用 Google 圖片搜尋這個菜名（找到後可下載再點縮圖上傳，或複製圖片網址貼到 🔗）"
+                                  >
+                                    <Search className="w-5 h-5" />
+                                  </a>
                                   <button
                                     onClick={() => promptItemImageUrl(item.id)}
                                     className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors rounded-lg hover:bg-indigo-50"
@@ -1066,6 +1185,20 @@ ${itemList}
                     <input type="file" accept="image/*" className="hidden" onChange={handleMenuScreenshotUpload} disabled={isReadingScreenshot} />
                   </label>
                   <p className="mt-1 text-xs text-slate-500">在 Google 地圖打開餐廳 →「菜單」分頁，截下有餐點照片和名稱的畫面上傳即可（需 Gemini Key）。</p>
+
+                  {/* 方法四：店家找不到的品項，用菜名找通用示意圖 */}
+                  <button
+                    onClick={handleFindGenericImages}
+                    disabled={isFindingGeneric}
+                    className={`mt-3 flex items-center justify-center w-full p-3 border border-amber-300 text-amber-700 rounded-xl transition-colors shadow-sm ${isFindingGeneric ? 'bg-slate-100 cursor-wait' : 'bg-amber-50 hover:bg-amber-100'}`}
+                  >
+                    {isFindingGeneric ? (
+                      <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> 正在搜尋示意圖...</>
+                    ) : (
+                      <><Search className="w-5 h-5 mr-2" /> 還沒有圖片的品項：用菜名找示意圖（非店家照片）</>
+                    )}
+                  </button>
+                  <p className="mt-1 text-xs text-slate-500">從維基百科找外觀接近的同名餐點照片，讓學生知道大概長什麼樣子，圖片會標示「示意圖」。有 Gemini Key 時，AI 會先把店家菜名轉成通用菜名，找到的機率較高。</p>
                   {plusCode.trim() && (
                     <a
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(plusCode.trim())}`}
@@ -1195,7 +1328,7 @@ ${itemList}
                                   return (
                                     <div key={item.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${qty > 0 ? 'border-indigo-400 bg-indigo-50/30' : 'border-slate-100 bg-slate-50'}`}>
                                       <div className="flex-1 flex items-center gap-3 min-w-0">
-                                        <ItemImage src={item.image} className="w-16 h-16 rounded-lg shrink-0" />
+                                        <MenuItemImage item={item} className="w-16 h-16 rounded-lg" />
                                         <div className="min-w-0">
                                           <div className="font-semibold text-slate-800 text-lg">{item.name}</div>
                                           <div className="text-slate-500">${item.price}</div>
