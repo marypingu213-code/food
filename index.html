@@ -36,7 +36,7 @@
 
   <!-- 系統核心邏輯 -->
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     // --- 圖示元件 (全內建，不依賴外部圖示庫) ---
     const Settings = ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>;
@@ -222,6 +222,13 @@
       const [currentStudent, setCurrentStudent] = useState('');
       const [orders, setOrders] = useState(saved?.orders ?? {}); // { studentName: { itemId: quantity } }
       const [currentCart, setCurrentCart] = useState({});
+      const [selectedCategory, setSelectedCategory] = useState(null); // 點餐頁面目前打開的分類
+      const categoryItemsRef = useRef(null);
+
+      // 選了分類後，把該分類的餐點捲到畫面中
+      useEffect(() => {
+        if (selectedCategory) categoryItemsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, [selectedCategory]);
 
       // 資料有變動就自動暫存
       useEffect(() => {
@@ -804,6 +811,7 @@ ${itemList}
       const handleSelectStudent = (studentName) => {
         setCurrentStudent(studentName);
         setCurrentCart(orders[studentName] || {});
+        setSelectedCategory(null); // 每位學生都先看到全部分類
       };
 
       // 修改購物車數量
@@ -883,6 +891,9 @@ ${itemList}
         acc[cat].push(item);
         return acc;
       }, {});
+
+      // 分類若已被改名或刪除，就當作沒有打開任何分類
+      const openCategory = groupedMenu[selectedCategory] ? selectedCategory : null;
 
       return (
         <div className="min-h-screen text-slate-800 font-sans pb-20">
@@ -1315,38 +1326,66 @@ ${itemList}
                           </span>
                         </h2>
 
-                        <div className="space-y-6">
-                          {Object.entries(groupedMenu).map(([category, items]) => (
-                            <div key={category} className="mb-4">
-                              <h3 className="text-md font-bold text-slate-700 flex items-center gap-2 mb-3">
+                        {/* 大分類區塊並列：學生先看到全部分類，再點進去選餐點 */}
+                        <p className="text-sm text-slate-500 mb-3">請先點選想吃的分類：</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {Object.entries(groupedMenu).map(([category, items]) => {
+                            const isOpen = openCategory === category;
+                            const pickedCount = items.reduce((sum, item) => sum + (currentCart[item.id] || 0), 0);
+                            return (
+                              <button
+                                key={category}
+                                onClick={() => setSelectedCategory(isOpen ? null : category)}
+                                className={`relative text-left p-3 rounded-xl border-2 transition-all ${isOpen ? 'border-indigo-500 bg-indigo-50 shadow-md' : 'border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40'}`}
+                              >
+                                {pickedCount > 0 && (
+                                  <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-xs font-bold rounded-full px-2 py-0.5 shadow">已選 {pickedCount}</span>
+                                )}
+                                <div className={`font-bold text-lg ${isOpen ? 'text-indigo-700' : 'text-slate-800'}`}>{category}</div>
+                                <div className="text-xs text-slate-500 mb-2">{items.length} 項餐點</div>
+                                <div className="flex gap-1">
+                                  {items.slice(0, 4).map(item => (
+                                    <ItemImage key={item.id} src={item.image} className="w-9 h-9 rounded-md" />
+                                  ))}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* 打開的分類底下的餐點 */}
+                        <div ref={categoryItemsRef} className="scroll-mt-32">
+                          {openCategory ? (
+                            <div className="mt-5 p-3 rounded-2xl border-2 border-indigo-200 bg-indigo-50/30 animate-fade-in">
+                              <h3 className="text-lg font-bold text-indigo-700 flex items-center gap-2 mb-3">
                                 <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                                {category}
+                                {openCategory}
                               </h3>
                               <div className="space-y-3">
-                                {items.map(item => {
+                                {groupedMenu[openCategory].map(item => {
                                   const qty = currentCart[item.id] || 0;
                                   return (
-                                    <div key={item.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${qty > 0 ? 'border-indigo-400 bg-indigo-50/30' : 'border-slate-100 bg-slate-50'}`}>
+                                    <div key={item.id} className={`flex items-center justify-between gap-2 p-3 rounded-xl border transition-all ${qty > 0 ? 'border-indigo-400 bg-white' : 'border-slate-100 bg-white'}`}>
                                       <div className="flex-1 flex items-center gap-3 min-w-0">
-                                        <MenuItemImage item={item} className="w-16 h-16 rounded-lg" />
+                                        <MenuItemImage item={item} className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg" />
                                         <div className="min-w-0">
                                           <div className="font-semibold text-slate-800 text-lg">{item.name}</div>
                                           <div className="text-slate-500">${item.price}</div>
                                         </div>
                                       </div>
 
-                                      <div className="flex items-center gap-3 bg-white p-1 rounded-lg border border-slate-200 shadow-sm shrink-0">
+                                      <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-sm shrink-0">
                                         <button
                                           onClick={() => updateCart(item.id, -1)}
-                                          className={`w-10 h-10 flex items-center justify-center rounded-md transition-colors ${qty > 0 ? 'text-slate-700 hover:bg-slate-100' : 'text-slate-300 cursor-not-allowed'}`}
+                                          className={`w-9 h-9 flex items-center justify-center rounded-md transition-colors ${qty > 0 ? 'text-slate-700 hover:bg-slate-100' : 'text-slate-300 cursor-not-allowed'}`}
                                           disabled={qty === 0}
                                         >
                                           -
                                         </button>
-                                        <span className="w-8 text-center font-bold text-lg text-indigo-700">{qty}</span>
+                                        <span className="w-7 text-center font-bold text-lg text-indigo-700">{qty}</span>
                                         <button
                                           onClick={() => updateCart(item.id, 1)}
-                                          className="w-10 h-10 flex items-center justify-center rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors font-bold text-xl"
+                                          className="w-9 h-9 flex items-center justify-center rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors font-bold text-xl"
                                         >
                                           +
                                         </button>
@@ -1356,8 +1395,31 @@ ${itemList}
                                 })}
                               </div>
                             </div>
-                          ))}
+                          ) : (
+                            <div className="mt-5 p-6 rounded-2xl border-2 border-dashed border-slate-200 text-center text-slate-400">
+                              👆 點選上方的分類，就會在這裡顯示餐點
+                            </div>
+                          )}
                         </div>
+
+                        {/* 已選餐點：讓學生確認自己點了什麼 */}
+                        {Object.keys(currentCart).length > 0 && (
+                          <div className="mt-6 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                            <div className="text-sm font-bold text-amber-800 mb-2">🧾 已選餐點</div>
+                            <div className="flex flex-wrap gap-2">
+                              {Object.entries(currentCart).map(([itemId, qty]) => {
+                                const item = menuItems.find(m => m.id === itemId);
+                                if (!item) return null;
+                                return (
+                                  <span key={itemId} className="flex items-center gap-2 bg-white border border-amber-200 rounded-lg pl-1 pr-3 py-1 text-sm">
+                                    <ItemImage src={item.image} className="w-7 h-7 rounded" />
+                                    {item.name} × {qty}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
 
                         {/* 購物車總計與送出 */}
                         <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
