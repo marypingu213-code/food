@@ -17,6 +17,7 @@
         .match-item:hover { transform: scale(1.02); }
         .match-item.selected { border-color: #f59e0b; background-color: #fef3c7; box-shadow: 0 0 0 3px rgba(245,158,11,0.3); }
         .match-item.matched { background-color: #d1fae5; border-color: #10b981; opacity: 0.7; pointer-events: none; }
+        #view-puzzle .match-item.matched { opacity: 0.45; }
 
         #match-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
@@ -123,6 +124,9 @@
                 </button>
                 <button onclick="switchTab('comic')" id="tab-comic" class="tab-btn px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition hidden">
                     🖼️ 12格連環圖故事
+                </button>
+                <button onclick="switchTab('puzzle')" id="tab-puzzle" class="tab-btn px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition hidden">
+                    🧩 故事拼圖
                 </button>
                 <button onclick="switchTab('story')" id="tab-story" class="tab-btn px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition hidden">
                     📖 故事短文挑戰
@@ -253,9 +257,41 @@
             </div>
 
             <div class="mt-6 text-center bg-emerald-50 p-6 rounded-3xl border-2 border-emerald-200">
-                <h3 class="text-2xl font-black text-emerald-900 mb-2">看完了 12 格連環圖故事，準備好挑戰文章填空了嗎？</h3>
-                <p class="text-emerald-700 font-bold mb-4">快點選下面的按鈕前往短文填空，把適合的成語放進故事裡吧！</p>
-                <button onclick="switchTab('story')" class="px-8 py-3 bg-emerald-600 text-white font-black text-xl rounded-2xl hover:bg-emerald-700 transition shadow-md transform hover:scale-105">👉 前往故事短文大挑戰</button>
+                <h3 class="text-2xl font-black text-emerald-900 mb-2">看完了 12 格連環圖故事，準備好玩故事拼圖了嗎？</h3>
+                <p class="text-emerald-700 font-bold mb-4">快點選下面的按鈕，幫每一張圖找到對的成語吧！</p>
+                <button onclick="switchTab('puzzle')" class="px-8 py-3 bg-emerald-600 text-white font-black text-xl rounded-2xl hover:bg-emerald-700 transition shadow-md transform hover:scale-105">👉 前往故事拼圖</button>
+            </div>
+        </div>
+
+        <!-- 故事拼圖區塊 (圖畫故事到純文字閱讀的過渡) -->
+        <div id="view-puzzle" class="fade-in hidden">
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-lg border-2 border-sky-200 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 pb-4 border-b border-sky-100">
+                    <div>
+                        <h2 class="text-2xl font-black text-sky-900 flex items-center gap-2">🧩 故事拼圖：圖片配成語</h2>
+                        <p class="text-sky-700 font-bold text-sm mt-1">先點一張圖，再點和圖片意思一樣的成語！配對成功的會變淡，再繼續找下一組。</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="puzzle-progress" class="bg-sky-100 text-sky-800 font-black px-4 py-1.5 rounded-full text-sm">已配對 0 / 12</span>
+                        <button onclick="initPuzzleGame()" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition">🔄 重新開始</button>
+                    </div>
+                </div>
+
+                <!-- 成語卡片庫 (拼圖用) -->
+                <div class="bg-sky-50 p-4 rounded-2xl border border-sky-200 mb-6 sticky top-20 z-30 shadow-sm">
+                    <p class="text-xs font-black text-sky-700 uppercase tracking-wider mb-2">成語卡片庫（請點選）：</p>
+                    <div id="puzzle-bank" class="flex flex-wrap gap-3 min-h-[50px] items-center"></div>
+                </div>
+
+                <!-- 12 張圖片 -->
+                <div id="puzzle-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+
+                <!-- 完成反饋 -->
+                <div id="puzzle-done-banner" class="hidden mt-8 p-6 bg-sky-100 border-2 border-sky-300 rounded-2xl text-center">
+                    <h3 class="text-2xl font-black text-sky-900 mb-2">🎉 故事拼圖全部完成！</h3>
+                    <p class="text-sky-700 font-bold mb-4">你已經幫 12 張圖都找到成語了，接下來試試看只看文字的故事短文吧！</p>
+                    <button onclick="switchTab('story')" class="px-8 py-3 bg-emerald-600 text-white font-black text-xl rounded-2xl hover:bg-emerald-700 transition shadow-md transform hover:scale-105">👉 前往故事短文大挑戰</button>
+                </div>
             </div>
         </div>
 
@@ -608,6 +644,20 @@
                     { id: 11, text: "古時候沒有汽車，如果要去找住在遠方的親戚，只能辛苦地（ ）走好幾天的路。", answer: "跋山涉水" },
                     { id: 12, text: "老師對我的關心、照顧和幫忙，我一定會（ ），一輩子都記在心裡。", answer: "永誌不忘" }
                 ],
+                puzzlePanels: [
+                    { img: "images/puzzle/01.webp", ans: "一望無垠" },
+                    { img: "images/puzzle/02.webp", ans: "跋山涉水" },
+                    { img: "images/puzzle/03.webp", ans: "惹是生非" },
+                    { img: "images/puzzle/04.webp", ans: "衣衫不整" },
+                    { img: "images/puzzle/05.webp", ans: "蓬頭垢面" },
+                    { img: "images/puzzle/06.webp", ans: "水中撈月" },
+                    { img: "images/puzzle/07.webp", ans: "怒火中燒" },
+                    { img: "images/puzzle/08.webp", ans: "並肩作戰" },
+                    { img: "images/puzzle/09.webp", ans: "搖旗吶喊" },
+                    { img: "images/puzzle/10.webp", ans: "錦上添花" },
+                    { img: "images/puzzle/11.webp", ans: "酒足飯飽" },
+                    { img: "images/puzzle/12.webp", ans: "永誌不忘" }
+                ],
                 storyParagraphs: [
                     { p: "今天，學校舉辦了一場戶外尋寶大冒險。我們來到農場，看著（", ans: "一望無垠", s: "）的大草地，大家的心情都非常開心。" },
                     { p: "為了找到寶藏，我們跟著老師（", ans: "跋山涉水", s: "），走了好長一段路。一路上，調皮的阿寶又開始（" },
@@ -659,6 +709,7 @@
             const tabFill = document.getElementById('tab-fill');
             const tabDrag = document.getElementById('tab-drag');
             const tabComic = document.getElementById('tab-comic');
+            const tabPuzzle = document.getElementById('tab-puzzle');
             const tabStory = document.getElementById('tab-story');
 
             if (lessonKey === 'idioms') {
@@ -669,6 +720,7 @@
                 if (tabFill) tabFill.classList.add('hidden');
                 if (tabDrag) tabDrag.classList.remove('hidden');
                 if (tabComic) tabComic.classList.remove('hidden');
+                if (tabPuzzle) tabPuzzle.classList.remove('hidden');
                 if (tabStory) tabStory.classList.remove('hidden');
 
                 if (['match', 'quiz', 'fill'].includes(currentTab)) {
@@ -684,9 +736,10 @@
                 if (tabFill) tabFill.classList.remove('hidden');
                 if (tabDrag) tabDrag.classList.add('hidden');
                 if (tabComic) tabComic.classList.add('hidden');
+                if (tabPuzzle) tabPuzzle.classList.add('hidden');
                 if (tabStory) tabStory.classList.add('hidden');
 
-                if (['drag', 'comic', 'story'].includes(currentTab)) {
+                if (['drag', 'comic', 'puzzle', 'story'].includes(currentTab)) {
                     window.switchTab('dictionary');
                 } else {
                     window.switchTab(currentTab);
@@ -722,7 +775,7 @@
             const targetBtn = document.getElementById(`tab-${tabName}`);
             if (targetBtn) targetBtn.classList.add('active');
 
-            ['dictionary', 'match', 'quiz', 'fill', 'drag', 'comic', 'story'].forEach(t => {
+            ['dictionary', 'match', 'quiz', 'fill', 'drag', 'comic', 'puzzle', 'story'].forEach(t => {
                 const view = document.getElementById(`view-${t}`);
                 if (view) view.classList.add('hidden');
             });
@@ -736,6 +789,7 @@
             if (tabName === 'quiz') window.initQuizGame();
             if (tabName === 'fill') window.initFillGame();
             if (tabName === 'drag') window.initDragGame();
+            if (tabName === 'puzzle') window.initPuzzleGame();
             if (tabName === 'story') window.initStoryGame();
         };
 
@@ -1136,6 +1190,108 @@
                     desc.innerText = "紅色的框框表示需要再調整喔，可以按下「再試一次」重新挑戰！";
                     window.speakText(`你答對了${correctCount}題，繼續加油喔！`);
                 }
+            }
+        };
+
+        // --- 故事拼圖模組 ---
+        let selectedPuzzleItem = null;
+        let puzzleMatched = 0;
+
+        window.initPuzzleGame = function() {
+            const grid = document.getElementById('puzzle-grid');
+            const bank = document.getElementById('puzzle-bank');
+            const doneBanner = document.getElementById('puzzle-done-banner');
+            if (!grid || !bank) return;
+
+            selectedPuzzleItem = null;
+            puzzleMatched = 0;
+            if (doneBanner) doneBanner.classList.add('hidden');
+
+            const panels = lessonsData.idioms.puzzlePanels;
+            window.updatePuzzleProgress();
+
+            // 圖片依故事順序排列
+            grid.innerHTML = '';
+            panels.forEach((panel, idx) => {
+                const el = document.createElement('div');
+                el.className = "match-item relative bg-white border-4 border-sky-200 rounded-2xl overflow-hidden";
+                el.dataset.word = panel.ans;
+                el.dataset.side = "img";
+                el.innerHTML = `
+                    <span class="absolute top-2 left-2 bg-amber-500 text-white font-black text-sm w-7 h-7 rounded-full flex items-center justify-center shadow">${idx + 1}</span>
+                    <img src="${panel.img}" alt="第 ${idx + 1} 格故事圖片" class="w-full h-auto block pointer-events-none">
+                    <div class="puzzle-label hidden absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white font-black text-center py-1.5 text-lg"></div>
+                `;
+                el.onclick = () => window.handlePuzzleClick(el);
+                grid.appendChild(el);
+            });
+
+            // 成語卡片洗牌
+            const shuffled = panels.map(p => p.ans).sort(() => 0.5 - Math.random());
+            bank.innerHTML = '';
+            shuffled.forEach(word => {
+                const card = document.createElement('div');
+                card.className = "match-item bg-white border-2 border-sky-300 text-sky-900 font-black px-4 py-2 rounded-xl shadow-sm text-base select-none";
+                card.innerText = word;
+                card.dataset.word = word;
+                card.dataset.side = "word";
+                card.onclick = () => window.handlePuzzleClick(card);
+                bank.appendChild(card);
+            });
+        };
+
+        window.updatePuzzleProgress = function() {
+            const progress = document.getElementById('puzzle-progress');
+            const total = lessonsData.idioms.puzzlePanels.length;
+            if (progress) progress.innerText = `已配對 ${puzzleMatched} / ${total}`;
+        };
+
+        window.handlePuzzleClick = function(el) {
+            if (el.classList.contains('matched')) return;
+
+            if (el.dataset.side === 'word') window.speakText(el.dataset.word);
+
+            if (!selectedPuzzleItem || selectedPuzzleItem.dataset.side === el.dataset.side) {
+                // 第一次點選，或同一邊換一個選擇
+                if (selectedPuzzleItem) selectedPuzzleItem.classList.remove('selected');
+                if (selectedPuzzleItem === el) {
+                    selectedPuzzleItem = null;
+                    return;
+                }
+                selectedPuzzleItem = el;
+                el.classList.add('selected');
+                return;
+            }
+
+            const first = selectedPuzzleItem;
+            const second = el;
+            first.classList.remove('selected');
+            selectedPuzzleItem = null;
+
+            if (first.dataset.word === second.dataset.word) {
+                const imgEl = first.dataset.side === 'img' ? first : second;
+                const label = imgEl.querySelector('.puzzle-label');
+                if (label) {
+                    label.innerText = imgEl.dataset.word;
+                    label.classList.remove('hidden');
+                }
+                first.classList.add('matched');
+                second.classList.add('matched');
+                puzzleMatched++;
+                window.updatePuzzleProgress();
+
+                if (puzzleMatched === lessonsData.idioms.puzzlePanels.length) {
+                    document.getElementById('puzzle-done-banner').classList.remove('hidden');
+                    window.speakText('恭喜你！故事拼圖全部完成了！');
+                } else {
+                    window.speakText(`答對了！${imgEl.dataset.word}`);
+                }
+            } else {
+                second.classList.add('border-red-400', 'bg-red-50');
+                window.speakText('再試一次看看喔！');
+                setTimeout(() => {
+                    second.classList.remove('border-red-400', 'bg-red-50');
+                }, 800);
             }
         };
 
