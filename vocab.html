@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快樂語詞遊樂園</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
+        .tab-btn.active { background-color: white; color: #d97706; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .tab-btn { background-color: transparent; color: #78350f; }
+        .tab-btn:hover:not(.active) { background-color: #fde68a; }
+
+        /* 連連看專用樣式 */
+        .match-item { transition: all 0.2s; cursor: pointer; }
+        .match-item:hover { transform: scale(1.02); }
+        .match-item.selected { border-color: #f59e0b; background-color: #fef3c7; box-shadow: 0 0 0 3px rgba(245,158,11,0.3); }
+        .match-item.matched { background-color: #d1fae5; border-color: #10b981; opacity: 0.7; pointer-events: none; }
+
+        #match-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 拖曳填空專用樣式 */
+        .drag-card {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .drag-card:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+        }
+        .drag-card.used {
+            opacity: 0.3;
+            pointer-events: none;
+            background-color: #e2e8f0;
+        }
+        .drop-target {
+            min-width: 130px;
+            min-height: 44px;
+            border: 2px dashed #94a3b8;
+            transition: all 0.2s;
+            display: inline-flex;
+            vertical-align: middle;
+        }
+        .drop-target.drag-over {
+            border-color: #a855f7;
+            background-color: #f3e8ff;
+        }
+        .drop-target.filled {
+            border-style: solid;
+            border-color: #a855f7;
+            background-color: #faf5ff;
+        }
+        .drop-target.correct {
+            border-color: #10b981 !important;
+            background-color: #d1fae5 !important;
+            color: #065f46 !important;
+        }
+        .drop-target.incorrect {
+            border-color: #ef4444 !important;
+            background-color: #fee2e2 !important;
+            color: #991b1b !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- 頂部標題與導覽列 -->
+    <header class="bg-amber-400 border-b-4 border-amber-500 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
+
+            <div class="flex items-center gap-3">
+                <span class="text-4xl">🌱</span>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-amber-950 tracking-wide">快樂語詞遊樂園</h1>
+                    <p class="text-amber-800 text-xs md:text-sm font-bold">適合特教與低年級學生的白話圖文學習庫</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- 課程切換按鈕 -->
+                <div class="bg-amber-500/40 p-1.5 rounded-2xl flex flex-wrap gap-1 border border-amber-600/30">
+                    <button onclick="changeLesson('lesson1')" id="btn-lesson1" class="px-3 py-1.5 rounded-xl font-black text-sm transition">第一課</button>
+                    <button onclick="changeLesson('lesson2')" id="btn-lesson2" class="px-3 py-1.5 rounded-xl font-black text-sm transition">第二課</button>
+                    <button onclick="changeLesson('lesson3')" id="btn-lesson3" class="px-3 py-1.5 rounded-xl font-black text-sm transition">第三課</button>
+                    <button onclick="changeLesson('lesson4')" id="btn-lesson4" class="px-3 py-1.5 rounded-xl font-black text-sm transition">第四課</button>
+                    <button onclick="changeLesson('lesson5')" id="btn-lesson5" class="px-3 py-1.5 rounded-xl font-black text-sm transition">第五課</button>
+                    <button onclick="changeLesson('lesson6')" id="btn-lesson6" class="px-3 py-1.5 rounded-xl font-black text-sm transition">第六課</button>
+                    <button onclick="changeLesson('idioms')" id="btn-idioms" class="px-3 py-1.5 rounded-xl font-black text-sm text-purple-900 bg-amber-200 hover:bg-amber-100 transition border-2 border-purple-300">✨ 四字成語</button>
+                </div>
+
+                <!-- 難易度切換 (第一至六課) -->
+                <div id="difficulty-panel" class="bg-blue-100 p-1 rounded-xl flex gap-1 border border-blue-200 ml-auto">
+                    <button onclick="changeDifficulty('simple')" id="btn-diff-simple" class="px-3 py-1.5 rounded-lg font-bold text-sm transition">簡單 (5題)</button>
+                    <button onclick="changeDifficulty('advanced')" id="btn-diff-advanced" class="px-3 py-1.5 rounded-lg font-bold text-sm transition">進階 (10題)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遊戲關卡切換頁籤 -->
+        <div class="max-w-7xl mx-auto px-4 mt-2">
+            <div class="flex gap-2 border-b-0 overflow-x-auto pb-1" id="tab-container">
+                <button onclick="switchTab('dictionary')" id="tab-dictionary" class="tab-btn active px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition">
+                    📖 語詞字典
+                </button>
+                <button onclick="switchTab('match')" id="tab-match" class="tab-btn px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition">
+                    🔗 連連看
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition">
+                    📝 選選看
+                </button>
+                <button onclick="switchTab('fill')" id="tab-fill" class="tab-btn px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition">
+                    🧩 填空挑戰
+                </button>
+                <button onclick="switchTab('drag')" id="tab-drag" class="tab-btn px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition hidden">
+                    🎯 拖曳句型測驗
+                </button>
+                <button onclick="switchTab('comic')" id="tab-comic" class="tab-btn px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition hidden">
+                    🖼️ 12格連環圖故事
+                </button>
+                <button onclick="switchTab('story')" id="tab-story" class="tab-btn px-5 py-2.5 rounded-t-2xl font-black text-base flex items-center gap-2 transition hidden">
+                    📖 故事短文挑戰
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6">
+
+        <!-- 提示廣播 -->
+        <div class="bg-blue-50 border-2 border-blue-200 p-4 rounded-2xl mb-6 flex items-center gap-3 text-blue-900 font-bold shadow-sm">
+            <span class="text-2xl">💡</span>
+            <p class="text-sm md:text-base">點擊卡片上的「🔊 聽發音」可以聽發音喔！每張卡片都用最生活化的例子說明。</p>
+        </div>
+
+        <!-- 字典區塊 -->
+        <div id="view-dictionary" class="fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="vocab-grid"></div>
+        </div>
+
+        <!-- 連連看區塊 -->
+        <div id="view-match" class="fade-in hidden">
+            <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-amber-200 relative min-h-[500px]">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-amber-900 flex items-center gap-2">🔗 語詞連連看挑戰</h2>
+                        <p class="text-amber-700 font-bold text-sm">請點擊左邊的語詞，再點擊右邊正確的意思連起來！</p>
+                    </div>
+                    <button onclick="initMatchGame()" class="px-5 py-2.5 bg-amber-500 text-amber-950 font-black rounded-xl hover:bg-amber-400 transition shadow-sm">🔄 重置題目</button>
+                </div>
+                <div class="relative grid grid-cols-2 gap-8 md:gap-16" id="match-container">
+                    <svg id="match-svg"></svg>
+                    <div id="match-left" class="space-y-4 z-20"></div>
+                    <div id="match-right" class="space-y-4 z-20"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 選選看區塊 -->
+        <div id="view-quiz" class="fade-in hidden">
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-lg border-2 border-amber-200 max-w-3xl mx-auto">
+                <div class="flex justify-between items-center mb-6 border-b border-amber-100 pb-4">
+                    <span id="quiz-progress" class="bg-amber-100 text-amber-800 font-black px-4 py-1.5 rounded-full text-sm">第 1 / 5 題</span>
+                    <span id="quiz-score" class="font-black text-amber-600 text-lg">得分：0</span>
+                </div>
+                <div id="quiz-card">
+                    <h3 id="quiz-question" class="text-2xl md:text-3xl font-black text-gray-800 mb-6 leading-relaxed"></h3>
+                    <div id="quiz-options" class="grid grid-cols-1 gap-4"></div>
+                    <div id="quiz-feedback" class="mt-6 p-4 rounded-2xl font-bold text-center text-lg hidden"></div>
+                </div>
+                <div id="quiz-result" class="hidden text-center py-8">
+                    <span class="text-6xl mb-4 block">🎉</span>
+                    <h3 class="text-3xl font-black text-amber-950 mb-2">太棒了！完成測驗！</h3>
+                    <p id="quiz-final-score" class="text-xl font-bold text-amber-800 mb-6"></p>
+                    <button onclick="initQuizGame()" class="px-8 py-3 bg-amber-500 text-amber-950 font-black text-lg rounded-2xl hover:bg-amber-400 transition shadow-md">再玩一次</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 填空挑戰區塊 -->
+        <div id="view-fill" class="fade-in hidden">
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-lg border-2 border-amber-200 max-w-3xl mx-auto">
+                <div class="flex justify-between items-center mb-6 border-b border-amber-100 pb-4">
+                    <span id="fill-progress" class="bg-amber-100 text-amber-800 font-black px-4 py-1.5 rounded-full text-sm">第 1 / 5 題</span>
+                    <span id="fill-score" class="font-black text-amber-600 text-lg">得分：0</span>
+                </div>
+                <div id="fill-card">
+                    <h3 id="fill-sentence" class="text-2xl md:text-3xl font-black text-gray-800 mb-8 leading-relaxed"></h3>
+                    <div id="fill-options" class="grid grid-cols-2 gap-4"></div>
+                    <div id="fill-feedback" class="mt-6 p-4 rounded-2xl font-bold text-center text-lg hidden"></div>
+                </div>
+                <div id="fill-result" class="hidden text-center py-8">
+                    <span class="text-6xl mb-4 block">🌟</span>
+                    <h3 class="text-3xl font-black text-amber-950 mb-2">太厲害了！句子填空全破關！</h3>
+                    <p id="fill-final-score" class="text-xl font-bold text-amber-800 mb-6"></p>
+                    <button onclick="initFillGame()" class="px-8 py-3 bg-amber-500 text-amber-950 font-black text-lg rounded-2xl hover:bg-amber-400 transition shadow-md">再試一次</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 拖曳句型測驗區塊 (四字成語專屬) -->
+        <div id="view-drag" class="fade-in hidden">
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-lg border-2 border-purple-200 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 pb-4 border-b border-purple-100">
+                    <div>
+                        <h2 class="text-2xl font-black text-purple-900 flex items-center gap-2">🎯 四字成語拖曳句型大挑戰</h2>
+                        <p class="text-gray-600 font-bold text-sm mt-1">請將上方的成語卡片，用滑鼠拖曳或點選放入下方對應的句子空格中！</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="clearDragAnswers()" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition">清空重填</button>
+                        <button onclick="checkDragAnswers()" class="px-6 py-2 bg-purple-600 text-white rounded-xl font-black hover:bg-purple-700 shadow-md transition transform hover:scale-105">送出檢查答案</button>
+                    </div>
+                </div>
+
+                <!-- 成語卡片庫 -->
+                <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200 mb-6 sticky top-20 z-30 shadow-sm">
+                    <p class="text-xs font-black text-purple-700 uppercase tracking-wider mb-2">成語卡片庫（請點選或拖曳）：</p>
+                    <div id="drag-bank" class="flex flex-wrap gap-3 min-h-[50px] items-center"></div>
+                </div>
+
+                <!-- 題目區塊 -->
+                <div id="drag-questions" class="space-y-4"></div>
+
+                <!-- 結果反饋浮層 -->
+                <div id="drag-score-banner" class="hidden mt-8 p-6 bg-purple-100 border-2 border-purple-300 rounded-2xl text-center">
+                    <h3 id="drag-score-title" class="text-2xl font-black text-purple-900 mb-2"></h3>
+                    <p id="drag-score-desc" class="text-purple-700 font-bold mb-4"></p>
+                    <button onclick="initDragGame()" class="px-8 py-3 bg-purple-600 text-white rounded-xl font-black hover:bg-purple-700 transition">再試一次</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12格連環圖故事導覽區塊 -->
+        <div id="view-comic" class="fade-in hidden">
+            <div class="bg-amber-100 border-2 border-amber-300 p-6 rounded-3xl mb-6 text-center shadow-sm">
+                <div class="inline-block bg-amber-500 text-white font-black text-sm px-4 py-1 rounded-full mb-2">故事引導</div>
+                <h2 class="text-3xl font-black text-amber-900">🖼️ 週末尋寶大冒險：12格連環圖故事</h2>
+                <p class="text-amber-800 font-bold mt-2">請先仔細看這 12 格連環圖故事，了解事情發生的順序，看完就可以挑戰後面的短文填空喔！</p>
+            </div>
+
+            <div class="bg-white p-4 md:p-6 rounded-3xl border-2 border-amber-200 shadow-lg mb-8 text-center">
+                <img id="main-comic-img"
+                     src="連環圖文字版.jpg"
+                     alt="週末尋寶大冒險 12格連環圖"
+                     class="w-full max-w-5xl h-auto mx-auto rounded-2xl shadow-md border border-amber-100 object-contain mb-6">
+            </div>
+
+            <div class="mt-6 text-center bg-emerald-50 p-6 rounded-3xl border-2 border-emerald-200">
+                <h3 class="text-2xl font-black text-emerald-900 mb-2">看完了 12 格連環圖故事，準備好挑戰文章填空了嗎？</h3>
+                <p class="text-emerald-700 font-bold mb-4">快點選下面的按鈕前往短文填空，把適合的成語放進故事裡吧！</p>
+                <button onclick="switchTab('story')" class="px-8 py-3 bg-emerald-600 text-white font-black text-xl rounded-2xl hover:bg-emerald-700 transition shadow-md transform hover:scale-105">👉 前往故事短文大挑戰</button>
+            </div>
+        </div>
+
+        <!-- 故事短文挑戰區塊 -->
+        <div id="view-story" class="fade-in hidden">
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-lg border-2 border-emerald-200 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 pb-4 border-b border-emerald-100">
+                    <div>
+                        <h2 class="text-2xl font-black text-emerald-900 flex items-center gap-2">📖 故事短文填空大挑戰</h2>
+                        <p class="text-emerald-700 font-bold text-sm mt-1">閱讀《週末尋寶大冒險》故事，將上方的四字成語放進正確的空格中！</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="clearStoryAnswers()" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition">清空重填</button>
+                        <button onclick="checkStoryAnswers()" class="px-6 py-2 bg-emerald-600 text-white rounded-xl font-black hover:bg-emerald-700 shadow-md transition transform hover:scale-105">送出檢查故事</button>
+                    </div>
+                </div>
+
+                <!-- 成語卡片庫 (故事用) -->
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 mb-6 sticky top-20 z-30 shadow-sm">
+                    <p class="text-xs font-black text-emerald-700 uppercase tracking-wider mb-2">成語卡片庫（請點選或拖曳）：</p>
+                    <div id="story-drag-bank" class="flex flex-wrap gap-3 min-h-[50px] items-center"></div>
+                </div>
+
+                <!-- 短文文章內文與空格區 -->
+                <div id="story-article-container" class="bg-amber-50/50 p-6 md:p-8 rounded-2xl border border-amber-200 text-lg md:text-xl font-bold leading-loose text-gray-800 space-y-4"></div>
+
+                <!-- 結果反饋浮層 (故事) -->
+                <div id="story-score-banner" class="hidden mt-8 p-6 bg-emerald-100 border-2 border-emerald-300 rounded-2xl text-center">
+                    <h3 id="story-score-title" class="text-2xl font-black text-emerald-900 mb-2"></h3>
+                    <p id="story-score-desc" class="text-emerald-700 font-bold mb-4"></p>
+                    <button onclick="initStoryGame()" class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-black hover:bg-emerald-700 transition">再試一次</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 腳本主邏輯 -->
+    <script>
+        let currentLesson = 'lesson1';
+        let currentDifficulty = 'simple'; // 'simple' (5題) or 'advanced' (10題)
+        let currentTab = 'dictionary';
+        let selectedDragCard = null;
+        let selectedStoryCard = null;
+
+        // 完整語詞與題目數據庫
+        const lessonsData = {
+            lesson1: {
+                title: "第一課",
+                vocab: [
+                    { word: "晴天", pinyin: "ㄑㄧㄥˊ ㄊㄧㄢ", icon: "☀️", simple: "太陽出來了，天空沒有下雨，很明亮的天氣。", example: "晴天時我們可以去公園玩溜滑梯。" },
+                    { word: "涼爽", pinyin: "ㄌㄧㄤˊ ㄕㄨㄤˇ", icon: "🍃", simple: "吹來的風冷冷的、很舒服，不會流汗也不會發抖。", example: "秋天的晚上吹著涼爽的微風。" },
+                    { word: "塵垢", pinyin: "ㄔㄣˊ ㄍㄡˋ", icon: "🧹", simple: "物品上面黑黑灰灰的灰塵和髒東西。", example: "媽媽用抹布把桌上的塵垢擦乾淨。" },
+                    { word: "膽怯", pinyin: "ㄉㄢˇ ㄑㄧㄝˋ", icon: "😨", simple: "心裡覺得害怕，不敢去做、不敢說話。", example: "小黑狗遇到大狗時，會膽怯地躲在主人後面。" },
+                    { word: "抬頭", pinyin: "ㄊㄞˊ ㄊㄡˊ", icon: "🙄", simple: "把頭往上仰，眼睛看著上面的地方。", example: "我抬頭看著天上飛過去的飛機。" },
+                    { word: "綻放", pinyin: "ㄓㄢˋ ㄈㄤˋ", icon: "🌸", simple: "花朵打開了，開得很漂亮。", example: "春天到了，花園裡的櫻花都綻放了。" },
+                    { word: "曝曬", pinyin: "ㄆㄨˋ ㄕㄞˋ", icon: "☀️", simple: "放在很大的太陽底下來曬。", example: "夏天中午在操場上曝曬太久會中暑。" },
+                    { word: "收合", pinyin: "ㄕㄡ ㄏㄜˊ", icon: "☂️", simple: "把原本打開的東西收起來、合起來。", example: "下雨停了，爸爸把雨傘收合起來。" },
+                    { word: "赤腳", pinyin: "ㄔˋ ㄐㄧㄠˇ", icon: "🦶", simple: "沒有穿鞋子也沒有穿襪子，光著腳丫。", example: "在沙灘上赤腳走路感覺沙子軟軟的。" },
+                    { word: "攜手", pinyin: "ㄒㄧ ㄕㄡˇ", icon: "🤝", simple: "手牽著手，一起做一件事。", example: "大家攜手合作，很快就把教室打掃乾淨。" },
+                    { word: "踩踏", pinyin: "ㄘㄞˇ ㄊㄚˋ", icon: "👣", simple: "腳用力踩在地上或是東西上面。", example: "請不要踩踏草坪上的小花。" },
+                    { word: "陰霾", pinyin: "ㄧㄣ ㄇㄞˊ", icon: "☁️", simple: "天空灰灰暗暗的像快下雨；或是心裡不開心。", example: "烏雲散去後，天空不再陰霾。" },
+                    { word: "皺紋", pinyin: "ㄓㄡ ㄨㄣˊ", icon: "👵", simple: "皮膚或是衣服上有一條一條皺起來的紋路。", example: "奶奶笑起來的時候，臉上有親切的皺紋。" },
+                    { word: "足跡", pinyin: "ㄗㄨˊ ㄐㄧ", icon: "🐾", simple: "腳踩過之後留下來的痕跡。", example: "雪地上留下了小鳥走路的足跡。" },
+                    { word: "暈開", pinyin: "ㄩㄣ ㄎㄞ", icon: "🎨", simple: "水墨或顏色在紙上慢慢擴散開來的樣子。", example: "水滴到圖畫紙上，顏料立刻暈開了。" }
+                ],
+                quiz: [
+                    { q: "太陽出來了，天空沒有下雨，這叫做什麼天氣？", options: ["晴天", "陰霾", "暴雨", "颱風"], answer: 0, hint: "出太陽的好天氣。" },
+                    { q: "吹過來的風很舒服、讓人不會流汗，這感覺是？", options: ["曝曬", "涼爽", "寒冷", "悶熱"], answer: 1, hint: "像秋天的微風一樣舒服。" },
+                    { q: "桌子很久沒有擦，上面積滿了黑黑灰灰的東西，這是？", options: ["皺紋", "足跡", "塵垢", "暈開"], answer: 2, hint: "灰塵和髒東西。" },
+                    { q: "小明不敢一個人在黑黑的房間裡，心裡覺得很害怕，這是？", options: ["膽怯", "攜手", "綻放", "抬頭"], answer: 0, hint: "害怕不敢向前。" },
+                    { q: "要把眼睛看著天上的小鳥，我們需要做什麼動作？", options: ["踩踏", "抬頭", "收合", "赤腳"], answer: 1, hint: "把頭往上抬。" },
+                    { q: "春天的花朵打開了，開得非常漂亮，可以說是？", options: ["綻放", "暈開", "陰霾", "曝曬"], answer: 0, hint: "花朵打開盛開。" },
+                    { q: "把洗好的衣服放在很大的太陽底下來晾乾，這是？", options: ["曝曬", "收合", "攜手", "踩踏"], answer: 0, hint: "在大太陽下曬。" },
+                    { q: "下雨過後，爸爸把雨傘撐開的部分合起來，這是？", options: ["綻放", "收合", "抬頭", "膽怯"], answer: 1, hint: "把打開的東西合起來。" },
+                    { q: "沒有穿鞋子也沒有穿襪子，光著腳丫走在沙灘上，叫作？", options: ["赤腳", "攜手", "足跡", "皺紋"], answer: 0, hint: "光腳丫走路。" },
+                    { q: "大家手牽著手，一起互相幫忙完成任務，叫作？", options: ["攜手", "踩踏", "暈開", "陰霾"], answer: 0, hint: "牽手合作。" }
+                ],
+                fill: [
+                    { sentence: "今天是個陽光普照的（　），大家決定去郊遊。", options: ["晴天", "陰霾", "塵垢", "皺紋"], answer: "晴天" },
+                    { sentence: "坐在樹蔭下吹著（　）的微風，真讓人想睡覺。", options: ["涼爽", "曝曬", "膽怯", "踩踏"], answer: "涼爽" },
+                    { sentence: "媽媽拿濕抹布把櫃子上的（　）擦拭乾淨。", options: ["塵垢", "足跡", "綻放", "赤腳"], answer: "塵垢" },
+                    { sentence: "看到兇猛的大狗，小弟弟（　）地躲在媽媽身後。", options: ["膽怯", "攜手", "抬頭", "暈開"], answer: "膽怯" },
+                    { sentence: "我們（　）看著空中飛過的彩色氣球。", options: ["抬頭", "踩踏", "收合", "曝曬"], answer: "抬頭" },
+                    { sentence: "公園裡的小花在溫暖的陽光下（　）了。", options: ["綻放", "陰霾", "皺紋", "赤腳"], answer: "綻放" },
+                    { sentence: "被棉被放在太陽底下（　），蓋起來會香香的。", options: ["曝曬", "攜手", "收合", "足跡"], answer: "曝曬" },
+                    { sentence: "放學後，請同學把雨傘（　）放進傘架。", options: ["收合", "膽怯", "踩踏", "暈開"], answer: "收合" },
+                    { sentence: "海邊的沙灘很軟，小朋友們都脫下鞋子（　）奔跑。", options: ["赤腳", "塵垢", "陰霾", "皺紋"], answer: "赤腳" },
+                    { sentence: "全班同學（　）合作，贏得了大隊接力比賽。", options: ["攜手", "抬頭", "綻放", "曝曬"], answer: "攜手" }
+                ]
+            },
+            lesson2: {
+                title: "第二課",
+                vocab: [
+                    { word: "竹編", pinyin: "ㄓㄨˊ ㄅㄧㄢ", icon: "🧺", simple: "用細細的竹子削成條，編織成籃子或扇子。", example: "阿嬤拿著竹編的菜籃去市場買菜。" },
+                    { word: "鳥巢", pinyin: "ㄋㄧㄠˇ ㄔㄠˊ", icon: "🪹", simple: "小鳥用乾草、樹枝自己蓋的小房子，用來生蛋和小鳥住。", example: "樹枝上會有一個小鳥巢，裡面有鳥寶寶。" },
+                    { word: "栽種", pinyin: "ㄗㄞ ㄓㄨㄥˋ", icon: "🌱", simple: "把種子或幼苗放進泥土裡，天天澆水照顧它長大。", example: "我們在小花盆裡栽種向日葵。" },
+                    { word: "茂盛", pinyin: "ㄇㄠˋ ㄕㄥˋ", icon: "🌳", simple: "植物長得很健康，葉子綠油油的、多到遮住太陽。", example: "大榕樹的葉子好茂盛，我們可以在樹下乘涼。" },
+                    { word: "藤蔓", pinyin: "ㄊㄥˊ ㄇㄢˋ", icon: "🌿", simple: "細長像綠色繩子的植物，會沿著牆壁或柱子往上爬。", example: "圍牆上爬滿了牽牛花的藤蔓。" },
+                    { word: "格外", pinyin: "ㄍㄜˊ ㄨㄞˋ", icon: "✨", simple: "比平常時候「還要更加、更特別」的意思。", example: "吃了冰淇淋之後，我覺得今天格外開心。" },
+                    { word: "掀開", pinyin: "ㄒㄧㄢ ㄎㄞ", icon: "📖", simple: "用手把蓋在上面的布、被子或鍋蓋翻起來、移開。", example: "媽媽掀開鍋蓋，裡面正煮著香噴噴的玉米濃湯。" },
+                    { word: "熟悉", pinyin: "ㄕㄡˊ ㄒㄧ", icon: "🤝", simple: "看過很多次、非常清楚明白，覺得安心不陌生。", example: "走在熟悉的回家的路上，不用看地圖也認識。" },
+                    { word: "添加", pinyin: "ㄊㄧㄢ ㄐㄧㄚ", icon: "➕", simple: "在原本的東西裡面，再加入新的東西讓它變多。", example: "天氣變冷了，出門要記得添加一件外套。" },
+                    { word: "縫隙", pinyin: "ㄈㄥˋ ㄒㄧˋ", icon: "🚪", simple: "兩個東西中間留出來的小小的空隙或洞。", example: "小貓咪從門縫隙裡偷偷看著客廳。" },
+                    { word: "大膽", pinyin: "ㄉㄚˋ ㄉㄢˇ", icon: "🦁", simple: "勇敢、不怕危險或勇敢表達想法。", example: "小明大膽地走上台向大家自我介紹。" },
+                    { word: "稿紙", pinyin: "ㄍㄠˇ ㄓˇ", icon: "📝", simple: "上面印有一格一格，專門用來寫作文的紙。", example: "我們在稿紙上寫下發揮想像力的作文。" },
+                    { word: "索性", pinyin: "ㄙㄨㄛˇ ㄒㄧㄥˋ", icon: "🤷", simple: "乾脆直接這樣做，不再猶豫（課文中常寫作索幸）。", example: "雨下太大了，我們索性待在室內看書。" },
+                    { word: "絨毛", pinyin: "ㄖㄨㄥˊ ㄇㄠˊ", icon: "🧸", simple: "摸起來細細、軟軟又舒服的小毛毛。", example: "這隻熊熊玩偶身上滿是軟軟的絨毛。" },
+                    { word: "信賴", pinyin: "ㄒㄧㄣˋ ㄌㄞˋ", icon: "❤️", simple: "非常相信一個人，覺得有他在就很安心。", example: "狗狗非常信賴主人，總是一直跟在後面。" }
+                ],
+                quiz: [
+                    { q: "用細細的竹子編織成的竹籃或菜籃，這叫作？", options: ["竹編", "藤蔓", "稿紙", "絨毛"], answer: 0, hint: "竹子編織的作品。" },
+                    { q: "小鳥用乾草和樹枝蓋在樹上的家，稱為？", options: ["縫隙", "鳥巢", "索性", "大膽"], answer: 1, hint: "小鳥住的巢穴。" },
+                    { q: "把植物的小苗埋進土裡澆水照顧，這個動作是？", options: ["掀開", "添加", "栽種", "熟悉"], answer: 2, hint: "種植植物。" },
+                    { q: "大樹長得非常好，綠色葉子非常多又密，叫作？", options: ["茂盛", "格外", "信賴", "大膽"], answer: 0, hint: "植物生長旺盛。" },
+                    { q: "像繩子一樣會順著牆壁往上爬的綠色植物是？", options: ["絨毛", "藤蔓", "竹編", "稿紙"], answer: 1, hint: "會攀爬的植物。" },
+                    { q: "比起昨天，今天的太陽「特別」大，可以說是？", options: ["熟悉", "格外", "添加", "掀開"], answer: 1, hint: "特別、更加的意思。" },
+                    { q: "把蓋在蒸籠上的蓋子拿起來，這個動作是？", options: ["掀開", "栽種", "縫隙", "鳥巢"], answer: 0, hint: "翻開蓋子。" },
+                    { q: "這條路我每天走，對路上的店家非常明白了解，這是？", options: ["大膽", "熟悉", "索性", "絨毛"], answer: 1, hint: "很了解不陌生。" },
+                    { q: "天氣轉冷，媽媽叫我在衣服裡面「多加」一件毛衣，這是？", options: ["添加", "茂盛", "信賴", "藤蔓"], answer: 0, hint: "加入、增加。" },
+                    { q: "門沒有關緊留下來的那一條窄窄的小空隙叫作？", options: ["縫隙", "稿紙", "鳥巢", "竹編"], answer: 0, hint: "狹小的空隙。" }
+                ],
+                fill: [
+                    { sentence: "阿嬤拿著（　）籃子去菜市場買新鮮蔬菜。", options: ["竹編", "絨毛", "稿紙", "大膽"], answer: "竹編" },
+                    { sentence: "小鳥在樹枝上築了一個溫暖的（　）。", options: ["鳥巢", "縫隙", "藤蔓", "熟悉"], answer: "鳥巢" },
+                    { sentence: "我們在校園的小花圃裡（　）了許多美麗的花朵。", options: ["栽種", "掀開", "添加", "索性"], answer: "栽種" },
+                    { sentence: "森林裡的樹木長得非常（　），擋住了陽光。", options: ["茂盛", "格外", "大膽", "信賴"], answer: "茂盛" },
+                    { sentence: "綠色的（　）爬滿了這面老舊的磚牆。", options: ["藤蔓", "竹編", "絨毛", "稿紙"], answer: "藤蔓" },
+                    { sentence: "今天得到了第一名，小明心裡（　）開心。", options: ["格外", "熟悉", "縫隙", "添加"], answer: "格外" },
+                    { sentence: "媽媽（　）鍋蓋，香味立刻飄滿了整個廚房。", options: ["掀開", "栽種", "索性", "信賴"], answer: "掀開" },
+                    { sentence: "這是我最（　）的玩具，我每天都要抱著它睡覺。", options: ["熟悉", "大膽", "茂盛", "鳥巢"], answer: "熟悉" },
+                    { sentence: "喝湯的時候可以（　）一點胡椒粉增添香味。", options: ["添加", "掀開", "藤蔓", "縫隙"], answer: "添加" },
+                    { sentence: "小貓咪從牆壁的（　）裡鑽了過去。", options: ["縫隙", "稿紙", "竹編", "絨毛"], answer: "縫隙" }
+                ]
+            },
+            lesson3: {
+                title: "第三課",
+                vocab: [
+                    { word: "宿舍", pinyin: "ㄙㄨˋ ㄕㄜˋ", icon: "🏢", simple: "學校或公司提供給學生或員工住的房子。", example: "哥哥上大學後住在學校的宿舍裡。" },
+                    { word: "邊緣", pinyin: "ㄅㄧㄢ ㄩㄢˊ", icon: "📐", simple: "靠近最外圍、最旁邊的地方。", example: "請不要把水杯放在桌子的邊緣，會掉下去。" },
+                    { word: "蓬鬆", pinyin: "ㄆㄥˊ ㄙㄨㄥ", icon: "☁️", simple: "蓬蓬軟軟的，裡面有很多空氣的樣子。", example: "剛烘乾的毛巾摸起來非常蓬鬆舒服。" },
+                    { word: "兼顧", pinyin: "ㄐㄧㄢ ㄍㄨˋ", icon: "⚖️", simple: "同時把兩件不同的事情都做好。", example: "我們要做個能兼顧學習與運動的好學生。" },
+                    { word: "酒精", pinyin: "ㄐㄧㄡˇ ㄐㄧㄥ", icon: "🧴", simple: "用來消毒殺菌，擦起來涼涼的液體。", example: "進教室前要先用酒精消毒雙手。" },
+                    { word: "破舊", pinyin: "ㄆㄛˋ ㄐㄧㄡˋ", icon: "🏚️", simple: "破破爛爛又很舊的樣子。", example: "角落裡放著一把破舊的椅子。" },
+                    { word: "籬笆", pinyin: "ㄌㄧˊ ㄅㄚ", icon: "🪵", simple: "用木條或竹子圍在房子周圍的矮牆。", example: "花園周圍用木頭築起了矮矮的籬笆。" },
+                    { word: "孤寂", pinyin: "ㄍㄨ ㄐㄧˋ", icon: "🧍", simple: "一個人孤單又安靜的感覺。", example: "小狗一個人在家時會覺得孤寂。" },
+                    { word: "簡陋", pinyin: "ㄐㄧㄢˇ ㄌㄡˋ", icon: "🛖", simple: "簡單粗糙，設備沒有很好。", example: "這間小木屋設備簡陋，但能遮風避雨。" },
+                    { word: "招待", pinyin: "ㄓㄠ ㄉㄞˋ", icon: "🍵", simple: "熱情地請客人吃東西或招待客人。", example: "媽媽準備了豐盛的點心招待客人。" },
+                    { word: "豐盛", pinyin: "ㄈㄥ ㄕㄥˋ", icon: "🍱", simple: "食物非常多、非常豐富好吃的樣子。", example: "過年時我們吃了一頓豐盛的年夜飯。" },
+                    { word: "城鎮", pinyin: "ㄔㄥˊ ㄓㄣˋ", icon: "🏙️", simple: "有人居住、有商店和街道的地方。", example: "這座美麗的城鎮住了許多親切的人。" },
+                    { word: "過濾", pinyin: "ㄍㄨㄛˋ ㄌㄩˋ", icon: "🧃", simple: "把水或液體裡的雜質渣渣隔開拿掉。", example: "我們用濾網把茶葉過濾掉。" },
+                    { word: "潺潺", pinyin: "ㄔㄢˊ ㄔㄢˊ", icon: "💧", simple: "水慢慢流動時發出水流聲的樣子。", example: "小溪流發出潺潺的水聲。" },
+                    { word: "寂靜", pinyin: "ㄐㄧˋ ㄐㄧㄥˋ", icon: "🤫", simple: "非常安靜，一點聲音也沒有。", example: "夜晚的森林裡一片寂靜。" },
+                    { word: "鋪陳", pinyin: "ㄆㄨ ㄔㄣˊ", icon: "📝", simple: "安排布置好，為後面的事情做準備。", example: "這故事的前面鋪陳得非常有吸引力。" },
+                    { word: "偏遠", pinyin: "ㄆㄧㄢ ㄩㄢˇ", icon: "🏔️", simple: "距離城市很遠，交通比較不方便的地方。", example: "志工們前往偏遠的山區幫助小朋友。" }
+                ],
+                quiz: [
+                    { q: "學校提供給遠道學生住宿的地方叫作？", options: ["宿舍", "籬笆", "城鎮", "偏遠"], answer: 0, hint: "學生住的團體房間。" },
+                    { q: "東西放得太靠桌子最外圍的地方，這是放在？", options: ["邊緣", "蓬鬆", "簡陋", "寂靜"], answer: 0, hint: "最旁邊的外圍。" },
+                    { q: "剛洗好吹乾的頭髮摸起來蓬蓬軟軟的，這是？", options: ["蓬鬆", "破舊", "孤寂", "潺潺"], answer: 0, hint: "軟軟有空氣感。" },
+                    { q: "同時把讀書和打球兩件事都照顧好，這叫？", options: ["兼顧", "過濾", "招待", "鋪陳"], answer: 0, hint: "兩邊都顧好。" },
+                    { q: "吃完飯拿來消毒手部的涼涼液體是？", options: ["酒精", "豐盛", "邊緣", "宿舍"], answer: 0, hint: "消毒殺菌用。" },
+                    { q: "這間房子又破又舊，看起來年久失修，這是？", options: ["破舊", "蓬鬆", "兼顧", "寂靜"], answer: 0, hint: "破破舊舊。" },
+                    { q: "院子周圍用木條搭起來遮擋的小圍牆是？", options: ["籬笆", "城鎮", "偏遠", "鋪陳"], answer: 0, hint: "木頭小圍牆。" },
+                    { q: "一個人待在空蕩蕩的房間裡覺得孤單，這種感受是？", options: ["孤寂", "豐盛", "招待", "過濾"], answer: 0, hint: "孤單寂寞。" },
+                    { q: "設備非常簡單粗糙，沒有華麗裝潢的地方是？", options: ["簡陋", "蓬鬆", "邊緣", "宿舍"], answer: 0, hint: "簡單粗糙。" },
+                    { q: "拿美味的餅乾和茶水熱情接待客人，這是？", options: ["招待", "兼顧", "過濾", "潺潺"], answer: 0, hint: "熱情請客。" }
+                ],
+                fill: [
+                    { sentence: "哥哥讀大學時住在學校的（　）裡。", options: ["宿舍", "籬笆", "偏遠", "鋪陳"], answer: "宿舍" },
+                    { sentence: "請把杯子往中間放，不要放在桌子（　）。", options: ["邊緣", "蓬鬆", "簡陋", "寂靜"], answer: "邊緣" },
+                    { sentence: "曬過太陽的被子摸起來非常（　）。", options: ["蓬鬆", "破舊", "孤寂", "過濾"], answer: "蓬鬆" },
+                    { sentence: "我們應該要（　）課業與身體健康。", options: ["兼顧", "招待", "潺潺", "豐盛"], answer: "兼顧" },
+                    { sentence: "用餐前先用（　）把雙手噴一噴消毒。", options: ["酒精", "邊緣", "城鎮", "籬笆"], answer: "酒精" },
+                    { sentence: "爺爺把那把（　）的舊椅子重新修好了。", options: ["破舊", "蓬鬆", "兼顧", "寂靜"], answer: "破舊" },
+                    { sentence: "花園外圍有一圈漂亮的木造（　）。", options: ["籬笆", "偏遠", "宿舍", "鋪陳"], answer: "籬笆" },
+                    { sentence: "夜深了，一個人走在街道上難免覺得（　）。", options: ["孤寂", "豐盛", "過濾", "招待"], answer: "孤寂" },
+                    { sentence: "雖然這間小山屋很（　），但能遮風避雨。", options: ["簡陋", "蓬鬆", "邊緣", "城鎮"], answer: "簡陋" },
+                    { sentence: "媽媽準備了好多水果來（　）到家裡玩的朋友。", options: ["招待", "兼顧", "過濾", "潺潺"], answer: "招待" }
+                ]
+            },
+            lesson4: {
+                title: "第四課",
+                vocab: [
+                    { word: "肌膚", pinyin: "ㄐㄧ ㄈㄨ", icon: "👶", simple: "身體最外層的皮膚。", example: "小嬰兒的肌膚摸起來非常細嫩。" },
+                    { word: "沸騰", pinyin: "ㄈㄟˋ ㄊㄥˊ", icon: "♨️", simple: "水燒開了一直冒泡泡；或是大家熱血激動。", example: "聽到台灣隊贏了，全場觀眾熱血沸騰。" },
+                    { word: "逆轉", pinyin: "ㄋㄧˋ ㄓㄨㄢˇ", icon: "🔄", simple: "情況反過來，原本快要輸了最後卻贏了。", example: "比賽最後一分鐘我們投進三分球成功逆轉。" },
+                    { word: "吶喊", pinyin: "ㄋㄚˋ ㄏㄢˇ", icon: "🗣️", simple: "張大嘴巴非常大聲地叫出來加油。", example: "運動會時大家在場邊大聲吶喊加油。" },
+                    { word: "拱門", pinyin: "ㄍㄨㄥˇ ㄇㄣˊ", icon: "🌈", simple: "上面彎彎像半個圓形的門。", example: "學校大門口用氣球做了一個漂亮的拱門。" },
+                    { word: "抵達", pinyin: "ㄉㄧˇ ㄉㄚˊ", icon: "🏁", simple: "到了目的地，也就是到了要去的地方。", example: "坐了兩個小時的車，我們終於抵達阿公家。" },
+                    { word: "設置", pinyin: "ㄕㄜˋ ㄓˋ", icon: "🛠️", simple: "準備好並安放好一個東西讓大家使用。", example: "公園裡設置了新的溜滑梯讓小朋友玩。" },
+                    { word: "頒獎", pinyin: "ㄅㄢ ㄐㄧㄤˇ", icon: "🏆", simple: "把獎狀或獎品發給表現很棒的人。", example: "校長在台上頒獎給跑步第一名的同學。" },
+                    { word: "榮耀", pinyin: "ㄖㄨㄥˊ ㄧㄠˋ", icon: "🎖️", simple: "做了一件很棒的事，覺得光榮很有面子。", example: "能代表學校出去比賽是一件很大的榮耀。" },
+                    { word: "搞錯", pinyin: "ㄍㄠˇ ㄘㄨㄛˋ", icon: "❌", simple: "不小心弄錯了，或是想錯想偏了。", example: "我搞錯了集合時間，所以遲到了。" },
+                    { word: "獲勝", pinyin: "ㄏㄨㄛˋ ㄕㄥˋ", icon: "🥇", simple: "在比賽中贏了，得到了勝利。", example: "經過一場努力，我們班終於在拔河比賽中獲勝！" },
+                    { word: "黝黑", pinyin: "ㄧㄡˇ ㄏㄟ", icon: "👦🏽", simple: "皮膚曬得黑黑亮亮的。", example: "夏天常去海邊玩，他的皮膚曬得很黝黑。" },
+                    { word: "訝異", pinyin: "ㄧㄚˋ ㄧˋ", icon: "😲", simple: "看到沒想到的事情，覺得嚇一跳神奇。", example: "看到魔術師把鴿子變不見大家都感到很訝異。" },
+                    { word: "責罵", pinyin: "ㄗㄜˊ ㄇㄚˋ", icon: "😡", simple: "因做錯事情而被大聲說哪裡不對。", example: "弟弟不小心打破玻璃杯被媽媽責罵了一頓。" },
+                    { word: "喝采", pinyin: "ㄏㄜˋ ㄘㄞˇ", icon: "👏", simple: "看到很棒的表演，大聲拍手叫好。", example: "表演結束後觀眾們為台上的人熱烈喝采。" }
+                ],
+                quiz: [
+                    { q: "在比賽中贏了得到了第一名，這叫作？", options: ["獲勝", "搞錯", "設置", "抵達"], answer: 0, hint: "贏得勝利。" },
+                    { q: "看到魔術師把東西變不見感到神奇嚇一跳，這是？", options: ["訝異", "榮耀", "黝黑", "沸騰"], answer: 0, hint: "感到神奇驚訝。" },
+                    { q: "到了要去的地方（例如到了阿公家），可以說？", options: ["抵達", "沸騰", "逆轉", "喝采"], answer: 0, hint: "到達目的地。" },
+                    { q: "原本比分落後最後卻反敗為勝贏了比賽，稱為？", options: ["逆轉", "責罵", "拱門", "肌膚"], answer: 0, hint: "情況反過來贏了。" },
+                    { q: "運動會大聲幫選手加油大叫，這個動作是？", options: ["吶喊", "搞錯", "設置", "頒獎"], answer: 0, hint: "大聲加油大叫。" },
+                    { q: "上方形狀圓圓像半個圓圈的門叫作？", options: ["拱門", "肌膚", "榮耀", "黝黑"], answer: 0, hint: "彎彎形狀的門。" },
+                    { q: "公園裡安放安裝了新的體健設施，這是？", options: ["設置", "喝采", "責罵", "沸騰"], answer: 0, hint: "安裝擺設好。" },
+                    { q: "把獎盃和獎狀送到表現優秀的人手上是？", options: ["頒獎", "逆轉", "抵達", "訝異"], answer: 0, hint: "頒發獎品。" },
+                    { q: "皮膚長時間曬太陽變得黑黑亮亮的，是？", options: ["黝黑", "拱門", "肌膚", "搞錯"], answer: 0, hint: "曬得黑黑的。" },
+                    { q: "做錯事情被大人生氣地檢討批評，這是？", options: ["責罵", "喝采", "榮耀", "獲勝"], answer: 0, hint: "被生氣訓話。" }
+                ],
+                fill: [
+                    { sentence: "經過激烈的比賽，我們班最後順利（　）了！", options: ["獲勝", "搞錯", "設置", "抵達"], answer: "獲勝" },
+                    { sentence: "大家對於小明突然展示的特技表演感到十分（　）。", options: ["訝異", "榮耀", "黝黑", "沸騰"], answer: "訝異" },
+                    { sentence: "經過長途跋涉，我們終於（　）了山頂。", options: ["抵達", "沸騰", "逆轉", "喝采"], answer: "抵達" },
+                    { sentence: "最後關頭投進壓哨球，我們成功（　）了局勢！", options: ["逆轉", "責罵", "拱門", "肌膚"], answer: "逆轉" },
+                    { sentence: "啦啦隊在場邊賣力地（　），為選手加油。", options: ["吶喊", "搞錯", "設置", "頒獎"], answer: "吶喊" },
+                    { sentence: "校園大門口搭起了一個彩色的氣球（　）。", options: ["拱門", "肌膚", "榮耀", "黝黑"], answer: "拱門" },
+                    { sentence: "社區公園裡（　）了許多適合長輩運動的器材。", options: ["設置", "喝采", "責罵", "沸騰"], answer: "設置" },
+                    { sentence: "校長在朝會時間親自（　）給獲獎的同學。", options: ["頒獎", "逆轉", "抵達", "訝異"], answer: "頒獎" },
+                    { sentence: "救生員長時間在海邊執勤，皮膚曬得非常（　）。", options: ["黝黑", "拱門", "肌膚", "搞錯"], answer: "黝黑" },
+                    { sentence: "弟弟因為打破了花瓶而遭到媽媽的（　）。", options: ["責罵", "喝采", "榮耀", "獲勝"], answer: "責罵" }
+                ]
+            },
+            lesson5: {
+                title: "第五課",
+                vocab: [
+                    { word: "職業", pinyin: "ㄓˊ ㄧㄝˋ", icon: "👨‍🚒", simple: "長大後做的工作，例如警察、老師、醫生。", example: "消防員是一份非常勇敢的職業。" },
+                    { word: "秘密", pinyin: "ㄇㄧˋ ㄇㄧˋ", icon: "🤫", simple: "不能隨便告訴別人的事情。", example: "這是我和好朋友之間的小秘密。" },
+                    { word: "偶像", pinyin: "ㄡˇ ㄒㄧㄤˋ", icon: "🌟", simple: "心裡非常崇拜、很想向他學習的人。", example: "球技高超的林書豪是許多人的偶像。" },
+                    { word: "噪音", pinyin: "ㄗㄠˋ ㄧㄣ", icon: "📢", simple: "聽起來很不舒服、很刺耳吵鬧的聲音。", example: "施工現場傳來陣陣令人難受的噪音。" },
+                    { word: "避免", pinyin: "ㄅㄧˋ ㄇㄧㄢˇ", icon: "🛡️", simple: "事先做好準備，不要讓壞事發生。", example: "走路專心看路可以避免跌倒。" },
+                    { word: "迅速", pinyin: "ㄒㄩㄣˋ ㄙㄨˋ", icon: "⚡", simple: "速度非常非常快。", example: "消防車迅速地趕到了火災現場。" },
+                    { word: "撲滅", pinyin: "ㄆㄨ ㄇㄧㄝˋ", icon: "🧯", simple: "把火打熄、把火給熄滅。", example: "英勇的消防員很快就把火勢撲滅了。" },
+                    { word: "救援", pinyin: "ㄐㄧㄡˋ ㄩㄢˊ", icon: "🚑", simple: "快點跑去救幫助遇到危險的人。", example: "救難隊迅速展開救援行動。" },
+                    { word: "液體", pinyin: "ㄧㄝˋ ㄊㄧˇ", icon: "💧", simple: "會像水一樣流動的東西，例如果汁、牛奶。", example: "水和牛奶都是常見的液體。" },
+                    { word: "腐蝕", pinyin: "ㄈㄨˇ ㄕˊ", icon: "🧪", simple: "強酸等化學藥品把物品咬壞破壞掉。", example: "強酸藥水具有強烈的腐蝕性。" },
+                    { word: "隔絕", pinyin: "ㄍㄜˊ ㄐㄩㄝˊ", icon: "🧱", simple: "中間擋住，讓兩邊碰不到、通不過去。", example: "戴上口罩可以隔絕空氣中的飛沫。" },
+                    { word: "承受", pinyin: "ㄔㄥˊ ㄕㄡˋ", icon: "🏋️", simple: "肩膀撐住重量或心裡忍受壓力。", example: "這張桌子無法承受太重的重量。" },
+                    { word: "陌生", pinyin: "ㄇㄛˋ ㄕㄥ", icon: "❓", simple: "從來沒看過、不認識的感覺。", example: "不可以隨便跟陌生人走。" },
+                    { word: "拍攝", pinyin: "ㄆㄞ ㄕㄜˋ", icon: "📷", simple: "用照相機或手機拍照、拍影片。", example: "我們在景點拍攝了許多照片留念。" },
+                    { word: "錄製", pinyin: "ㄌㄨˋ ㄓˋ", icon: "🎙️", simple: "把聲音或影像錄下來保存。", example: "歌星在錄音室裡錄製新歌曲。" },
+                    { word: "檔案", pinyin: "ㄉㄤˇ ㄢˋ", icon: "📁", simple: "電腦裡裝資料的文件或是整理好的文件資料。", example: "請把這份作業儲存成電腦檔案。" },
+                    { word: "註明", pinyin: "ㄓㄨˋ ㄇㄧㄥˊ", icon: "🏷️", simple: "在旁邊寫清楚說明標記。", example: "請在物品上註明自己的姓名。" },
+                    { word: "攝氏", pinyin: "ㄕㄜˋ ㄕˋ", icon: "🌡️", simple: "量溫度的單位，例如今天氣溫攝氏25度。", example: "夏天氣溫常常超過攝氏三十度。" },
+                    { word: "接觸", pinyin: "ㄐㄧㄝ ㄔㄨˋ", icon: "👈", simple: "碰觸到、碰到在一起。", example: "手不要直接接觸到燙燙的鍋子。" }
+                ],
+                quiz: [
+                    { q: "長大之後選擇的工作（如老師、醫生），叫作？", options: ["職業", "秘密", "噪音", "檔案"], answer: 0, hint: "工作與事業。" },
+                    { q: "不能隨便隨口跟別人說的心事是？", options: ["秘密", "偶像", "液體", "攝氏"], answer: 0, hint: "隱密的事。" },
+                    { q: "讓人聽了耳朵很不舒服又吵鬧的聲音是？", options: ["噪音", "迅速", "隔絕", "接觸"], answer: 0, hint: "刺耳吵鬧聲。" },
+                    { q: "事先小心注意，不讓危險或壞事發生，這是？", options: ["避免", "撲滅", "承受", "拍攝"], answer: 0, hint: "防止發生。" },
+                    { q: "消防隊動作極快，非常快地趕到現場，這是？", options: ["迅速", "陌生", "註明", "錄製"], answer: 0, hint: "非常快速。" },
+                    { q: "消防員用水噴向大火把火熄滅，這個動作是？", options: ["撲滅", "救援", "腐蝕", "偶像"], answer: 0, hint: "熄滅火勢。" },
+                    { q: "去幫助救護受困在危險中的人，這是？", options: ["救援", "避免", "噪音", "檔案"], answer: 0, hint: "救助支援。" },
+                    { q: "像水、果汁一樣會流動的東西統稱為？", options: ["液體", "攝氏", "職業", "秘密"], answer: 0, hint: "會流動的水狀物。" },
+                    { q: "戴上防護木板或牆壁把危險擋在外面，這是？", options: ["隔絕", "接觸", "拍攝", "錄製"], answer: 0, hint: "阻擋開來。" },
+                    { q: "完全不認識、沒見過的人或環境，感覺很？", options: ["陌生", "迅速", "撲滅", "偶像"], answer: 0, hint: "不熟悉不認識。" }
+                ],
+                fill: [
+                    { sentence: "我的夢想（　）是當一名保護大家的警察。", options: ["職業", "秘密", "噪音", "檔案"], answer: "職業" },
+                    { sentence: "這是我們之間的（　），千萬不可以說出去喔！", options: ["秘密", "偶像", "液體", "攝氏"], answer: "秘密" },
+                    { sentence: "夜深了請降低音量，以免產生（　）影響鄰居。", options: ["噪音", "迅速", "隔絕", "接觸"], answer: "噪音" },
+                    { sentence: "過馬路走斑馬線可以（　）發生危險。", options: ["避免", "撲滅", "承受", "拍攝"], answer: "避免" },
+                    { sentence: "救護車（　）趕往現場將傷患送醫。", options: ["迅速", "陌生", "註明", "錄製"], answer: "迅速" },
+                    { sentence: "消防員經過奮力灌救，終於將大火（　）了。", options: ["撲滅", "救援", "腐蝕", "偶像"], answer: "撲滅" },
+                    { sentence: "救難隊員深入山區展開（　）行動。", options: ["救援", "避免", "噪音", "檔案"], answer: "救援" },
+                    { sentence: "水和牛奶都是常見的（　）。", options: ["液體", "攝氏", "職業", "秘密"], answer: "液體" },
+                    { sentence: "戴上耳塞可以（　）外界的吵雜聲音。", options: ["隔絕", "接觸", "拍攝", "錄製"], answer: "隔絕" },
+                    { sentence: "來到（　）的環境，小弟弟緊張地牽緊媽媽的手。", options: ["陌生", "迅速", "撲滅", "偶像"], answer: "陌生" }
+                ]
+            },
+            lesson6: {
+                title: "第六課",
+                vocab: [
+                    { word: "劃破", pinyin: "ㄏㄨㄚˊ ㄆㄛˋ", icon: "🗡️", simple: "尖銳的東西劃過去割破；或是聲音打破安靜。", example: "流星劃破了夜晚寧靜的天空。" },
+                    { word: "荒涼", pinyin: "ㄏㄨㄤ ㄌㄧㄤˊ", icon: "🏜️", simple: "沒有人住、沒有植物，冷冷清清的地方。", example: "這座廢棄的小鎮看起來非常荒涼。" },
+                    { word: "宇宙", pinyin: "ㄩˇ ㄓㄡˋ", icon: "🌌", simple: "包含所有星球、太陽、月亮和地球的超大空間。", example: "太空人搭乘火箭探索神秘的宇宙。" },
+                    { word: "雜誌", pinyin: "ㄗㄚˊ ㄓˋ", icon: "📖", simple: "定期出版，裡面有許多圖文故事的書本。", example: "這本兒童雜誌裡有許多有趣的科普知識。" },
+                    { word: "執照", pinyin: "ㄓˊ ㄓㄠˋ", icon: "🪪", simple: "考過考試後政府發給可以做這件事的證照卡片。", example: "開車上路前必須先考取駕駛執照。" },
+                    { word: "訓練", pinyin: "ㄒㄩㄣˋ ㄌㄧㄢˋ", icon: "🏋️", simple: "反覆練習讓技能變得越來越厲害。", example: "運動員每天都要接受辛苦的訓練。" },
+                    { word: "機械", pinyin: "ㄐㄧ ㄒㄧㄝˋ", icon: "⚙️", simple: "由許多零件組裝而成會運作的機器。", example: "工廠裡有許多自動化的機械設備。" },
+                    { word: "伴隨", pinyin: "ㄅㄢˋ ㄙㄨㄟˊ", icon: "👫", simple: "跟在旁邊一起出現、一起發生。", example: "閃電常常伴隨著隆隆的雷聲。" },
+                    { word: "隕石", pinyin: "ㄩㄣˇ ㄕˊ", icon: "☄️", simple: "外太空掉落下來打到地面上的大石頭。", example: "博物館裡展示了一塊來自太空的隕石。" },
+                    { word: "指揮", pinyin: "ㄓˇ ㄏㄨㄟ", icon: "🎼", simple: "在前面領導引導大家一起做動作。", example: "交警在十字路口發揮專業指揮交通。" },
+                    { word: "駕駛", pinyin: "ㄐㄧㄚˋ ㄕˇ", icon: "🚗", simple: "掌控操控車子、飛機或船前進。", example: "爸爸專心地駕駛汽車載我們去玩。" },
+                    { word: "凌晨", pinyin: "ㄌㄧㄥˊ ㄔㄣˊ", icon: "🌙", simple: "天還沒亮，半夜三四點的時候。", example: "今天凌晨天還沒亮我們就出發了。" },
+                    { word: "燦爛", pinyin: "ㄘㄢˋ ㄌㄢˋ", icon: "✨", simple: "非常光亮、美麗耀眼的樣子。", example: "夜空中綻放著燦爛的煙火。" },
+                    { word: "跳躍", pinyin: "ㄊㄧㄠˋ ㄩㄝˋ", icon: "🦘", simple: "雙腳用力往上跳起來。", example: "小兔子在草地上快樂地跳躍。" },
+                    { word: "清晰", pinyin: "ㄑㄧㄥ ㄒㄧ", icon: "👓", simple: "看得很清楚，一點也不模糊。", example: "戴上眼鏡後，遠方的字體變得很清晰。" },
+                    { word: "著迷", pinyin: "ㄓㄠˊ ㄇㄧˊ", icon: "🤩", simple: "非常喜歡，看得很入迷都不想離開。", example: "大家都對這本精彩的故事書深深著迷。" },
+                    { word: "模型", pinyin: "ㄇㄛˊ ㄒㄧㄥˊ", icon: "✈️", simple: "依照真實東西縮小做的玩具或樣品。", example: "哥哥組裝了一架精美的飛機模型。" },
+                    { word: "倒數", pinyin: "ㄉㄠˋ ㄕㄨˇ", icon: "⏱️", simple: "從後面的數字往前數（3, 2, 1）。", example: "跨年夜大家一起倒數迎接新年。" },
+                    { word: "搭檔", pinyin: "ㄉㄚ ㄉㄤˇ", icon: "🧑‍🤝‍🧑", simple: "一起合作互相幫忙的好夥伴。", example: "我和小明是接力賽的好搭檔。" },
+                    { word: "陌生", pinyin: "ㄇㄛˋ ㄕㄥ", icon: "❓", simple: "不認識、沒見過的感覺。", example: "來到新環境，一切都感到很陌生。" }
+                ],
+                quiz: [
+                    { q: "流星快速劃過夜空打破了平靜，這是？", options: ["劃破", "荒涼", "訓練", "倒數"], answer: 0, hint: "割劃破開。" },
+                    { q: "沒有人煙植物、感覺冷清地方是？", options: ["荒涼", "燦爛", "清晰", "搭檔"], answer: 0, hint: "冷清無人。" },
+                    { q: "包含地球、太陽和所有顆粒星球的廣大空間是？", options: ["宇宙", "雜誌", "機械", "模型"], answer: 0, hint: "無邊無際的太空。" },
+                    { q: "開車前必須經過考試考取合法的證明卡片是？", options: ["執照", "隕石", "指揮", "凌晨"], answer: 0, hint: "駕駛許可證。" },
+                    { q: "每天不斷練習讓自己體能或技巧變好，這是？", options: ["訓練", "著迷", "跳躍", "伴隨"], answer: 0, hint: "反覆練習。" },
+                    { q: "從外太空掉落在地球表面上的石頭叫作？", options: ["隕石", "劃破", "宇宙", "駕駛"], answer: 0, hint: "太空來的石頭。" },
+                    { q: "操控引導汽車或飛機前進的人或動作是？", options: ["駕駛", "荒涼", "雜誌", "倒數"], answer: 0, hint: "開車駕駛。" },
+                    { q: "半夜天還沒有亮的清晨時分（約3,4點）是？", options: ["凌晨", "燦爛", "跳躍", "清晰"], answer: 0, hint: "天亮前半夜。" },
+                    { q: "形容煙火或陽光非常耀眼光亮的樣子是？", options: ["燦爛", "著迷", "模型", "搭檔"], answer: 0, hint: "光亮耀眼。" },
+                    { q: "按照真實車子或飛機等比例縮小的樣品玩具是？", options: ["模型", "執照", "機械", "指揮"], answer: 0, hint: "縮小樣品模型。" }
+                ],
+                fill: [
+                    { sentence: "一道閃電（　）了黑夜。", options: ["劃破", "荒涼", "訓練", "倒數"], answer: "劃破" },
+                    { sentence: "沙漠裡一片（　），幾乎看不到任何植物。", options: ["荒涼", "燦爛", "清晰", "搭檔"], answer: "荒涼" },
+                    { sentence: "人類一直夢想能搭乘火箭探索神秘的（　）。", options: ["宇宙", "雜誌", "機械", "模型"], answer: "宇宙" },
+                    { sentence: "考取（　）之後才可以開車上路。", options: ["執照", "隕石", "指揮", "凌晨"], answer: "執照" },
+                    { sentence: "運動員必須經過嚴格的（　）才能在比賽獲得佳績。", options: ["訓練", "著迷", "跳躍", "伴隨"], answer: "訓練" },
+                    { sentence: "博物館展示了一塊來自外太空的（　）。", options: ["隕石", "劃破", "宇宙", "駕駛"], answer: "隕石" },
+                    { sentence: "爸爸專心地（　）汽車帶我們全家去郊遊。", options: ["駕駛", "荒涼", "雜誌", "倒數"], answer: "駕駛" },
+                    { sentence: "今天（　）天還沒亮，爸爸就起身去抓魚了。", options: ["凌晨", "燦爛", "跳躍", "清晰"], answer: "凌晨" },
+                    { sentence: "夜空中綻放著（　）美麗的煙火。", options: ["燦爛", "著迷", "模型", "搭檔"], answer: "燦爛" },
+                    { sentence: "哥哥最喜歡組裝各種鋼彈（　）。", options: ["模型", "執照", "機械", "指揮"], answer: "模型" }
+                ]
+            },
+            idioms: {
+                title: "✨ 四字成語",
+                vocab: [
+                    { word: "蓬頭垢面", pinyin: "ㄆㄥˊ ㄊㄡˊ ㄍㄡˋ ㄇㄧㄢˋ", icon: "🦁", simple: "頭髮很亂、臉很髒的樣子。", example: "弟弟在公園泥巴裡玩了一下午，搞得全身蓬頭垢面。" },
+                    { word: "跋山涉水", pinyin: "ㄅㄚˊ ㄕㄢ ㄕㄜˋ ㄕㄨㄟˇ", icon: "🏔️", simple: "走很遠、很辛苦的路。", example: "探險隊跋山涉水，終於找到神秘的山洞。" },
+                    { word: "並肩作戰", pinyin: "ㄅㄧㄥˋ ㄐㄧㄢ ㄗㄨㄛˋ ㄓㄢˋ", icon: "🤝", simple: "大家一起合作、一起努力。", example: "大隊接力時，我們全班一起並肩作戰贏得第一名。" },
+                    { word: "錦上添花", pinyin: "ㄐㄧㄣˇ ㄕㄤˋ ㄊㄧㄢ ㄏㄨㄚ", icon: "🍦", simple: "讓原本已經很好的東西，變得更漂亮或更好。", example: "考第一名又有冰淇淋吃，真是錦上添花。" },
+                    { word: "酒足飯飽", pinyin: "ㄐㄧㄡˇ ㄗㄨˊ ㄈㄢˋ ㄅㄠˇ", icon: "🍱", simple: "吃得很飽、喝得很滿足的樣子。", example: "喜宴結束後，大家吃得酒足飯飽地回家。" },
+                    { word: "衣衫不整", pinyin: "ㄧ ㄕㄢ ㄅㄨˋ ㄓㄥˇ", icon: "👕", simple: "衣服沒穿好、扣子沒扣好，看起來亂亂的。", example: "上學前要檢查儀容，不可以衣衫不整。" },
+                    { word: "搖旗吶喊", pinyin: "ㄧㄠˊ ㄑㄧˊ ㄋㄚˋ ㄏㄢˇ", icon: "🚩", simple: "拿著旗子大聲加油。", example: "啦啦隊站在場邊為選手搖旗吶喊。" },
+                    { word: "惹是生非", pinyin: "ㄖㄜˇ ㄕˋ ㄕㄥ ㄈㄟ", icon: "🦶", simple: "故意去搗蛋、製造麻煩。", example: "我們要做個守秩序的好學生，不要惹是生非。" },
+                    { word: "怒火中燒", pinyin: "ㄋㄨˋ ㄏㄨㄛˇ ㄓㄨㄥ ㄕㄠ", icon: "😡", simple: "心裡像有火在燒一樣，非常非常生氣。", example: "看到玩具被故意破壞，哥哥氣得怒火中燒。" },
+                    { word: "水中撈月", pinyin: "ㄕㄨㄟˇ ㄓㄨㄥ ㄌㄠ ㄩㄝˋ", icon: "☁️", simple: "就像在水裡撈月亮一樣，絕對做不到、白費力氣。", example: "用破網子捕魚就像水中撈月一樣不可能成功。" },
+                    { word: "一望無垠", pinyin: "ㄧ ㄨㄤˋ ㄨˊ ㄧㄣˊ", icon: "🌾", simple: "一眼看不完，非常非常大（像大海或大草地）。", example: "站在草原上，眼前是一望無垠的綠色大地。" },
+                    { word: "永誌不忘", pinyin: "ㄩㄥˇ ㄓˋ ㄅㄨˋ ㄨㄤˋ", icon: "☀️", simple: "永遠記在心裡，不會忘記。", example: "老師對我們的教導，我一定會永誌不忘。" }
+                ],
+                dragQuestions: [
+                    { id: 1, text: "弟弟在公園的泥巴裡玩了一整個下午，回家時弄得全身髒兮兮、（ ），被媽媽唸了一頓。", answer: "蓬頭垢面" },
+                    { id: 2, text: "上學前要照一下鏡子，把衣服穿好、領子翻好，才不會（ ）地出門。", answer: "衣衫不整" },
+                    { id: 3, text: "運動會大隊接力的時候，我們全班同學一起（ ），最後終於得到了第一名！", answer: "並肩作戰" },
+                    { id: 4, text: "啦啦隊的同學站在操場旁邊（ ），大聲幫跑步的選手加油。", answer: "搖旗吶喊" },
+                    { id: 5, text: "去吃到飽餐廳吃晚餐，大家都吃了好多喜歡的食物，每個人都（ ），摸著圓滾滾的肚子回家。", answer: "酒足飯飽" },
+                    { id: 6, text: "小明常常在班上故意打擾別人、（ ），讓老師覺得很頭痛。", answer: "惹是生非" },
+                    { id: 7, text: "看到自己辛苦疊了一個小時的積木被弟弟故意踢倒，哥哥氣得（ ），大聲哭了出來。", answer: "怒火中燒" },
+                    { id: 8, text: "妹妹在原本就很漂亮的卡片上，又貼了許多亮晶晶的貼紙，真是（ ）。", answer: "錦上添花" },
+                    { id: 9, text: "站在沙灘上，看著眼前（ ）的大海，感覺大海大到連邊際都看不到。", answer: "一望無垠" },
+                    { id: 10, text: "用破掉的網子去撈小魚，就像（ ）一樣，是不可能成功的。", answer: "水中撈月" },
+                    { id: 11, text: "古時候沒有汽車，如果要去找住在遠方的親戚，只能辛苦地（ ）走好幾天的路。", answer: "跋山涉水" },
+                    { id: 12, text: "老師對我的關心、照顧和幫忙，我一定會（ ），一輩子都記在心裡。", answer: "永誌不忘" }
+                ],
+                storyParagraphs: [
+                    { p: "今天，學校舉辦了一場戶外尋寶大冒險。我們來到農場，看著（", ans: "一望無垠", s: "）的大草地，大家的心情都非常開心。" },
+                    { p: "為了找到寶藏，我們跟著老師（", ans: "跋山涉水", s: "），走了好長一段路。一路上，調皮的阿寶又開始（" },
+                    { p: "", ans: "惹是生非", s: "）了，他故意跑去踩泥巴坑，弄得自己（" },
+                    { p: "", ans: "衣衫不整", s: "），臉上和頭髮也沾滿了泥巴，完全是一副（" },
+                    { p: "", ans: "蓬頭垢面", s: "）的樣子。他甚至還想去抓池塘水面上雲朵的倒影，結果就像（" },
+                    { p: "", ans: "水中撈月", s: "）一樣，什麼也沒抓到，只是白費力氣。" },
+                    { p: "看到阿寶一直搗蛋卻不幫忙找寶藏，隊長小華氣得（", ans: "怒火中燒", s: "），大聲提醒他要注意安全。阿寶發現自己拖累了隊伍，覺得很不好意思，趕緊跟大家道歉。" },
+                    { p: "到了尋寶的最後一關，我們需要合力拔出一顆大蘿蔔。全班同學決定一起（", ans: "並肩作戰", s: "），大家緊緊拉著繩子，旁邊休息的同學也大聲地為我們（" },
+                    { p: "", ans: "搖旗吶喊", s: "）。最後，我們終於成功拔出蘿蔔，拿到了寶箱！" },
+                    { p: "老師除了發給我們寶箱裡的餅乾，還加碼請大家吃冰淇淋，這對我們來說真是（", ans: "錦上添花", s: "）。中午的時候，大家坐在一起吃著美味的午餐，每個人都吃得（" },
+                    { p: "", ans: "酒足飯飽", s: "），開心地摸摸圓滾滾的肚子。" },
+                    { p: "這次的尋寶活動雖然發生了小插曲，但大家學會了團結合作，這份快樂的回憶，我們一定會（", ans: "永誌不忘", s: "）。" }
+                ]
+            }
+        };
+
+        window.speakText = function(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-TW';
+                utterance.rate = 0.85; // 稍微放慢語速，適合特教生
+                window.speechSynthesis.speak(utterance);
+            }
+        };
+
+        window.changeLesson = function(lessonKey) {
+            currentLesson = lessonKey;
+
+            // 切換按鈕樣式
+            document.querySelectorAll('[id^="btn-lesson"]').forEach(btn => {
+                btn.className = "px-3 py-1.5 rounded-xl font-black text-sm transition text-amber-950 hover:bg-amber-300/50";
+            });
+            const activeBtn = document.getElementById(`btn-${lessonKey}`);
+            if (activeBtn) {
+                if (lessonKey === 'idioms') {
+                    activeBtn.className = "px-3 py-1.5 rounded-xl font-black text-sm text-purple-900 bg-amber-200 border-2 border-purple-400 shadow-sm";
+                } else {
+                    activeBtn.className = "px-3 py-1.5 rounded-xl font-black text-sm bg-white text-amber-950 shadow-sm";
+                }
+            }
+
+            // 控制面板顯示與隱藏
+            const diffPanel = document.getElementById('difficulty-panel');
+            const tabDict = document.getElementById('tab-dictionary');
+            const tabMatch = document.getElementById('tab-match');
+            const tabQuiz = document.getElementById('tab-quiz');
+            const tabFill = document.getElementById('tab-fill');
+            const tabDrag = document.getElementById('tab-drag');
+            const tabComic = document.getElementById('tab-comic');
+            const tabStory = document.getElementById('tab-story');
+
+            if (lessonKey === 'idioms') {
+                if (diffPanel) diffPanel.classList.add('hidden');
+                if (tabDict) tabDict.innerHTML = '📖 成語字典';
+                if (tabMatch) tabMatch.classList.add('hidden');
+                if (tabQuiz) tabQuiz.classList.add('hidden');
+                if (tabFill) tabFill.classList.add('hidden');
+                if (tabDrag) tabDrag.classList.remove('hidden');
+                if (tabComic) tabComic.classList.remove('hidden');
+                if (tabStory) tabStory.classList.remove('hidden');
+
+                if (['match', 'quiz', 'fill'].includes(currentTab)) {
+                    window.switchTab('drag');
+                } else {
+                    window.switchTab(currentTab);
+                }
+            } else {
+                if (diffPanel) diffPanel.classList.remove('hidden');
+                if (tabDict) tabDict.innerHTML = '📖 語詞字典';
+                if (tabMatch) tabMatch.classList.remove('hidden');
+                if (tabQuiz) tabQuiz.classList.remove('hidden');
+                if (tabFill) tabFill.classList.remove('hidden');
+                if (tabDrag) tabDrag.classList.add('hidden');
+                if (tabComic) tabComic.classList.add('hidden');
+                if (tabStory) tabStory.classList.add('hidden');
+
+                if (['drag', 'comic', 'story'].includes(currentTab)) {
+                    window.switchTab('dictionary');
+                } else {
+                    window.switchTab(currentTab);
+                }
+            }
+
+            window.speakText(`切換到${lessonsData[lessonKey].title}`);
+        };
+
+        window.changeDifficulty = function(diff) {
+            currentDifficulty = diff;
+            const btnSimple = document.getElementById('btn-diff-simple');
+            const btnAdv = document.getElementById('btn-diff-advanced');
+
+            if (diff === 'simple') {
+                if (btnSimple) btnSimple.className = "px-3 py-1.5 rounded-lg font-black text-sm bg-blue-600 text-white shadow-sm transition";
+                if (btnAdv) btnAdv.className = "px-3 py-1.5 rounded-lg font-bold text-sm text-blue-800 hover:bg-blue-200/60 transition";
+            } else {
+                if (btnSimple) btnSimple.className = "px-3 py-1.5 rounded-lg font-bold text-sm text-blue-800 hover:bg-blue-200/60 transition";
+                if (btnAdv) btnAdv.className = "px-3 py-1.5 rounded-lg font-black text-sm bg-blue-600 text-white shadow-sm transition";
+            }
+
+            // 重置當前測驗
+            if (currentTab === 'match') window.initMatchGame();
+            if (currentTab === 'quiz') window.initQuizGame();
+            if (currentTab === 'fill') window.initFillGame();
+        };
+
+        window.switchTab = function(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            const targetBtn = document.getElementById(`tab-${tabName}`);
+            if (targetBtn) targetBtn.classList.add('active');
+
+            ['dictionary', 'match', 'quiz', 'fill', 'drag', 'comic', 'story'].forEach(t => {
+                const view = document.getElementById(`view-${t}`);
+                if (view) view.classList.add('hidden');
+            });
+
+            const currentView = document.getElementById(`view-${tabName}`);
+            if (currentView) currentView.classList.remove('hidden');
+
+            // 初始化各模組
+            if (tabName === 'dictionary') window.renderDictionary();
+            if (tabName === 'match') window.initMatchGame();
+            if (tabName === 'quiz') window.initQuizGame();
+            if (tabName === 'fill') window.initFillGame();
+            if (tabName === 'drag') window.initDragGame();
+            if (tabName === 'story') window.initStoryGame();
+        };
+
+        window.renderDictionary = function() {
+            const container = document.getElementById('vocab-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const vocabList = lessonsData[currentLesson].vocab;
+            vocabList.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl p-6 shadow-md border-2 border-amber-100 hover:border-amber-300 transition flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-4xl">${item.icon}</span>
+                                <div>
+                                    <h3 class="text-2xl font-black text-gray-800">${item.word}</h3>
+                                    <p class="text-xs font-bold text-amber-700 tracking-wider">${item.pinyin}</p>
+                                </div>
+                            </div>
+                            <button onclick="speakText('${item.word}。${item.simple}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 transition">
+                                🔊 聽發音
+                            </button>
+                        </div>
+                        <div class="bg-amber-50/60 p-3.5 rounded-2xl mb-3 border border-amber-100/80">
+                            <span class="text-xs font-black text-amber-800 bg-amber-200 px-2 py-0.5 rounded-md mb-1 inline-block">簡單意思</span>
+                            <p class="text-gray-700 font-bold text-sm leading-relaxed">${item.simple}</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <p class="text-xs text-gray-500 font-bold"><span class="text-amber-600 font-black">例句：</span>${item.example}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        // --- 連連看模組 ---
+        let selectedMatchItem = null;
+        let matchedPairs = 0;
+        let totalPairs = 0;
+
+        window.initMatchGame = function() {
+            const leftCol = document.getElementById('match-left');
+            const rightCol = document.getElementById('match-right');
+            const svg = document.getElementById('match-svg');
+            if (!leftCol || !rightCol || !svg) return;
+
+            leftCol.innerHTML = '';
+            rightCol.innerHTML = '';
+            svg.innerHTML = '';
+            selectedMatchItem = null;
+            matchedPairs = 0;
+
+            const vocab = [...lessonsData[currentLesson].vocab];
+            const count = currentDifficulty === 'simple' ? 5 : 10;
+            const shuffled = vocab.sort(() => 0.5 - Math.random()).slice(0, Math.min(count, vocab.length));
+            totalPairs = shuffled.length;
+
+            const leftItems = [...shuffled].sort(() => 0.5 - Math.random());
+            const rightItems = [...shuffled].sort(() => 0.5 - Math.random());
+
+            leftItems.forEach(item => {
+                const el = document.createElement('div');
+                el.className = "match-item bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl font-black text-lg text-amber-950 flex items-center justify-between";
+                el.dataset.word = item.word;
+                el.dataset.side = "left";
+                el.innerHTML = `<span>${item.icon} ${item.word}</span> <button onclick="event.stopPropagation(); speakText('${item.word}')" class="text-sm bg-white p-1 rounded-lg border border-amber-200">🔊</button>`;
+                el.onclick = () => window.handleMatchClick(el);
+                leftCol.appendChild(el);
+            });
+
+            rightItems.forEach(item => {
+                const el = document.createElement('div');
+                el.className = "match-item bg-blue-50 border-2 border-blue-200 p-4 rounded-2xl font-bold text-sm text-blue-950 flex items-center justify-between";
+                el.dataset.word = item.word;
+                el.dataset.side = "right";
+                el.innerHTML = `<span>${item.simple}</span> <button onclick="event.stopPropagation(); speakText('${item.simple}')" class="text-sm bg-white p-1 rounded-lg border border-blue-200">🔊</button>`;
+                el.onclick = () => window.handleMatchClick(el);
+                rightCol.appendChild(el);
+            });
+        };
+
+        window.handleMatchClick = function(el) {
+            if (el.classList.contains('matched')) return;
+
+            if (!selectedMatchItem) {
+                selectedMatchItem = el;
+                el.classList.add('selected');
+                window.speakText(el.dataset.side === 'left' ? el.dataset.word : '這個意思');
+            } else if (selectedMatchItem.dataset.side === el.dataset.side) {
+                selectedMatchItem.classList.remove('selected');
+                selectedMatchItem = el;
+                el.classList.add('selected');
+            } else {
+                const first = selectedMatchItem;
+                const second = el;
+
+                if (first.dataset.word === second.dataset.word) {
+                    first.classList.remove('selected');
+                    first.classList.add('matched');
+                    second.classList.add('matched');
+                    selectedMatchItem = null;
+                    matchedPairs++;
+                    window.speakText('答對了！太棒了！');
+
+                    if (matchedPairs === totalPairs) {
+                        setTimeout(() => window.speakText('恭喜你！完成了連連看挑戰！'), 500);
+                    }
+                } else {
+                    first.classList.remove('selected');
+                    second.classList.add('border-red-400', 'bg-red-50');
+                    window.speakText('再試一次看看喔！');
+                    setTimeout(() => {
+                        second.classList.remove('border-red-400', 'bg-red-50');
+                    }, 800);
+                    selectedMatchItem = null;
+                }
+            }
+        };
+
+        // --- 選選看模組 ---
+        let currentQuizIdx = 0;
+        let quizScore = 0;
+        let quizList = [];
+
+        window.initQuizGame = function() {
+            const quizCard = document.getElementById('quiz-card');
+            const quizResult = document.getElementById('quiz-result');
+            if (!quizCard || !quizResult) return;
+
+            quizCard.classList.remove('hidden');
+            quizResult.classList.add('hidden');
+            currentQuizIdx = 0;
+            quizScore = 0;
+
+            const allQuiz = lessonsData[currentLesson].quiz || [];
+            const count = currentDifficulty === 'simple' ? 5 : 10;
+            quizList = [...allQuiz].sort(() => 0.5 - Math.random()).slice(0, Math.min(count, allQuiz.length));
+
+            window.renderQuizQuestion();
+        };
+
+        window.renderQuizQuestion = function() {
+            if (currentQuizIdx >= quizList.length) {
+                document.getElementById('quiz-card').classList.add('hidden');
+                document.getElementById('quiz-result').classList.remove('hidden');
+                document.getElementById('quiz-final-score').innerText = `總得分：${quizScore} 分（共 ${quizList.length * 10} 分）`;
+                window.speakText(`太棒了！測驗完成！你獲得了${quizScore}分！`);
+                return;
+            }
+
+            const qData = quizList[currentQuizIdx];
+            document.getElementById('quiz-progress').innerText = `第 ${currentQuizIdx + 1} / ${quizList.length} 題`;
+            document.getElementById('quiz-score').innerText = `得分：${quizScore}`;
+            document.getElementById('quiz-question').innerText = qData.q;
+            document.getElementById('quiz-feedback').className = "mt-6 p-4 rounded-2xl font-bold text-center text-lg hidden";
+
+            const optContainer = document.getElementById('quiz-options');
+            optContainer.innerHTML = '';
+
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-2xl text-left font-black text-xl text-amber-950 transition flex justify-between items-center";
+                btn.innerHTML = `<span>${idx + 1}. ${opt}</span> <span class="text-sm bg-white px-2 py-1 rounded-lg border border-amber-200">🔊</span>`;
+                btn.onclick = () => window.checkQuizAnswer(idx, qData.answer);
+                optContainer.appendChild(btn);
+            });
+
+            window.speakText(qData.q);
+        };
+
+        window.checkQuizAnswer = function(selectedIdx, correctIdx) {
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.classList.remove('hidden');
+
+            if (selectedIdx === correctIdx) {
+                quizScore += 10;
+                feedback.className = "mt-6 p-4 rounded-2xl font-bold text-center text-lg bg-emerald-100 text-emerald-900 border-2 border-emerald-300";
+                feedback.innerText = "⭕ 答對了！太厲害了！";
+                window.speakText("答對了！太棒了！");
+            } else {
+                feedback.className = "mt-6 p-4 rounded-2xl font-bold text-center text-lg bg-rose-100 text-rose-900 border-2 border-rose-300";
+                feedback.innerText = "❌ 差一點點，再加油喔！";
+                window.speakText("差一點點，再試試看！");
+            }
+
+            setTimeout(() => {
+                currentQuizIdx++;
+                window.renderQuizQuestion();
+            }, 1200);
+        };
+
+        // --- 填空挑戰模組 ---
+        let currentFillIdx = 0;
+        let fillScore = 0;
+        let fillList = [];
+
+        window.initFillGame = function() {
+            const fillCard = document.getElementById('fill-card');
+            const fillResult = document.getElementById('fill-result');
+            if (!fillCard || !fillResult) return;
+
+            fillCard.classList.remove('hidden');
+            fillResult.classList.add('hidden');
+            currentFillIdx = 0;
+            fillScore = 0;
+
+            const allFill = lessonsData[currentLesson].fill || [];
+            const count = currentDifficulty === 'simple' ? 5 : 10;
+            fillList = [...allFill].sort(() => 0.5 - Math.random()).slice(0, Math.min(count, allFill.length));
+
+            window.renderFillQuestion();
+        };
+
+        window.renderFillQuestion = function() {
+            if (currentFillIdx >= fillList.length) {
+                document.getElementById('fill-card').classList.add('hidden');
+                document.getElementById('fill-result').classList.remove('hidden');
+                document.getElementById('fill-final-score').innerText = `總得分：${fillScore} 分（共 ${fillList.length * 10} 分）`;
+                window.speakText(`太棒了！填空挑戰完成！你獲得了${fillScore}分！`);
+                return;
+            }
+
+            const fData = fillList[currentFillIdx];
+            document.getElementById('fill-progress').innerText = `第 ${currentFillIdx + 1} / ${fillList.length} 題`;
+            document.getElementById('fill-score').innerText = `得分：${fillScore}`;
+            document.getElementById('fill-sentence').innerText = fData.sentence;
+            document.getElementById('fill-feedback').className = "mt-6 p-4 rounded-2xl font-bold text-center text-lg hidden";
+
+            const optContainer = document.getElementById('fill-options');
+            optContainer.innerHTML = '';
+
+            fData.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 rounded-2xl font-black text-xl text-purple-950 transition text-center";
+                btn.innerText = opt;
+                btn.onclick = () => window.checkFillAnswer(opt, fData.answer);
+                optContainer.appendChild(btn);
+            });
+
+            window.speakText(fData.sentence.replace('（　）', '什麼'));
+        };
+
+        window.checkFillAnswer = function(selectedOpt, correctOpt) {
+            const feedback = document.getElementById('fill-feedback');
+            feedback.classList.remove('hidden');
+
+            if (selectedOpt === correctOpt) {
+                fillScore += 10;
+                feedback.className = "mt-6 p-4 rounded-2xl font-bold text-center text-lg bg-emerald-100 text-emerald-900 border-2 border-emerald-300";
+                feedback.innerText = "⭕ 完全正確！好棒的語意理解！";
+                window.speakText("答對了！太厲害了！");
+            } else {
+                feedback.className = "mt-6 p-4 rounded-2xl font-bold text-center text-lg bg-rose-100 text-rose-900 border-2 border-rose-300";
+                feedback.innerText = `❌ 不太對喔，答案應該是「${correctOpt}」`;
+                window.speakText(`差一點點，正確答案是${correctOpt}`);
+            }
+
+            setTimeout(() => {
+                currentFillIdx++;
+                window.renderFillQuestion();
+            }, 1200);
+        };
+
+        // --- 四字成語拖曳句型測驗 ---
+        let dragAnswers = {};
+
+        window.initDragGame = function() {
+            const dragBank = document.getElementById('drag-bank');
+            const dragQContainer = document.getElementById('drag-questions');
+            const scoreBanner = document.getElementById('drag-score-banner');
+            if (!dragBank || !dragQContainer) return;
+
+            dragAnswers = {};
+            selectedDragCard = null;
+            scoreBanner.classList.add('hidden');
+
+            const idioms = lessonsData.idioms.vocab.map(v => v.word);
+            const questions = lessonsData.idioms.dragQuestions;
+
+            // 洗牌卡片庫
+            const shuffledIdioms = [...idioms].sort(() => 0.5 - Math.random());
+            dragBank.innerHTML = '';
+
+            shuffledIdioms.forEach(word => {
+                const card = document.createElement('div');
+                card.className = "drag-card bg-white border-2 border-purple-300 text-purple-900 font-black px-4 py-2 rounded-xl shadow-sm text-base hover:bg-purple-100 transition";
+                card.innerText = word;
+                card.dataset.word = word;
+                card.onclick = () => window.selectDragCard(card);
+                dragBank.appendChild(card);
+            });
+
+            // 渲染問題
+            dragQContainer.innerHTML = '';
+            questions.forEach((q, idx) => {
+                const parts = q.text.split('（ ）');
+                const row = document.createElement('div');
+                row.className = "bg-purple-50/50 p-4 rounded-2xl border border-purple-100 flex flex-wrap items-center gap-2 text-lg font-bold text-gray-800";
+
+                row.innerHTML = `
+                    <span>${idx + 1}. ${parts[0]}</span>
+                    <div id="drop-target-${q.id}" onclick="window.handleDropTargetClick(${q.id})" class="drop-target rounded-xl px-3 py-1 bg-white border-2 border-dashed border-purple-300 text-purple-950 font-black text-center flex items-center justify-center cursor-pointer min-w-[140px] min-h-[44px]">
+                        <span class="text-gray-400 text-sm font-normal pointer-events-none">點擊放入成語</span>
+                    </div>
+                    <span>${parts[1] || ''}</span>
+                `;
+                dragQContainer.appendChild(row);
+            });
+        };
+
+        window.selectDragCard = function(card) {
+            if (card.classList.contains('used')) return;
+
+            if (selectedDragCard) {
+                selectedDragCard.classList.remove('ring-4', 'ring-purple-400');
+            }
+
+            if (selectedDragCard === card) {
+                selectedDragCard = null;
+            } else {
+                selectedDragCard = card;
+                card.classList.add('ring-4', 'ring-purple-400');
+                window.speakText(card.dataset.word);
+            }
+        };
+
+        window.handleDropTargetClick = function(qId) {
+            const target = document.getElementById(`drop-target-${qId}`);
+            if (!target) return;
+
+            // 若已有答案，先清除歸還
+            if (dragAnswers[qId]) {
+                const prevWord = dragAnswers[qId];
+                delete dragAnswers[qId];
+
+                // 解鎖卡片庫對應卡片
+                const bankCards = document.querySelectorAll('#drag-bank .drag-card');
+                bankCards.forEach(c => {
+                    if (c.dataset.word === prevWord) c.classList.remove('used');
+                });
+
+                target.innerHTML = '<span class="text-gray-400 text-sm font-normal pointer-events-none">點擊放入成語</span>';
+                target.classList.remove('filled', 'correct', 'incorrect');
+            }
+
+            if (selectedDragCard) {
+                const word = selectedDragCard.dataset.word;
+                dragAnswers[qId] = word;
+
+                selectedDragCard.classList.add('used');
+                selectedDragCard.classList.remove('ring-4', 'ring-purple-400');
+
+                target.innerHTML = `<span class="font-black text-purple-900">${word}</span>`;
+                target.classList.add('filled');
+
+                selectedDragCard = null;
+            }
+        };
+
+        window.clearDragAnswers = function() {
+            window.initDragGame();
+        };
+
+        window.checkDragAnswers = function() {
+            const questions = lessonsData.idioms.dragQuestions;
+            let correctCount = 0;
+
+            questions.forEach(q => {
+                const target = document.getElementById(`drop-target-${q.id}`);
+                const userAns = dragAnswers[q.id];
+
+                if (target) {
+                    if (userAns === q.answer) {
+                        correctCount++;
+                        target.className = "drop-target filled correct rounded-xl px-3 py-1 text-emerald-950 font-black min-w-[140px] min-h-[44px]";
+                    } else {
+                        target.className = "drop-target filled incorrect rounded-xl px-3 py-1 text-rose-950 font-black min-w-[140px] min-h-[44px]";
+                    }
+                }
+            });
+
+            const banner = document.getElementById('drag-score-banner');
+            const title = document.getElementById('drag-score-title');
+            const desc = document.getElementById('drag-score-desc');
+
+            if (banner && title && desc) {
+                banner.classList.remove('hidden');
+                if (correctCount === questions.length) {
+                    title.innerText = "🎉 滿分太厲害了！";
+                    desc.innerText = `恭喜你 12 題全對，完全掌握了四字成語的用法！`;
+                    window.speakText("恭喜你！十二題全部答對了！太棒了！");
+                } else {
+                    title.innerText = `👍 完成練習！答對 ${correctCount} / ${questions.length} 題`;
+                    desc.innerText = "紅色的框框表示需要再調整喔，可以按下「再試一次」重新挑戰！";
+                    window.speakText(`你答對了${correctCount}題，繼續加油喔！`);
+                }
+            }
+        };
+
+        // --- 故事短文挑戰模組 ---
+        let storyAnswers = {};
+
+        window.initStoryGame = function() {
+            const bank = document.getElementById('story-drag-bank');
+            const articleContainer = document.getElementById('story-article-container');
+            const scoreBanner = document.getElementById('story-score-banner');
+            if (!bank || !articleContainer) return;
+
+            storyAnswers = {};
+            selectedStoryCard = null;
+            if (scoreBanner) scoreBanner.classList.add('hidden');
+
+            const idioms = lessonsData.idioms.vocab.map(v => v.word);
+            const paragraphs = lessonsData.idioms.storyParagraphs;
+
+            // 渲染卡片庫
+            const shuffledIdioms = [...idioms].sort(() => 0.5 - Math.random());
+            bank.innerHTML = '';
+            shuffledIdioms.forEach(word => {
+                const card = document.createElement('div');
+                card.className = "drag-card bg-white border-2 border-emerald-300 text-emerald-900 font-black px-4 py-2 rounded-xl shadow-sm text-base hover:bg-emerald-100 transition";
+                card.innerText = word;
+                card.dataset.word = word;
+                card.onclick = () => window.selectStoryCard(card);
+                bank.appendChild(card);
+            });
+
+            // 渲染故事內文與填空框
+            articleContainer.innerHTML = '';
+            paragraphs.forEach((item, idx) => {
+                const spanContainer = document.createElement('span');
+                spanContainer.innerHTML = `
+                    ${item.p}
+                    <span id="story-target-${idx}" onclick="window.handleStoryTargetClick(${idx})" class="drop-target rounded-xl px-3 py-1 bg-white border-2 border-dashed border-emerald-400 text-emerald-950 font-black text-center inline-flex items-center justify-center cursor-pointer min-w-[130px] min-h-[40px] align-middle my-1">
+                        <span class="text-gray-400 text-sm font-normal pointer-events-none">點選放入</span>
+                    </span>
+                    ${item.s || ''}
+                `;
+                articleContainer.appendChild(spanContainer);
+            });
+        };
+
+        window.selectStoryCard = function(card) {
+            if (card.classList.contains('used')) return;
+
+            if (selectedStoryCard) {
+                selectedStoryCard.classList.remove('ring-4', 'ring-emerald-400');
+            }
+
+            if (selectedStoryCard === card) {
+                selectedStoryCard = null;
+            } else {
+                selectedStoryCard = card;
+                card.classList.add('ring-4', 'ring-emerald-400');
+                window.speakText(card.dataset.word);
+            }
+        };
+
+        window.handleStoryTargetClick = function(idx) {
+            const target = document.getElementById(`story-target-${idx}`);
+            if (!target) return;
+
+            if (storyAnswers[idx]) {
+                const prevWord = storyAnswers[idx];
+                delete storyAnswers[idx];
+
+                const bankCards = document.querySelectorAll('#story-drag-bank .drag-card');
+                bankCards.forEach(c => {
+                    if (c.dataset.word === prevWord) c.classList.remove('used');
+                });
+
+                target.innerHTML = '<span class="text-gray-400 text-sm font-normal pointer-events-none">點選放入</span>';
+                target.classList.remove('filled', 'correct', 'incorrect');
+            }
+
+            if (selectedStoryCard) {
+                const word = selectedStoryCard.dataset.word;
+                storyAnswers[idx] = word;
+
+                selectedStoryCard.classList.add('used');
+                selectedStoryCard.classList.remove('ring-4', 'ring-emerald-400');
+
+                target.innerHTML = `<span class="font-black text-emerald-900">${word}</span>`;
+                target.classList.add('filled');
+
+                selectedStoryCard = null;
+            }
+        };
+
+        window.clearStoryAnswers = function() {
+            window.initStoryGame();
+        };
+
+        window.checkStoryAnswers = function() {
+            const paragraphs = lessonsData.idioms.storyParagraphs;
+            let correctCount = 0;
+
+            paragraphs.forEach((item, idx) => {
+                const target = document.getElementById(`story-target-${idx}`);
+                const userAns = storyAnswers[idx];
+
+                if (target) {
+                    if (userAns === item.ans) {
+                        correctCount++;
+                        target.className = "drop-target filled correct rounded-xl px-3 py-1 text-emerald-950 font-black min-w-[130px] min-h-[40px] align-middle my-1";
+                    } else {
+                        target.className = "drop-target filled incorrect rounded-xl px-3 py-1 text-rose-950 font-black min-w-[130px] min-h-[40px] align-middle my-1";
+                    }
+                }
+            });
+
+            const banner = document.getElementById('story-score-banner');
+            const title = document.getElementById('story-score-title');
+            const desc = document.getElementById('story-score-desc');
+
+            if (banner && title && desc) {
+                banner.classList.remove('hidden');
+                if (correctCount === paragraphs.length) {
+                    title.innerText = "🏆 太優秀了！故事短文填空大成功！";
+                    desc.innerText = `你完美地閱讀並理解了《週末尋寶大冒險》短文！`;
+                    window.speakText("太棒了！故事短文填空完全正確！");
+                } else {
+                    title.innerText = `👍 答對 ${correctCount} / ${paragraphs.length} 個成語`;
+                    desc.innerText = "對照一下紅色部分，點擊紅框可以重新選擇成語喔！";
+                    window.speakText(`你答對了${correctCount}個成語，再接再厲！`);
+                }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.changeLesson('lesson1');
+            window.changeDifficulty('simple');
+        });
+    </script>
+</body>
+</html>
