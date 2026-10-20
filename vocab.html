@@ -1196,6 +1196,7 @@
         // --- 故事拼圖模組 ---
         let selectedPuzzleItem = null;
         let puzzleMatched = 0;
+        let lastPuzzleOrder = '';
 
         window.initPuzzleGame = function() {
             const grid = document.getElementById('puzzle-grid');
@@ -1210,26 +1211,35 @@
             const panels = lessonsData.idioms.puzzlePanels;
             window.updatePuzzleProgress();
 
-            // 圖片依故事順序排列
+            // 圖片每次重新開始都換位置（不和上一次、也不和故事順序相同）
+            let order, key;
+            do {
+                order = panels.map((_, i) => i);
+                for (let i = order.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [order[i], order[j]] = [order[j], order[i]];
+                }
+                key = order.join(',');
+            } while (key === lastPuzzleOrder || key === panels.map((_, i) => i).join(','));
+            lastPuzzleOrder = key;
+
             grid.innerHTML = '';
-            panels.forEach((panel, idx) => {
+            order.map(i => panels[i]).forEach(panel => {
                 const el = document.createElement('div');
                 el.className = "match-item relative bg-white border-4 border-sky-200 rounded-2xl overflow-hidden";
                 el.dataset.word = panel.ans;
                 el.dataset.side = "img";
                 el.innerHTML = `
-                    <span class="absolute top-2 left-2 bg-amber-500 text-white font-black text-sm w-7 h-7 rounded-full flex items-center justify-center shadow">${idx + 1}</span>
-                    <img src="${panel.img}" alt="第 ${idx + 1} 格故事圖片" class="w-full h-auto block pointer-events-none">
+                    <img src="${panel.img}" alt="故事圖片" class="w-full block pointer-events-none" style="aspect-ratio: 3 / 2; object-fit: cover;">
                     <div class="puzzle-label hidden absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white font-black text-center py-1.5 text-lg"></div>
                 `;
                 el.onclick = () => window.handlePuzzleClick(el);
                 grid.appendChild(el);
             });
 
-            // 成語卡片洗牌
-            const shuffled = panels.map(p => p.ans).sort(() => 0.5 - Math.random());
+            // 成語卡片位置固定（依成語字典順序）
             bank.innerHTML = '';
-            shuffled.forEach(word => {
+            lessonsData.idioms.vocab.map(v => v.word).forEach(word => {
                 const card = document.createElement('div');
                 card.className = "match-item bg-white border-2 border-sky-300 text-sky-900 font-black px-4 py-2 rounded-xl shadow-sm text-base select-none";
                 card.innerText = word;
