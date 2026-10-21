@@ -109,6 +109,7 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .sqopts { display: flex; flex-direction: column; gap: clamp(8px, 1.6vh, 20px); }
 .sqopts .pc { font-size: clamp(18px, 2vw, 40px); padding: .6em .8em; }
 .pc.dimmed { opacity: .3; }
+.fact { background: #fff6dc; border-left: 8px solid var(--mango); border-radius: 0 14px 14px 0; padding: .5em .8em; font-size: clamp(16px, 1.6vw, 30px); line-height: 1.45; }
 .col { overflow: auto; justify-content: safe center; }
 .col.photos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-content: safe center; }
 .col.photos .pc { padding: .3em; flex-direction: column; align-items: stretch; gap: .2em; position: relative; font-size: clamp(13px, 1.25vw, 24px); text-align: center; }
@@ -198,23 +199,29 @@ const SPOTS = [
 ].map(([r, n, nm, clue]) => ({ r, nm, clue, img: `img/${r}${n}.jpg` }));
 // 建築師的祕密：設計 ↔ 用意（依建築師設計概念導覽）
 const SECRETS = [
-  ["屋頂上鋪滿草坡（覆土建築）", "房子藏進山坡裡，比較涼，停車場也藏起來", "img/s1.jpg", "設計圖"],
-  ["像飛鳥翅膀的折板大屋頂", "幫大家遮太陽，屋頂下空空的讓南風吹過", "img/s2.jpg", "實景"],
-  ["屋頂上的天窗", "陽光照進來，地上出現光影", "img/s3.jpg", "實景"],
-  ["入口圓弧形的房間", "像西拉雅人祭拜用的「壺」", "img/s4.jpg", "實景"],
-  ["二樓水池流到一樓的瀑布", "像水庫的溢洪道，把阿立祖的「水」帶進來", "img/s5.jpg", "實景"],
-  ["房子圍著廣場、面向草地和水池", "像西拉雅聚落面向水、在戶外聚會", "img/s6.jpg", "設計圖"],
-  ["藍色、紅色的柱子和白牆", "西拉雅傳統服飾的顏色", "img/s7.jpg", "設計圖"],
-  ["黃色的牆和白色的八葉花", "芒果黃、稻穗黃，加上西拉雅刺繡的花", "img/s8.jpg", "實景"],
-].map(([a, b, img, kind]) => ({ a, b, img, kind }));
-// 實景找一找的內建題目（老師提供的照片，框選位置以百分比記錄）
+  ["停車場屋頂上種滿植物（覆土建築）", "停車場藏在下面，上面變成綠地，比較涼", "img/s1.jpg", "官田遊客中心是覆土式綠建築，2022 年得到園冶獎"],
+  ["像飛鳥翅膀的折板大屋頂", "幫大家遮太陽，屋頂下空空的讓南風吹過", "img/s2.jpg", "大屋頂底下的「空」讓風到處流動，走在裡面很舒服"],
+  ["屋頂上的天窗", "陽光照進來，地上出現光影", "img/s3.jpg", "建築把台南的「陽光」帶進房子裡"],
+  ["入口圓弧形的房間", "像西拉雅人祭拜用的「壺」", "img/s4.jpg", "西拉雅人信仰阿立祖，用壺來祭拜"],
+  ["二樓水池流到一樓的瀑布", "像水庫的溢洪道，把阿立祖的「水」帶進來", "img/s5.jpg", "建築結合了水圳和景觀水池"],
+  ["房子圍著廣場、面向草地和水池", "像西拉雅聚落面向水、在戶外聚會", "img/s6.jpg", "園區融合台南的陽光、嘉南平原的風、阿立祖的水"],
+  ["白牆上的藍色線條、紅色窗框", "西拉雅傳統服飾的顏色", "img/s7.jpg", "西拉雅傳統服飾以藍、白、紅、黑為主"],
+  ["黃色的牆和白色的八葉花", "芒果黃、稻穗黃，加上西拉雅刺繡的花", "img/s8.jpg", "芒果黃、稻穗黃是這裡最有名的農產顏色"],
+  ["二樓的無邊際景觀水池", "水面像鏡子，映出天空和美麗的倒影", "img/s9.jpg", "站在二樓，可以拍到天空和雲朵的倒影"],
+  ["草原上的梅花鹿裝置", "以前嘉南平原上有成群的梅花鹿", "img/s10.jpg", "草原另一邊的小山坡上，還有許願鶴「幸福翔起」"],
+  ["屋頂上的太陽能板", "用太陽發電，是省電的綠建築", "img/s11.jpg", "這裡以前是國軍的野戰訓練場，2020 年 8 月變成遊客中心"],
+].map(([a, b, img, fact]) => ({ a, b, img, fact, kind: "實景" }));
+// 實景找一找的內建題目（老師提供的照片，框選位置以百分比記錄；同一題可有多個框）
 const FIND_PRESETS = [
+  { id: "p10", src: "img/find10.jpg", boxes: [{ label: "入口的壺（圓弧形房間）", x: 57.3, y: 35.8, w: 14.6, h: 25 }, { label: "入口的壺（圓弧形房間）", x: 31.2, y: 36.9, w: 8, h: 17 }, { label: "入口的壺（圓弧形房間）", x: 48.6, y: 53.2, w: 16.7, h: 30.3 }, { label: "折板大屋頂", x: 18.4, y: 29.8, w: 42.7, h: 8.6 }, { label: "SIRAYA 大字", x: 45.5, y: 25.9, w: 8.7, h: 3.9 }, { label: "停車場上的草（覆土建築）", x: 11.1, y: 61.4, w: 36.8, h: 36.4 }] },
+  { id: "p13", src: "img/find13.jpg", boxes: [{ label: "水圳", x: 26.4, y: 66.1, w: 43.8, h: 33.9 }, { label: "太陽能板", x: 65.3, y: 8, w: 9.4, h: 10.3 }, { label: "折板大屋頂", x: 23.3, y: 15.9, w: 26.7, h: 22.2 }, { label: "SIRAYA 大字", x: 67.7, y: 47.8, w: 9, h: 6.8 }] },
+  { id: "p11", src: "img/find11.jpg", boxes: [{ label: "無邊際景觀水池", x: 32.7, y: 83.5, w: 67.3, h: 16.5 }, { label: "石頭窗框", x: 1.7, y: 5.7, w: 30.9, h: 92.6 }, { label: "牆上的八葉花", x: 74, y: 57.4, w: 5.9, h: 5.7 }, { label: "SIRAYA 大字", x: 12.5, y: 65.9, w: 11.8, h: 4 }] },
+  { id: "p12", src: "img/find12.jpg", boxes: [{ label: "黃色的窗框", x: 73, y: 33.2, w: 17, h: 44.6 }, { label: "紅色的窗框", x: 45.5, y: 60.1, w: 6.6, h: 14.3 }, { label: "藍色的線條", x: 84.1, y: 31.5, w: 4.2, h: 17.6 }] },
   { id: "p7", src: "img/find7.jpg", boxes: [{ label: "折板大屋頂", x: 0, y: 25, w: 58.7, h: 23 }, { label: "屋頂的天窗", x: 28.1, y: 37.8, w: 10.2, h: 12.6 }, { label: "入口的壺（圓弧形房間）", x: 58.7, y: 21, w: 14.9, h: 21 }] },
   { id: "p8", src: "img/find8.jpg", boxes: [{ label: "水池瀑布", x: 61.3, y: 25.5, w: 36.6, h: 42.4 }, { label: "牆上的八葉花", x: 81.3, y: 22.6, w: 9.8, h: 11.3 }] },
   { id: "p9", src: "img/find9.jpg", boxes: [{ label: "折板大屋頂", x: 7.7, y: 27.5, w: 91.9, h: 20.3 }] },
-  { id: "p5", src: "img/find5.jpg", boxes: [{ label: "水圳", x: 0, y: 39, w: 37.9, h: 61 }, { label: "房子戴草帽（草坡屋頂）", x: 41.9, y: 58.4, w: 18.9, h: 35.1 }] },
 ];
-const FIND_LABELS = ["房子戴草帽（草坡屋頂）", "入口的壺（圓弧形房間）", "屋頂的天窗", "牆上的八葉花", "地上的光影", "折板大屋頂", "水池瀑布", "水圳", "西拉雅顏色的牆", "瞭望台"];
+const FIND_LABELS = ["入口的壺（圓弧形房間）", "折板大屋頂", "屋頂的天窗", "牆上的八葉花", "水池瀑布", "無邊際景觀水池", "停車場上的草（覆土建築）", "水圳", "SIRAYA 大字", "太陽能板", "黃色的窗框", "紅色的窗框", "藍色的線條"];
 
 const $ = (s, r = document) => r.querySelector(s);
 const main = $("#main");
@@ -448,7 +455,7 @@ function clueGame({ names, n, route }) {
 function secretSetup() {
   setupScreen("建築師的祕密", "看照片，想一想建築為什麼這樣蓋。先選擇玩法", [
     { label: "玩法", key: "mode", value: "quiz", options: [["quiz", "一題一題"], ["pair", "全部配對"]] },
-    { label: "題數", key: "n", value: 5, options: [[3, "3 題"], [5, "5 題"], [8, "全部 8 題"]] },
+    { label: "題數", key: "n", value: 5, options: [[3, "3 題"], [5, "5 題"], [8, "8 題"], [11, "全部 11 題"]] },
     { label: "選項", key: "k", value: 3, options: [[2, "2 個"], [3, "3 個"], [4, "4 個"]] },
   ], v => v.mode === "quiz" ? secretQuiz(v) : secretPair(v));
 }
@@ -471,8 +478,9 @@ function secretQuiz({ n, k }) {
         if (o === it) {
           lock = true; b.classList.add("done"); b.querySelector(".tag").textContent = "✓";
           col.querySelectorAll(".pc").forEach(x => x !== b && x.classList.add("dimmed"));
-          toast("答對了！", true, `答對了。${it.a}，${it.b}`);
-          setTimeout(() => { i++; i < qs.length ? ask() : finish("secret", `${qs.length} 個設計，答錯 ${miss} 次`); }, 3200);
+          toast("答對了！", true, `答對了。${it.b}。${it.fact}`);
+          col.append(el("div", "fact", `小知識：${it.fact}`));
+          setTimeout(() => { i++; i < qs.length ? ask() : finish("secret", `${qs.length} 個設計，答錯 ${miss} 次`); }, 5200);
         } else {
           wrong++; miss++; b.classList.add("dimmed"); toast("再想想看", false);
           if (wrong >= hintAfter()) [...col.children].find(x => x.dataset.ok)?.classList.add("hint");
@@ -487,7 +495,8 @@ function secretQuiz({ n, k }) {
   ask();
 }
 function secretPair({ n }) {
-  const set = shuffle(SECRETS).slice(0, n).map((x, i) => ({ ...x, id: i }));
+  const set = shuffle(SECRETS).slice(0, Math.min(n, 8)).map((x, i) => ({ ...x, id: i }));
+  n = set.length;
   let sel = null, matched = 0, miss = 0, wrong = 0;
   const s = screen();
   s.append(promptEl("先點左邊的照片，再點右邊的用意", "先點左邊的照片，再點右邊它的用意", `0 / ${n}`));
@@ -537,7 +546,7 @@ function shrink(file) {
 }
 async function findHome() {
   const photos = [...FIND_PRESETS, ...(await DB.all())];
-  const targets = photos.flatMap(p => p.boxes.map(b => ({ p, b })));
+  const targets = photos.flatMap(p => [...new Set(p.boxes.map(b => b.label))].map(label => ({ p, label, rects: p.boxes.filter(b => b.label === label) })));
   const s = screen();
   s.append(promptEl("實景找一找", "用遊客中心的照片，找出建築的設計"));
   if (!targets.length) {
@@ -546,7 +555,7 @@ async function findHome() {
     s.append(el("div", "empty", `<h2>${photos.length} 張照片、${targets.length} 個題目</h2><p class="tip">內建 ${FIND_PRESETS.length} 張遊客中心照片；老師可以按「老師設定」加入自己拍的照片。<br>學生點照片上的位置找答案，答錯 ${hintAfter()} 次會閃爍提示。</p>`));
   }
   const bar = el("div", "bar");
-  if (targets.length) { const g = el("button", "next", "開始"); g.onclick = () => findGame(shuffle(targets).slice(0, 6)); bar.append(g); }
+  if (targets.length) { [6, 12].forEach(k => { const g = el("button", "next", `開始（${k} 題）`); g.onclick = () => findGame(shuffle(targets).slice(0, k)); bar.append(g); }); }
   const t = el("button", "next alt", "老師設定"); t.onclick = () => findEdit(0); bar.append(t);
   s.append(bar);
 }
@@ -603,27 +612,27 @@ async function findEdit(idx) {
     };
   };
 }
-function findGame(all) {
-  const qs = shuffle(all);
+function findGame(qs) {
   let i = 0, wrong = 0, lock = false, miss = 0;
   const s = screen();
   const p = el("div"), stage = el("div", "stage"); s.append(p, stage);
   function ask() {
     wrong = 0; lock = false;
-    const { p: ph, b } = qs[i];
-    p.replaceChildren(promptEl(`找到「${b.label}」`, `請在照片上找到${b.label}`, `${i + 1} / ${qs.length}`));
+    const { p: ph, label, rects } = qs[i];
+    const many = rects.length > 1 ? `（有 ${rects.length} 個，找到一個就可以）` : "";
+    p.replaceChildren(promptEl(`找到「${label}」${many}`, `請在照片上找到${label}`, `${i + 1} / ${qs.length}`));
     const wrap = el("div", "photo", `<img src="${ph.src}" alt="遊客中心照片">`);
-    const box = el("div", "box"); Object.assign(box.style, { left: b.x + "%", top: b.y + "%", width: b.w + "%", height: b.h + "%" });
-    wrap.append(box); stage.replaceChildren(wrap);
+    const boxes = rects.map(b => { const d = el("div", "box"); Object.assign(d.style, { left: b.x + "%", top: b.y + "%", width: b.w + "%", height: b.h + "%" }); wrap.append(d); return d; });
+    stage.replaceChildren(wrap);
     wrap.onclick = e => {
       if (lock) return;
       const q = wrap.getBoundingClientRect(), x = (e.clientX - q.left) / q.width * 100, y = (e.clientY - q.top) / q.height * 100, pad = 3;
-      if (x >= b.x - pad && x <= b.x + b.w + pad && y >= b.y - pad && y <= b.y + b.h + pad) {
-        lock = true; box.classList.remove("hint"); box.classList.add("found"); toast("找到了！");
-        setTimeout(() => { i++; i < qs.length ? ask() : finish("find", `找到 ${qs.length} 個設計，答錯 ${miss} 次`); }, 1500);
-      } else { wrong++; miss++; toast("再找找看", false); if (wrong >= hintAfter()) box.classList.add("hint"); }
+      if (rects.some(b => x >= b.x - pad && x <= b.x + b.w + pad && y >= b.y - pad && y <= b.y + b.h + pad)) {
+        lock = true; boxes.forEach(d => { d.classList.remove("hint"); d.classList.add("found"); }); toast("找到了！");
+        setTimeout(() => { i++; i < qs.length ? ask() : finish("find", `找到 ${qs.length} 個設計，答錯 ${miss} 次`); }, 1600);
+      } else { wrong++; miss++; toast("再找找看", false); if (wrong >= hintAfter()) boxes.forEach(d => d.classList.add("hint")); }
     };
-    speak(`請在照片上找到${b.label}`);
+    speak(`請在照片上找到${label}`);
   }
   ask();
 }
