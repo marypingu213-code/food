@@ -1,0 +1,526 @@
+<title>西拉雅建築探險</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@500;700;900&display=swap">
+<style>
+/* 版面：一個畫面的觸控遊戲；上方深綠工具列（像展板的深綠帶），下方大畫面舞台。刻意採單一亮色主題，教室電視上對比清楚。 */
+:root {
+  --paper: #eef2f0;
+  --card: #ffffff;
+  --ink: #1f2a2a;
+  --muted: #55615f;
+  --band: #1f4a3e;
+  --red: #e8452c;
+  --blue: #2f5aa8;
+  --mango: #f4b223;
+  --grass: #5aa05a;
+  --ok: #2e8b57;
+  --display: "Huninn", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --body: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); overflow: hidden; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, .hs:focus-visible rect:first-child { outline: 5px solid var(--mango); outline-offset: 4px; }
+#app { height: 100%; display: flex; flex-direction: column; }
+header { background: var(--band); color: #fff; display: flex; align-items: center; gap: clamp(8px, 1.2vw, 20px); padding-block: clamp(8px, 1.2vh, 16px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); flex-wrap: wrap; }
+header h1 { font-family: var(--display); font-weight: 400; font-size: clamp(20px, 2.4vw, 44px); margin: 0; letter-spacing: .04em; flex: 1; min-width: 0; }
+.tbtn { background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.35); border-radius: 999px; color: #fff; padding: .35em .9em; font-size: clamp(14px, 1.3vw, 26px); font-weight: 700; white-space: nowrap; }
+.tbtn[aria-pressed="true"] { background: var(--mango); color: var(--ink); border-color: var(--mango); }
+.stars { font-size: clamp(18px, 1.8vw, 34px); letter-spacing: .1em; color: var(--mango); white-space: nowrap; }
+main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 2vh, 28px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; }
+.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: clamp(10px, 2vh, 24px); }
+.prompt { display: flex; align-items: center; gap: .5em; font-family: var(--display); font-size: clamp(24px, 3.4vw, 64px); line-height: 1.2; text-wrap: balance; }
+.prompt .say { flex: none; width: 1.6em; height: 1.6em; border-radius: 50%; border: 0; background: var(--blue); color: #fff; font-size: .7em; display: grid; place-items: center; }
+.prompt .pic { width: 1.6em; height: 1.6em; flex: none; }
+.prompt .pic svg { width: 100%; height: 100%; }
+
+/* 首頁 */
+.home { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: clamp(12px, 2vw, 32px); flex: 1; min-height: 0; align-content: center; }
+.gcard { background: var(--card); border: 0; border-radius: 28px; box-shadow: 0 6px 0 rgba(31,74,62,.18); padding: clamp(12px, 2vw, 32px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3em; min-height: clamp(160px, 30vh, 420px); transition: transform .15s; }
+.gcard:active { transform: scale(.97); }
+.gcard svg { width: min(60%, 26vh); height: auto; }
+.gcard .nm { font-family: var(--display); font-size: clamp(24px, 2.8vw, 54px); }
+.gcard .ds { font-size: clamp(14px, 1.3vw, 24px); color: var(--muted); }
+.gcard .st { font-size: clamp(22px, 2.2vw, 40px); color: var(--mango); min-height: 1.2em; }
+
+/* 認識好朋友 */
+.friends { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: clamp(12px, 2vw, 32px); }
+.friend { background: var(--card); border: 6px solid transparent; border-radius: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4em; padding: 16px; }
+.friend.on { border-color: var(--mango); }
+.friend svg { width: min(70%, 30vh); height: auto; overflow: visible; }
+.friend .nm { font-family: var(--display); font-size: clamp(48px, 7vw, 150px); line-height: 1; }
+.friend .ex { font-size: clamp(16px, 1.7vw, 32px); text-align: center; color: var(--muted); max-width: 18em; min-height: 3em; }
+.friend.on .ex { color: var(--ink); }
+.friend.on[data-k="sun"] svg { animation: spin 6s linear infinite; }
+.friend.on[data-k="wind"] svg { animation: blow 1.2s ease-in-out infinite; }
+.friend.on[data-k="water"] svg { animation: drop 1.2s ease-in infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes blow { 50% { transform: translateX(14%); } }
+@keyframes drop { 0% { transform: translateY(-12%); } 60% { transform: translateY(8%); } 100% { transform: translateY(-12%); } }
+
+/* 找一找 */
+.scene { flex: 1; min-height: 0; display: flex; justify-content: center; }
+.scene > svg { max-width: 100%; max-height: 100%; width: auto; height: 100%; border-radius: 24px; background: #dcecf3; }
+.hs { cursor: pointer; transition: filter .2s; outline: none; }
+.hs.hint { animation: pulse 1s ease-in-out infinite; }
+.hs.found { filter: drop-shadow(0 0 10px var(--mango)) drop-shadow(0 0 4px var(--mango)); }
+@keyframes pulse { 50% { filter: drop-shadow(0 0 16px var(--red)) drop-shadow(0 0 6px var(--red)); } }
+.wind-line { stroke-dasharray: 40 30; animation: flow 1.4s linear infinite; }
+.fall { stroke-dasharray: 12 10; animation: flow 0.8s linear infinite reverse; }
+@keyframes flow { to { stroke-dashoffset: -70; } }
+
+/* 顏色 */
+.colorq { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: clamp(16px, 5vw, 90px); flex-wrap: wrap; }
+.target { width: clamp(140px, 26vh, 360px); }
+.target svg { width: 100%; height: auto; }
+.opts { display: flex; gap: clamp(14px, 3vw, 48px); flex-wrap: wrap; justify-content: center; }
+.sw { width: clamp(110px, 20vh, 260px); aspect-ratio: 1; max-width: 100%; border-radius: 28px; border: 5px solid var(--ink); box-shadow: 0 6px 0 rgba(0,0,0,.15); }
+.sw.wrong { animation: shake .4s; }
+.sw.right { outline: 10px solid var(--mango); outline-offset: 6px; }
+
+/* 路線配對 */
+.route { flex: 1; min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: clamp(10px, 2vh, 24px); }
+.bins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 1.6vw, 28px); }
+.bin { background: var(--card); border: 5px dashed #b8c4c1; border-radius: 24px; padding: clamp(8px, 1.2vw, 20px); display: flex; flex-direction: column; align-items: center; gap: .2em; min-height: clamp(150px, 30vh, 380px); }
+.bin.over, .bin.hint { border-color: var(--red); border-style: solid; }
+.bin.hint { animation: pulseb 1s ease-in-out infinite; }
+@keyframes pulseb { 50% { background: #fde3dd; } }
+.bin > svg { width: clamp(60px, 11vh, 150px); height: auto; }
+.bin .nm { font-family: var(--display); font-size: clamp(20px, 2.6vw, 52px); }
+.bin .got { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.bin .got svg { width: clamp(36px, 6vh, 80px); height: auto; background: var(--paper); border-radius: 10px; }
+.deck { display: flex; align-items: center; justify-content: center; gap: 4vw; flex-wrap: wrap; }
+.item { background: var(--card); border-radius: 28px; box-shadow: 0 8px 0 rgba(31,74,62,.2); padding: clamp(10px, 1.6vw, 24px); display: flex; flex-direction: column; align-items: center; touch-action: none; width: clamp(150px, 28vh, 340px); cursor: grab; }
+.item svg { width: 80%; height: auto; pointer-events: none; }
+.item .nm { font-family: var(--display); font-size: clamp(22px, 2.6vw, 50px); pointer-events: none; }
+.item.drag { position: fixed; z-index: 50; cursor: grabbing; box-shadow: 0 16px 30px rgba(0,0,0,.25); }
+.item.wrong { animation: shake .4s; }
+.tip { font-size: clamp(14px, 1.4vw, 26px); color: var(--muted); text-align: center; }
+@keyframes shake { 25% { transform: translateX(-12px); } 75% { transform: translateX(12px); } }
+
+/* 回饋與證書 */
+.toast { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; background: var(--ok); color: #fff; font-family: var(--display); font-size: clamp(36px, 6vw, 120px); padding: .2em .8em; border-radius: 999px; transition: .25s; z-index: 60; white-space: nowrap; }
+.toast.try { background: var(--blue); }
+.toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.cert { flex: 1; min-height: 0; background: var(--card); border: 12px double var(--red); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3em; text-align: center; padding: 16px; }
+.cert svg { width: clamp(80px, 18vh, 240px); height: auto; animation: spin 12s linear infinite; }
+.cert h2 { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 6vw, 120px); margin: 0; color: var(--band); }
+.cert p { font-size: clamp(18px, 2.2vw, 44px); margin: 0; }
+.cert .big { font-size: clamp(40px, 5vw, 96px); color: var(--mango); letter-spacing: .1em; }
+.bar { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.next { background: var(--red); color: #fff; border: 0; border-radius: 999px; padding: .4em 1.4em; font-family: var(--display); font-size: clamp(22px, 2.6vw, 50px); box-shadow: 0 6px 0 rgba(0,0,0,.18); }
+.next.alt { background: var(--blue); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+
+<div id="app">
+  <header>
+    <h1>西拉雅建築探險</h1>
+    <span class="stars" id="stars" aria-label="星星"></span>
+    <button class="tbtn" id="bHome">首頁</button>
+    <button class="tbtn" id="bEasy" aria-pressed="false">簡單模式</button>
+    <button class="tbtn" id="bSound" aria-pressed="true">聲音 開</button>
+    <button class="tbtn" id="bFull">全螢幕</button>
+  </header>
+  <main id="main"></main>
+</div>
+
+<template id="tScene">
+<svg viewBox="0 0 1200 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="西拉雅遊客中心建築">
+  <circle cx="1110" cy="80" r="44" fill="#e8452c"/>
+  <rect x="0" y="470" width="1200" height="90" fill="#8cc68c"/>
+  <!-- 草帽：覆土建築 -->
+  <g class="hs" data-k="grass" tabindex="0" aria-label="房子戴草帽">
+    <rect x="30" y="240" width="460" height="235" fill="transparent"/>
+    <path d="M30,472 Q230,230 480,300 L480,472 Z" fill="#5aa05a"/>
+    <g stroke="#2d7a2d" stroke-width="5" fill="none">
+      <path d="M150,330 l8,-22 l8,22"/><path d="M230,290 l8,-22 l8,22"/><path d="M320,282 l8,-22 l8,22"/><path d="M410,292 l8,-22 l8,22"/><path d="M100,380 l8,-22 l8,22"/>
+    </g>
+    <rect x="140" y="392" width="300" height="80" fill="#e4ebe9" stroke="#1f2a2a" stroke-width="4"/>
+    <rect x="170" y="408" width="40" height="64" fill="#2f5aa8"/>
+    <rect x="240" y="408" width="170" height="36" fill="#f4b223"/>
+  </g>
+  <!-- 一樓 -->
+  <rect x="480" y="320" width="440" height="150" fill="#ffffff" stroke="#1f2a2a" stroke-width="4"/>
+  <rect x="500" y="340" width="120" height="110" fill="#2f5aa8"/>
+  <rect x="640" y="340" width="120" height="110" fill="#1f2a2a"/>
+  <rect x="780" y="340" width="120" height="110" fill="#e8452c"/>
+  <rect x="440" y="296" width="520" height="24" fill="#1f2a2a"/>
+  <!-- 風：飛簷折板屋頂 -->
+  <g class="hs" data-k="roof" tabindex="0" aria-label="風跑過的大屋頂">
+    <rect x="390" y="90" width="590" height="205" fill="transparent"/>
+    <polygon points="390,170 460,110 530,170 600,110 670,170 740,110 810,170 880,110 950,170 980,150 980,184 390,184" fill="#e8452c" stroke="#1f2a2a" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="450" y="184" width="16" height="112" fill="#1f2a2a"/>
+    <rect x="924" y="184" width="16" height="112" fill="#1f2a2a"/>
+    <path class="wind-line" d="M470,225 h420" stroke="#2f5aa8" stroke-width="8" stroke-linecap="round"/>
+    <path class="wind-line" d="M500,262 h360" stroke="#2f5aa8" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <!-- 光：八葉花天井 -->
+  <g class="hs" data-k="light" tabindex="0" aria-label="光的花">
+    <polygon points="650,150 720,150 770,294 600,294" fill="#f4b223" opacity=".4"/>
+    <g id="sceneFlowerTop"></g>
+    <ellipse cx="685" cy="292" rx="70" ry="10" fill="#f4b223"/>
+  </g>
+  <!-- 水：水池、瀑布、水圳 -->
+  <g class="hs" data-k="water" tabindex="0" aria-label="瀑布和水圳">
+    <rect x="940" y="300" width="80" height="230" fill="transparent"/>
+    <rect x="950" y="286" width="62" height="14" fill="#2f5aa8"/>
+    <rect x="980" y="300" width="30" height="175" fill="#7fb0e6"/>
+    <path class="fall" d="M988,300 v175 M1000,300 v175" stroke="#ffffff" stroke-width="4"/>
+    <rect x="0" y="490" width="1200" height="40" fill="#2f5aa8"/>
+    <path class="fall" d="M0,510 h1200" stroke="#8cc6ee" stroke-width="5"/>
+  </g>
+  <!-- 壺：入口三個弧形量體 -->
+  <g class="hs" data-k="jar" tabindex="0" aria-label="三個壺">
+    <rect x="1030" y="330" width="170" height="160" fill="transparent"/>
+    <g id="sceneJars"></g>
+  </g>
+</svg>
+</template>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ICON = {"sun": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"50\" cy=\"50\" r=\"20\" fill=\"#e8452c\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(0 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(30 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(60 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(90 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(120 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(150 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(180 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(210 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(240 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(270 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(300 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(330 50 50)\"/></svg>", "wind": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M12,38 h50 q14,0 14,-10 q0,-9 -9,-9 q-8,0 -8,8\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M12,58 h64 q14,0 14,-10 q0,-9 -9,-9 q-8,0 -8,8\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M12,78 h40 q14,0 14,-10 q0,-9 -9,-9 q-8,0 -8,8\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"6\" stroke-linecap=\"round\"/></svg>", "water": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M50,10 q30,40 30,58 a30,30 0 0 1 -60,0 q0,-18 30,-58z\" fill=\"#2f5aa8\"/><path d=\"M36,66 a14,14 0 0 0 12,14\" stroke=\"#fff\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/></svg>", "jar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(50 58) scale(1.35)\"><path d=\"M-9,-30 h18 v6 q16,8 16,28 q0,24 -25,26 q-25,-2 -25,-26 q0,-20 16,-28 z\" fill=\"#e8452c\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"-11\" y=\"-34\" width=\"22\" height=\"6\" rx=\"2\" fill=\"#1f2a2a\"/><path d=\"M-18,4 h36\" stroke=\"#fff\" stroke-width=\"3\"/></g></svg>", "flower": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(0 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(45 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(90 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(135 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(180 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(225 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(270 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(315 50 50)\"/><circle cx=\"50\" cy=\"50\" r=\"7.199999999999999\" fill=\"#fff\"/></svg>", "rest": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"18\" y=\"30\" width=\"64\" height=\"44\" rx=\"8\" fill=\"#5aa05a\"/><rect x=\"26\" y=\"20\" width=\"48\" height=\"16\" rx=\"6\" fill=\"#5aa05a\"/><text x=\"50\" y=\"62\" font-size=\"18\" text-anchor=\"middle\" fill=\"#fff\">Z z z</text></svg>", "m1": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M10,62 q40,-34 80,0 z\" fill=\"#5aa05a\"/><rect x=\"18\" y=\"62\" width=\"64\" height=\"26\" fill=\"#ddd\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"30\" y=\"68\" width=\"12\" height=\"20\" fill=\"#2f5aa8\"/><rect x=\"56\" y=\"68\" width=\"16\" height=\"10\" fill=\"#f4b223\"/><path d=\"M30,50 l3,-8 l3,8\" stroke=\"#2d7a2d\" stroke-width=\"2\" fill=\"none\"/><path d=\"M44,50 l3,-8 l3,8\" stroke=\"#2d7a2d\" stroke-width=\"2\" fill=\"none\"/><path d=\"M58,50 l3,-8 l3,8\" stroke=\"#2d7a2d\" stroke-width=\"2\" fill=\"none\"/><path d=\"M70,50 l3,-8 l3,8\" stroke=\"#2d7a2d\" stroke-width=\"2\" fill=\"none\"/></svg>", "m2": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(22 62) scale(0.8)\"><path d=\"M-9,-30 h18 v6 q16,8 16,28 q0,24 -25,26 q-25,-2 -25,-26 q0,-20 16,-28 z\" fill=\"#2f5aa8\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"-11\" y=\"-34\" width=\"22\" height=\"6\" rx=\"2\" fill=\"#1f2a2a\"/><path d=\"M-18,4 h36\" stroke=\"#fff\" stroke-width=\"3\"/></g><g transform=\"translate(50 58) scale(0.95)\"><path d=\"M-9,-30 h18 v6 q16,8 16,28 q0,24 -25,26 q-25,-2 -25,-26 q0,-20 16,-28 z\" fill=\"#e8452c\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"-11\" y=\"-34\" width=\"22\" height=\"6\" rx=\"2\" fill=\"#1f2a2a\"/><path d=\"M-18,4 h36\" stroke=\"#fff\" stroke-width=\"3\"/></g><g transform=\"translate(78 62) scale(0.8)\"><path d=\"M-9,-30 h18 v6 q16,8 16,28 q0,24 -25,26 q-25,-2 -25,-26 q0,-20 16,-28 z\" fill=\"#1f2a2a\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"-11\" y=\"-34\" width=\"22\" height=\"6\" rx=\"2\" fill=\"#1f2a2a\"/><path d=\"M-18,4 h36\" stroke=\"#fff\" stroke-width=\"3\"/></g></svg>", "m3": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M6,30 l22,-14 l22,14 l22,-14 l22,14\" fill=\"none\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><path d=\"M42,30 l-14,52 h44 l-14,-52z\" fill=\"#f4b223\" opacity=\".45\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(0 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(45 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(90 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(135 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(180 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(225 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(270 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(315 50 84)\"/><circle cx=\"50\" cy=\"84\" r=\"2.88\" fill=\"#fff\"/></svg>", "m4": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M6,40 l22,-16 l22,16 l22,-16 l22,16\" fill=\"none\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><line x1=\"16\" y1=\"40\" x2=\"16\" y2=\"90\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><line x1=\"84\" y1=\"40\" x2=\"84\" y2=\"90\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><path d=\"M24,60 h40 q10,0 10,-7\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M24,74 h40 q10,0 10,-7\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>", "m5": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"8\" y=\"20\" width=\"40\" height=\"12\" fill=\"#1f2a2a\"/><rect x=\"8\" y=\"32\" width=\"40\" height=\"58\" fill=\"#ccc\"/><rect x=\"48\" y=\"78\" width=\"46\" height=\"12\" fill=\"#2f5aa8\"/><path d=\"M44,24 q16,4 14,54\" stroke=\"#2f5aa8\" stroke-width=\"7\" fill=\"none\"/><path d=\"M14,26 h30\" stroke=\"#2f5aa8\" stroke-width=\"5\"/></svg>", "m6": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"10\" y=\"12\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#2f5aa8\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"38\" y=\"12\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#fff\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"66\" y=\"12\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#e8452c\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"10\" y=\"40\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#1f2a2a\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"38\" y=\"40\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#f4b223\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"66\" y=\"40\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#d9b44a\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"10\" y=\"68\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#5aa05a\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"38\" y=\"68\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#8cc6ee\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"66\" y=\"68\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#b07a45\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/></svg>", "bike": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"26\" cy=\"68\" r=\"16\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\"/><circle cx=\"76\" cy=\"68\" r=\"16\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\"/><path d=\"M26,68 l18,-26 h26 l6,26 M44,42 l12,26 l14,-26\" fill=\"none\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><circle cx=\"52\" cy=\"22\" r=\"7\" fill=\"#e8452c\"/><path d=\"M52,29 l-4,14 l10,8\" stroke=\"#2f5aa8\" stroke-width=\"5\" fill=\"none\"/></svg>", "hills": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0,70 q20,-40 40,-10 q20,-40 60,0 v30 h-100z\" fill=\"#5aa05a\"/><path d=\"M0,80 h100 v20 h-100z\" fill=\"#2f5aa8\"/><circle cx=\"80\" cy=\"22\" r=\"10\" fill=\"#e8452c\"/></svg>", "clouds": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0,60 l30,-30 l25,22 l20,-14 l25,22 v40 h-100z\" fill=\"#1f4a3e\"/><path d=\"M0,80 h100 v20 h-100z\" fill=\"#2f5aa8\"/><g fill=\"#fff\" stroke=\"#bbb\"><ellipse cx=\"30\" cy=\"48\" rx=\"22\" ry=\"8\"/><ellipse cx=\"72\" cy=\"40\" rx=\"18\" ry=\"7\"/></g></svg>", "cypress": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M12,55 l8,-40 l8,40z\" fill=\"#e8452c\"/><path d=\"M12,62 l8,32 l8,-32z\" fill=\"#e8452c\" opacity=\".45\"/><path d=\"M32,55 l8,-40 l8,40z\" fill=\"#2f5aa8\"/><path d=\"M32,62 l8,32 l8,-32z\" fill=\"#2f5aa8\" opacity=\".45\"/><path d=\"M52,55 l8,-40 l8,40z\" fill=\"#e8452c\"/><path d=\"M52,62 l8,32 l8,-32z\" fill=\"#e8452c\" opacity=\".45\"/><path d=\"M72,55 l8,-40 l8,40z\" fill=\"#2f5aa8\"/><path d=\"M72,62 l8,32 l8,-32z\" fill=\"#2f5aa8\" opacity=\".45\"/><line x1=\"0\" y1=\"58\" x2=\"100\" y2=\"58\" stroke=\"#2f5aa8\" stroke-width=\"2\"/></svg>", "caltrop": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M50,40 q-20,0 -40,-14 q12,20 6,34 q20,0 34,-6 q14,6 34,6 q-6,-14 6,-34 q-20,14 -40,14z\" fill=\"#1f2a2a\"/><rect x=\"0\" y=\"74\" width=\"100\" height=\"26\" fill=\"#2f5aa8\" opacity=\".5\"/></svg>", "statue": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"22\" y=\"76\" width=\"56\" height=\"16\" fill=\"#999\"/><circle cx=\"50\" cy=\"24\" r=\"10\" fill=\"#1f2a2a\"/><path d=\"M38,38 h24 l4,22 h10 v16 h-52 v-16 h10z\" fill=\"#e8452c\"/><path d=\"M40,60 l-6,16 M60,60 l6,16\" stroke=\"#1f2a2a\" stroke-width=\"5\"/></svg>", "fossil": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"50\" cy=\"82\" rx=\"38\" ry=\"8\" fill=\"#1f2a2a\"/><path d=\"M20,70 q10,-36 34,-36 q16,0 26,-14\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"5\"/><line x1=\"30\" y1=\"46\" x2=\"30\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"3\"/><line x1=\"38\" y1=\"40\" x2=\"38\" y2=\"54\" stroke=\"#e8452c\" stroke-width=\"3\"/><line x1=\"46\" y1=\"36\" x2=\"46\" y2=\"50\" stroke=\"#e8452c\" stroke-width=\"3\"/><line x1=\"54\" y1=\"36\" x2=\"54\" y2=\"50\" stroke=\"#e8452c\" stroke-width=\"3\"/><path d=\"M30,58 v20 M58,40 v38\" stroke=\"#e8452c\" stroke-width=\"4\"/></svg>", "ice": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M14,52 h72 q-6,30 -36,32 q-30,-2 -36,-32z\" fill=\"#2f5aa8\"/><rect x=\"24\" y=\"32\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 24 32)\"/><rect x=\"42\" y=\"26\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 42 26)\"/><rect x=\"58\" y=\"34\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 58 34)\"/><rect x=\"36\" y=\"40\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 36 40)\"/><rect x=\"52\" y=\"42\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 52 42)\"/><circle cx=\"50\" cy=\"20\" r=\"9\" fill=\"#e8452c\"/></svg>", "bridge": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"0\" y=\"74\" width=\"100\" height=\"26\" fill=\"#2f5aa8\"/><line x1=\"22\" y1=\"20\" x2=\"22\" y2=\"74\" stroke=\"#1f2a2a\" stroke-width=\"5\"/><line x1=\"78\" y1=\"20\" x2=\"78\" y2=\"74\" stroke=\"#1f2a2a\" stroke-width=\"5\"/><path d=\"M0,40 q22,-20 22,-20 q28,40 56,0 q22,20 22,20\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"3\"/><line x1=\"0\" y1=\"60\" x2=\"100\" y2=\"60\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><line x1=\"30\" y1=\"45.09090909090909\" x2=\"30\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"38\" y1=\"41.45454545454545\" x2=\"38\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"46\" y1=\"37.81818181818182\" x2=\"46\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"54\" y1=\"37.81818181818182\" x2=\"54\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"62\" y1=\"41.45454545454545\" x2=\"62\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"70\" y1=\"45.09090909090909\" x2=\"70\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/></svg>", "horse": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M24,40 h40 l10,-20 l12,6 l-6,10 l-6,4 v20 h-58z\" fill=\"#e8452c\"/><rect x=\"24\" y=\"60\" width=\"7\" height=\"28\" fill=\"#1f2a2a\"/><rect x=\"34\" y=\"60\" width=\"7\" height=\"28\" fill=\"#1f2a2a\"/><rect x=\"50\" y=\"60\" width=\"7\" height=\"28\" fill=\"#1f2a2a\"/><rect x=\"60\" y=\"60\" width=\"7\" height=\"28\" fill=\"#1f2a2a\"/><rect x=\"30\" y=\"44\" width=\"8\" height=\"8\" fill=\"#2f5aa8\"/><rect x=\"46\" y=\"44\" width=\"8\" height=\"8\" fill=\"#1f2a2a\"/><rect x=\"38\" y=\"52\" width=\"8\" height=\"8\" fill=\"#2f5aa8\"/><rect x=\"56\" y=\"50\" width=\"8\" height=\"8\" fill=\"#2f5aa8\"/><rect x=\"70\" y=\"28\" width=\"8\" height=\"8\" fill=\"#1f2a2a\"/></svg>", "gate": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"8\" y=\"22\" width=\"84\" height=\"12\" fill=\"#e8452c\"/><path d=\"M4,22 l10,-10 h72 l10,10z\" fill=\"#1f2a2a\"/><rect x=\"16\" y=\"34\" width=\"10\" height=\"56\" fill=\"#e8452c\"/><rect x=\"74\" y=\"34\" width=\"10\" height=\"56\" fill=\"#e8452c\"/><ellipse cx=\"50\" cy=\"72\" rx=\"22\" ry=\"14\" fill=\"#2f5aa8\"/><text x=\"50\" y=\"80\" font-size=\"22\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"bold\">佛</text></svg>", "hotspring": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"50\" cy=\"72\" rx=\"40\" ry=\"16\" fill=\"#1f2a2a\"/><ellipse cx=\"50\" cy=\"72\" rx=\"30\" ry=\"10\" fill=\"#8cc6ee\"/><path d=\"M36,54 q-8,-10 0,-20 q8,-10 0,-22\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M50,54 q-8,-10 0,-20 q8,-10 0,-22\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M64,54 q-8,-10 0,-20 q8,-10 0,-22\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>", "dam": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0,40 l30,-20 l20,14 l20,-10 l30,16 v20 h-100z\" fill=\"#1f4a3e\"/><rect x=\"0\" y=\"54\" width=\"100\" height=\"16\" fill=\"#2f5aa8\"/><path d=\"M0,70 h100 l-14,26 h-72z\" fill=\"#bbb\" stroke=\"#1f2a2a\" stroke-width=\"2\"/></svg>"};
+const $ = (s, r = document) => r.querySelector(s);
+const main = $("#main");
+const state = { done: { learn: false, find: false, color: false, route: false }, easy: false, sound: true };
+
+// ---------- 聲音 ----------
+let actx;
+function chime(ok) {
+  if (!state.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const notes = ok ? [523, 659, 784] : [392, 330];
+    notes.forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = "sine"; o.frequency.value = f;
+      const t = actx.currentTime + i * 0.12;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + 0.4);
+    });
+  } catch (e) {}
+}
+function speak(text) {
+  if (!state.sound) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW"; u.rate = 0.85;
+    const v = speechSynthesis.getVoices().find(v => /zh[-_]TW/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^zh/i.test(v.lang));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+let toastT;
+function toast(text, ok = true) {
+  const t = $("#toast");
+  t.textContent = text; t.className = "toast show" + (ok ? "" : " try");
+  clearTimeout(toastT); toastT = setTimeout(() => t.className = "toast", 1100);
+  chime(ok); speak(text);
+}
+function prompt(text, icon, spoken) {
+  const d = document.createElement("div"); d.className = "prompt";
+  d.innerHTML = `<button class="say" aria-label="再聽一次">▶</button>${icon ? `<span class="pic">${ICON[icon]}</span>` : ""}<span>${text}</span>`;
+  d.querySelector(".say").onclick = () => speak(spoken || text);
+  return d;
+}
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const hintAfter = () => state.easy ? 1 : 2;
+function renderStars() {
+  const n = Object.values(state.done).filter(Boolean).length;
+  $("#stars").textContent = "★".repeat(n) + "☆".repeat(4 - n);
+}
+function finish(key, name) {
+  state.done[key] = true; renderStars(); snapshot();
+  const all = Object.values(state.done).every(Boolean);
+  main.innerHTML = "";
+  const s = document.createElement("div"); s.className = "screen";
+  s.innerHTML = `<div class="cert">${ICON.flower}<p>完成「${name}」</p><div class="big">★ 得到一顆星 ★</div><div class="bar"></div></div>`;
+  const bar = s.querySelector(".bar");
+  const b1 = document.createElement("button"); b1.className = "next"; b1.textContent = all ? "看我的證書" : "回到首頁";
+  b1.onclick = all ? showCert : home;
+  const b2 = document.createElement("button"); b2.className = "next alt"; b2.textContent = "再玩一次";
+  b2.onclick = GAMES[key].run;
+  bar.append(b1, b2); main.append(s);
+  speak(`完成${name}，得到一顆星`); chime(true);
+}
+
+// ---------- 首頁 ----------
+const GAMES = {
+  learn: { name: "認識好朋友", icon: "sun", ds: "光・風・水", run: learn },
+  find: { name: "找一找", icon: "m1", ds: "在建築裡找答案", run: find },
+  color: { name: "顏色配對", icon: "m6", ds: "西拉雅的顏色", run: color },
+  route: { name: "路線配對", icon: "bike", ds: "三條旅遊路線", run: route },
+};
+function home() {
+  main.innerHTML = "";
+  const s = document.createElement("div"); s.className = "screen";
+  s.append(prompt("今天要玩哪一個？", null, "今天要玩哪一個？請點一下"));
+  const g = document.createElement("div"); g.className = "home";
+  for (const [k, v] of Object.entries(GAMES)) {
+    const b = document.createElement("button"); b.className = "gcard";
+    b.innerHTML = `${ICON[v.icon]}<span class="nm">${v.name}</span><span class="ds">${v.ds}</span><span class="st">${state.done[k] ? "★" : ""}</span>`;
+    b.onclick = v.run; g.append(b);
+  }
+  s.append(g);
+  if (Object.values(state.done).every(Boolean)) {
+    const bar = document.createElement("div"); bar.className = "bar";
+    const b = document.createElement("button"); b.className = "next"; b.textContent = "看我的證書"; b.onclick = showCert;
+    bar.append(b); s.append(bar);
+  }
+  main.append(s);
+}
+
+// ---------- 遊戲一：認識好朋友 ----------
+function learn() {
+  const F = [
+    { k: "sun", nm: "光", ex: "太陽從花形的窗照進來，地上有花的影子", act: "雙手張開，像太陽" },
+    { k: "wind", nm: "風", ex: "大屋頂下面是空的，風跑來跑去，好涼快", act: "手在臉前扇一扇" },
+    { k: "water", nm: "水", ex: "水從二樓的水池流下來，變成瀑布", act: "手指由上往下晃" },
+  ];
+  const seen = new Set();
+  main.innerHTML = "";
+  const s = document.createElement("div"); s.className = "screen";
+  s.append(prompt("點一點，認識三個好朋友", null));
+  const g = document.createElement("div"); g.className = "friends";
+  F.forEach(f => {
+    const b = document.createElement("button"); b.className = "friend"; b.dataset.k = f.k;
+    b.innerHTML = `${ICON[f.k]}<span class="nm">${f.nm}</span><span class="ex">點我</span>`;
+    b.onclick = () => {
+      g.querySelectorAll(".friend").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+      b.querySelector(".ex").innerHTML = `${f.ex}<br><b>動作：${f.act}</b>`;
+      speak(`${f.nm}。${f.ex}。一起做動作：${f.act}`);
+      seen.add(f.k);
+      if (seen.size === F.length && !s.querySelector(".bar")) {
+        const bar = document.createElement("div"); bar.className = "bar";
+        const n = document.createElement("button"); n.className = "next"; n.textContent = "我認識了！";
+        n.onclick = () => finish("learn", "認識好朋友");
+        bar.append(n); s.append(bar);
+      }
+    };
+    g.append(b);
+  });
+  s.append(g); main.append(s);
+  speak("點一點，認識三個好朋友：光、風、水");
+}
+
+// ---------- 遊戲二：找一找 ----------
+function find() {
+  const all = [
+    { k: "light", q: "找到「光的花」", say: "請找到光的花，太陽照進來的地方", icon: "flower" },
+    { k: "jar", q: "找到「三個壺」", say: "請找到三個壺", icon: "jar" },
+    { k: "grass", q: "找到「房子的草帽」", say: "請找到房子的草帽，草蓋在房子上面", icon: "m1" },
+    { k: "roof", q: "找到「風跑過的大屋頂」", say: "請找到風跑過的大屋頂", icon: "wind" },
+    { k: "water", q: "找到「瀑布和水圳」", say: "請找到瀑布和水圳", icon: "water" },
+  ];
+  const qs = shuffle(all).slice(0, state.easy ? 3 : 5);
+  let i = 0, wrong = 0, lock = false;
+  main.innerHTML = "";
+  const s = document.createElement("div"); s.className = "screen";
+  const p = document.createElement("div"); s.append(p);
+  const sc = document.createElement("div"); sc.className = "scene";
+  sc.append($("#tScene").content.cloneNode(true));
+  s.append(sc); main.append(s);
+  const svgEl = sc.querySelector("svg");
+  // 把共用圖示放進場景
+  const flowerTop = new DOMParser().parseFromString(ICON.flower, "image/svg+xml").documentElement;
+  flowerTop.setAttribute("x", 655); flowerTop.setAttribute("y", 108); flowerTop.setAttribute("width", 60); flowerTop.setAttribute("height", 60);
+  svgEl.querySelector("#sceneFlowerTop").append(document.importNode(flowerTop, true));
+  [[1035, 360, 60], [1090, 340, 80], [1150, 360, 60]].forEach(([x, y, w], n) => {
+    const j = new DOMParser().parseFromString(ICON.jar, "image/svg+xml").documentElement;
+    j.setAttribute("x", x - w / 2 + 10); j.setAttribute("y", y); j.setAttribute("width", w + 20); j.setAttribute("height", w + 40);
+    svgEl.querySelector("#sceneJars").append(document.importNode(j, true));
+  });
+  function ask() {
+    wrong = 0; lock = false;
+    svgEl.querySelectorAll(".hs").forEach(h => h.classList.remove("hint", "found"));
+    p.replaceChildren(prompt(`${qs[i].q}（${i + 1}/${qs.length}）`, qs[i].icon, qs[i].say));
+    speak(qs[i].say);
+  }
+  svgEl.querySelectorAll(".hs").forEach(h => {
+    const go = () => {
+      if (lock) return;
+      const want = qs[i].k;
+      if (h.dataset.k === want) {
+        lock = true; h.classList.remove("hint"); h.classList.add("found");
+        toast("答對了！");
+        setTimeout(() => { i++; i < qs.length ? ask() : finish("find", "找一找"); }, 1500);
+      } else {
+        wrong++; toast("再試試看", false);
+        if (wrong >= hintAfter()) svgEl.querySelector(`.hs[data-k="${want}"]`).classList.add("hint");
+      }
+    };
+    h.addEventListener("click", go);
+    h.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+  });
+  ask();
+}
+
+// ---------- 遊戲三：顏色配對 ----------
+function color() {
+  const C = [
+    { nm: "藍色", c: "#2f5aa8" }, { nm: "白色", c: "#ffffff" }, { nm: "紅色", c: "#e8452c" },
+    { nm: "黑色", c: "#1f2a2a" }, { nm: "芒果黃", c: "#f4b223" }, { nm: "稻穗黃", c: "#d9b44a" },
+  ];
+  const extra = [{ nm: "草綠", c: "#5aa05a" }, { nm: "天空藍", c: "#8cc6ee" }, { nm: "木頭色", c: "#b07a45" }, { nm: "粉紅", c: "#f2a7c3" }];
+  const qs = shuffle(C).slice(0, state.easy ? 4 : 6);
+  let i = 0, wrong = 0, lock = false;
+  main.innerHTML = "";
+  const s = document.createElement("div"); s.className = "screen";
+  const p = document.createElement("div"); s.append(p);
+  const box = document.createElement("div"); box.className = "colorq"; s.append(box);
+  main.append(s);
+  function ask() {
+    wrong = 0; lock = false;
+    const t = qs[i];
+    p.replaceChildren(prompt(`八葉花是什麼顏色？找一樣的（${i + 1}/${qs.length}）`, null, `八葉花是${t.nm}，請找到一樣的顏色`));
+    // 選項避開和答案太像的顏色
+    const pool = shuffle([...C, ...extra].filter(x => x.c !== t.c && !(t.nm.includes("黃") && x.nm.includes("黃"))));
+    const opts = shuffle([t, ...pool.slice(0, state.easy ? 1 : 2)]);
+    const flower = ICON.flower.replace(/#e8452c/g, t.c).replace(/<ellipse /g, '<ellipse stroke="#1f2a2a" stroke-width="1.5" ');
+    box.innerHTML = `<div class="target">${flower}</div><div class="opts"></div>`;
+    const o = box.querySelector(".opts");
+    opts.forEach(x => {
+      const b = document.createElement("button"); b.className = "sw"; b.style.background = x.c; b.setAttribute("aria-label", x.nm);
+      b.onclick = () => {
+        if (lock) return;
+        if (x.c === t.c) {
+          lock = true; b.classList.add("right"); toast(`${t.nm}，答對了！`);
+          setTimeout(() => { i++; i < qs.length ? ask() : finish("color", "顏色配對"); }, 1500);
+        } else {
+          wrong++; b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); toast("再試試看", false);
+          if (wrong >= hintAfter()) o.querySelectorAll(".sw").forEach(y => { if (y.getAttribute("aria-label") !== t.nm) y.style.opacity = .25; });
+        }
+      };
+      o.append(b);
+    });
+    speak(`八葉花是${t.nm}，請找到一樣的顏色`);
+  }
+  ask();
+}
+
+// ---------- 遊戲四：路線配對 ----------
+function route() {
+  const BINS = [
+    { k: "canal", nm: "水圳之源", icon: "bike" },
+    { k: "hill", nm: "湖丘時光", icon: "hills" },
+    { k: "cloud", nm: "雲水之間", icon: "clouds" },
+  ];
+  const ITEMS = [
+    { nm: "八田與一", icon: "statue", b: "canal" }, { nm: "落羽松", icon: "cypress", b: "canal" }, { nm: "菱角", icon: "caltrop", b: "canal" },
+    { nm: "化石", icon: "fossil", b: "hill" }, { nm: "芒果冰", icon: "ice", b: "hill" }, { nm: "吊橋", icon: "bridge", b: "hill" }, { nm: "走馬瀨的馬", icon: "horse", b: "hill" },
+    { nm: "曾文水庫", icon: "dam", b: "cloud" }, { nm: "玄空法寺", icon: "gate", b: "cloud" }, { nm: "龜丹溫泉", icon: "hotspring", b: "cloud" },
+  ];
+  let items = ITEMS;
+  if (state.easy) items = BINS.flatMap(b => ITEMS.filter(x => x.b === b.k).slice(0, 2));
+  const qs = shuffle(items);
+  let i = 0, wrong = 0, lock = false;
+  main.innerHTML = "";
+  const s = document.createElement("div"); s.className = "screen";
+  const p = document.createElement("div"); s.append(p);
+  const r = document.createElement("div"); r.className = "route";
+  const bins = document.createElement("div"); bins.className = "bins";
+  BINS.forEach(b => {
+    const el = document.createElement("button"); el.className = "bin"; el.dataset.k = b.k;
+    el.innerHTML = `${ICON[b.icon]}<span class="nm">${b.nm}</span><span class="got"></span>`;
+    el.onclick = () => drop(el);
+    bins.append(el);
+  });
+  const deck = document.createElement("div"); deck.className = "deck";
+  r.append(bins, deck); s.append(r);
+  const tip = document.createElement("div"); tip.className = "tip"; tip.textContent = "把卡片拖到對的路線，或直接點路線";
+  s.append(tip); main.append(s);
+  let card;
+  function ask() {
+    wrong = 0; lock = false;
+    bins.querySelectorAll(".bin").forEach(b => b.classList.remove("hint"));
+    const it = qs[i];
+    p.replaceChildren(prompt(`「${it.nm}」在哪一條路線？（${i + 1}/${qs.length}）`, null, `${it.nm}，在哪一條路線？`));
+    card = document.createElement("div"); card.className = "item";
+    card.innerHTML = `${ICON[it.icon]}<span class="nm">${it.nm}</span>`;
+    deck.replaceChildren(card);
+    makeDrag(card);
+    speak(`${it.nm}，在哪一條路線？`);
+  }
+  function drop(binEl) {
+    if (lock || !binEl) return;
+    const it = qs[i];
+    if (binEl.dataset.k === it.b) {
+      lock = true;
+      binEl.querySelector(".got").insertAdjacentHTML("beforeend", ICON[it.icon]);
+      card.remove(); toast(`答對了！是${binEl.querySelector(".nm").textContent}`);
+      setTimeout(() => { i++; i < qs.length ? ask() : finish("route", "路線配對"); }, 1500);
+    } else {
+      wrong++; resetCard(); card.classList.remove("wrong"); void card.offsetWidth; card.classList.add("wrong");
+      toast("再試試看", false);
+      if (wrong >= hintAfter()) bins.querySelector(`.bin[data-k="${it.b}"]`).classList.add("hint");
+    }
+  }
+  function resetCard() { card.classList.remove("drag"); card.style.left = card.style.top = card.style.width = ""; }
+  function makeDrag(el) {
+    let ox, oy, moved = false;
+    el.addEventListener("pointerdown", e => {
+      if (lock) return;
+      const rc = el.getBoundingClientRect();
+      ox = e.clientX - rc.left; oy = e.clientY - rc.top; moved = false;
+      el.setPointerCapture(e.pointerId);
+      el.style.width = rc.width + "px";
+      el.onpointermove = ev => {
+        if (!moved && Math.hypot(ev.clientX - e.clientX, ev.clientY - e.clientY) < 8) return;
+        moved = true; el.classList.add("drag");
+        el.style.left = ev.clientX - ox + "px"; el.style.top = ev.clientY - oy + "px";
+        const under = binAt(ev.clientX, ev.clientY);
+        bins.querySelectorAll(".bin").forEach(b => b.classList.toggle("over", b === under));
+      };
+      el.onpointerup = ev => {
+        el.onpointermove = el.onpointerup = null;
+        bins.querySelectorAll(".bin").forEach(b => b.classList.remove("over"));
+        if (!moved) { resetCard(); return; }
+        const under = binAt(ev.clientX, ev.clientY);
+        if (under) drop(under); else resetCard();
+      };
+    });
+  }
+  function binAt(x, y) {
+    return [...bins.querySelectorAll(".bin")].find(b => { const r = b.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; });
+  }
+  ask();
+}
+
+// ---------- 證書 ----------
+function showCert() {
+  main.innerHTML = "";
+  const s = document.createElement("div"); s.className = "screen";
+  s.innerHTML = `<div class="cert">${ICON.flower}<h2>西拉雅建築師</h2><p>完成 4 個建築探險遊戲！</p><p>我認識了 光、風、水 三個好朋友</p><div class="big">★★★★</div><div class="bar"></div></div>`;
+  const b = document.createElement("button"); b.className = "next alt"; b.textContent = "重新開始";
+  b.onclick = () => { for (const k in state.done) state.done[k] = false; renderStars(); snapshot(); home(); };
+  s.querySelector(".bar").append(b); main.append(s);
+  speak("恭喜你，成為西拉雅建築師！"); chime(true);
+}
+
+// ---------- 工具列 ----------
+$("#bHome").onclick = home;
+$("#bEasy").onclick = e => { state.easy = !state.easy; e.currentTarget.setAttribute("aria-pressed", state.easy); snapshot(); };
+$("#bSound").onclick = e => { state.sound = !state.sound; e.currentTarget.setAttribute("aria-pressed", state.sound); e.currentTarget.textContent = state.sound ? "聲音 開" : "聲音 關"; if (!state.sound) try { speechSynthesis.cancel(); } catch (_) {} snapshot(); };
+$("#bFull").onclick = async () => {
+  try { document.fullscreenElement ? await document.exitFullscreen() : await document.documentElement.requestFullscreen(); } catch (e) { toast("這個畫面不能全螢幕", false); }
+};
+try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => {}; } catch (e) {}
+
+function snapshot() { try { localStorage.setItem("siraya-game", JSON.stringify({ done: state.done, easy: state.easy, sound: state.sound })); } catch (e) {} }
+function start(data) {
+  let saved = data && data.done ? data : null;
+  if (!saved) try { saved = JSON.parse(localStorage.getItem("siraya-game") || "null"); } catch (e) {}
+  if (saved) { Object.assign(state.done, saved.done || {}); state.easy = !!saved.easy; state.sound = saved.sound !== false; }
+  $("#bEasy").setAttribute("aria-pressed", state.easy);
+  $("#bSound").setAttribute("aria-pressed", state.sound); $("#bSound").textContent = state.sound ? "聲音 開" : "聲音 關";
+  renderStars(); home();
+}
+window.claude?.hot?.snapshot?.(() => ({ done: state.done, easy: state.easy, sound: state.sound }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
