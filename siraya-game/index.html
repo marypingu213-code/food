@@ -28,7 +28,11 @@ header { background: var(--band); color: #fff; display: flex; align-items: cente
 header h1 { font-family: var(--display); font-weight: 400; font-size: clamp(20px, 2.2vw, 42px); margin: 0; letter-spacing: .04em; flex: 1; min-width: 0; }
 .tbtn { background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.35); border-radius: 999px; color: #fff; padding: .3em .9em; font-size: clamp(14px, 1.2vw, 24px); font-weight: 700; white-space: nowrap; }
 .tbtn[aria-pressed="true"] { background: var(--mango); color: var(--ink); border-color: var(--mango); }
-.stars { font-size: clamp(18px, 1.7vw, 32px); letter-spacing: .1em; color: var(--mango); white-space: nowrap; }
+.stars { display: flex; gap: .15em; font-size: clamp(22px, 2vw, 38px); white-space: nowrap; }
+.gem { width: 1.25em; height: 1em; display: inline-block; vertical-align: -.12em; flex: none; }
+.gem.off { filter: grayscale(1); opacity: .35; }
+header h1 { display: flex; align-items: center; gap: .35em; }
+header h1 .gem { width: 1.4em; height: 1.12em; background: #fff; border-radius: 10px; padding: .08em .1em; box-sizing: content-box; }
 main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.8vh, 26px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; }
 .screen { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: clamp(8px, 1.6vh, 22px); }
 .prompt { display: flex; align-items: center; gap: .45em; font-family: var(--display); font-size: clamp(22px, 3vw, 58px); line-height: 1.25; text-wrap: balance; }
@@ -48,7 +52,7 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .gcard .lv { position: absolute; left: 12px; top: 12px; background: var(--band); color: #fff; border-radius: 999px; padding: .15em .7em; font-size: clamp(12px, 1vw, 20px); font-weight: 700; }
 .gcard .tx { padding: clamp(10px, 1.2vw, 22px); display: flex; flex-direction: column; gap: .2em; }
 .gcard .nm { font-family: var(--display); font-size: clamp(22px, 2.3vw, 46px); display: flex; justify-content: space-between; align-items: baseline; gap: .3em; }
-.gcard .st { color: var(--mango); }
+.gcard .st { display: inline-flex; }
 .gcard .ds { font-size: clamp(14px, 1.15vw, 22px); color: var(--muted); line-height: 1.45; }
 
 /* 選項設定 */
@@ -146,15 +150,15 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .cert { flex: 1; min-height: 0; background: var(--card); border: 12px double var(--red); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4em; text-align: center; padding: 16px; }
 .cert h2 { font-family: var(--display); font-weight: 400; font-size: clamp(36px, 5.5vw, 110px); margin: 0; color: var(--band); }
 .cert p { font-size: clamp(18px, 2vw, 40px); margin: 0; }
-.cert .big { font-size: clamp(36px, 4.5vw, 90px); color: var(--mango); letter-spacing: .1em; }
+.cert .big { font-size: clamp(36px, 4.5vw, 90px); color: var(--band); display: flex; align-items: center; gap: .2em; flex-wrap: wrap; justify-content: center; font-family: var(--display); }
 @media (max-width: 700px) { .opts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pairs { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 
 <div id="app">
   <header>
-    <h1>寶石鑑定室～西拉雅國家風景區官田遊客中心</h1>
-    <span class="stars" id="stars" aria-label="星星"></span>
+    <h1><svg class="gem" viewBox="0 0 100 80" aria-hidden="true"><use href="#gemShape"/></svg>寶石鑑定室～西拉雅國家風景區官田遊客中心</h1>
+    <span class="stars" id="stars" aria-label="寶石"></span>
     <button class="tbtn" id="bHome">首頁</button>
     <button class="tbtn" id="bEasy" aria-pressed="false">提示快一點</button>
     <button class="tbtn" id="bSound" aria-pressed="true">聲音 開</button>
@@ -163,6 +167,23 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
   <main id="main"></main>
 </div>
 <div class="toast" id="toast"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="gemShape" viewBox="0 0 100 80">
+    <polygon points="20,6 80,6 96,30 50,76 4,30" fill="#4fbfca"/>
+    <polygon points="20,6 35,30 4,30" fill="#9ed9d4"/>
+    <polygon points="50,6 65,30 35,30" fill="#9ed9d4"/>
+    <polygon points="80,6 96,30 65,30" fill="#9ed9d4"/>
+    <polygon points="35,30 65,30 50,76" fill="#9ed9d4"/>
+    <g fill="none" stroke="#1f2a2a" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+      <polygon points="20,6 80,6 96,30 50,76 4,30"/>
+      <polyline points="4,30 96,30"/>
+      <polyline points="20,6 35,30 50,6 65,30 80,6"/>
+      <polyline points="35,30 50,76 65,30"/>
+    </g>
+    <rect x="12" y="34" width="20" height="7" rx="3.5" fill="#fff" transform="rotate(40 22 37)"/>
+    <circle cx="17" cy="23" r="3" fill="#fff"/>
+  </symbol>
+</svg>
 
 <script>
 // ---------- 資料：三大主軸與 24 個景點（取自館內常設展展板） ----------
@@ -279,18 +300,19 @@ const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 const hintAfter = () => state.easy ? 1 : 2;
 const routeOf = k => ROUTES.find(r => r.k === k);
 function screen() { main.innerHTML = ""; const s = el("div", "screen"); main.append(s); return s; }
-function renderStars() { const n = Object.values(state.done).filter(Boolean).length; $("#stars").textContent = "★".repeat(n) + "☆".repeat(Object.keys(state.done).length - n); }
+const gem = (on = true) => `<svg class="gem${on ? "" : " off"}" viewBox="0 0 100 80" aria-hidden="true"><use href="#gemShape"/></svg>`;
+function renderStars() { const v = Object.values(state.done); $("#stars").innerHTML = v.map(gem).join(""); $("#stars").setAttribute("aria-label", `寶石 ${v.filter(Boolean).length} / ${v.length}`); }
 
 function finish(key, summary) {
   state.done[key] = true; renderStars(); save();
   const s = screen();
-  const c = el("div", "cert", `<p>完成「${GAMES[key].name}」</p><div class="big">★ 得到一顆星 ★</div><p>${summary}</p>`);
+  const c = el("div", "cert", `<p>完成「${GAMES[key].name}」</p><div class="big">${gem()}鑑定成功，得到一顆寶石${gem()}</div><p>${summary}</p>`);
   const bar = el("div", "bar");
   const all = Object.values(state.done).every(Boolean);
   const b1 = el("button", "next", all ? "看我的證書" : "回到首頁"); b1.onclick = all ? showCert : home;
   const b2 = el("button", "next alt", "再玩一次"); b2.onclick = GAMES[key].run;
   bar.append(b1, b2); c.append(bar); s.append(c);
-  speak(`完成${GAMES[key].name}，得到一顆星`); chime(true);
+  speak(`完成${GAMES[key].name}，鑑定成功，得到一顆寶石`); chime(true);
 }
 
 // 選項設定畫面：rows = [{label, key, options:[[value,text]], value}]
@@ -320,7 +342,7 @@ function home() {
   s.append(promptEl("選一個遊戲", "請選一個遊戲"));
   const g = el("div", "home");
   for (const [k, v] of Object.entries(GAMES)) {
-    const b = el("button", "gcard", `<div class="ph" style="background-image:url('${v.ph}')"><span class="lv">${v.lv}</span></div><div class="tx"><span class="nm">${v.name}<span class="st">${state.done[k] ? "★" : ""}</span></span><span class="ds">${v.ds}</span></div>`);
+    const b = el("button", "gcard", `<div class="ph" style="background-image:url('${v.ph}')"><span class="lv">${v.lv}</span></div><div class="tx"><span class="nm">${v.name}<span class="st">${state.done[k] ? gem() : ""}</span></span><span class="ds">${v.ds}</span></div>`);
     b.onclick = v.run; g.append(b);
   }
   s.append(g);
@@ -717,7 +739,7 @@ function findGame(qs) {
 // ---------- 證書 ----------
 function showCert() {
   const s = screen();
-  const c = el("div", "cert", `<h2>寶石鑑定「加」</h2><p>鑑定完 ${Object.keys(state.done).length} 種西拉雅寶石，今天的知識又「加」了好多！</p><p>我認識了水圳之源、湖丘時光、雲水之間，知道建築師的祕密，也認識了 Tabe! Tabe! 的五隻動物</p><div class="big">${"★".repeat(Object.keys(state.done).length)}</div>`);
+  const c = el("div", "cert", `<h2>寶石鑑定「加」</h2><p>鑑定完 ${Object.keys(state.done).length} 種西拉雅寶石，今天的知識又「加」了好多！</p><p>我認識了水圳之源、湖丘時光、雲水之間，知道建築師的祕密，也認識了 Tabe! Tabe! 的五隻動物</p><div class="big">${Object.keys(state.done).map(() => gem()).join("")}</div>`);
   const bar = el("div", "bar"); const b = el("button", "next alt", "重新開始");
   b.onclick = () => { for (const k in state.done) state.done[k] = false; renderStars(); save(); home(); };
   bar.append(b); c.append(bar); s.append(c);
