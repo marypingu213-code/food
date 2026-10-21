@@ -28,11 +28,11 @@ header { background: var(--band); color: #fff; display: flex; align-items: cente
 header h1 { font-family: var(--display); font-weight: 400; font-size: clamp(20px, 2.2vw, 42px); margin: 0; letter-spacing: .04em; flex: 1; min-width: 0; }
 .tbtn { background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.35); border-radius: 999px; color: #fff; padding: .3em .9em; font-size: clamp(14px, 1.2vw, 24px); font-weight: 700; white-space: nowrap; }
 .tbtn[aria-pressed="true"] { background: var(--mango); color: var(--ink); border-color: var(--mango); }
-.stars { display: flex; gap: .15em; font-size: clamp(22px, 2vw, 38px); white-space: nowrap; }
+.stars { font-size: clamp(18px, 1.7vw, 32px); letter-spacing: .1em; color: var(--mango); white-space: nowrap; }
 .gem { width: 1.25em; height: 1em; display: inline-block; vertical-align: -.12em; flex: none; }
 .gem.off { filter: grayscale(1); opacity: .35; }
 header h1 { display: flex; align-items: center; gap: .35em; }
-header h1 .gem { width: 1.4em; height: 1.12em; background: #fff; border-radius: 10px; padding: .08em .1em; box-sizing: content-box; }
+header h1 .gem { width: 1.4em; height: 1.12em; }
 main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.8vh, 26px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; }
 .screen { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: clamp(8px, 1.6vh, 22px); }
 .prompt { display: flex; align-items: center; gap: .45em; font-family: var(--display); font-size: clamp(22px, 3vw, 58px); line-height: 1.25; text-wrap: balance; }
@@ -157,7 +157,7 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 
 <div id="app">
   <header>
-    <h1><svg class="gem" viewBox="0 0 100 80" aria-hidden="true"><use href="#gemShape"/></svg>寶石鑑定室～西拉雅國家風景區官田遊客中心</h1>
+    <h1><svg class="gem" viewBox="0 0 100 80" aria-hidden="true"><use href="#gemLine"/></svg>寶石鑑定室～西拉雅國家風景區官田遊客中心</h1>
     <span class="stars" id="stars" aria-label="寶石"></span>
     <button class="tbtn" id="bHome">首頁</button>
     <button class="tbtn" id="bEasy" aria-pressed="false">提示快一點</button>
@@ -182,6 +182,14 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
     </g>
     <rect x="12" y="34" width="20" height="7" rx="3.5" fill="#fff" transform="rotate(40 22 37)"/>
     <circle cx="17" cy="23" r="3" fill="#fff"/>
+  </symbol>
+  <symbol id="gemLine" viewBox="0 0 100 80">
+    <g fill="none" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+      <polygon points="20,6 80,6 96,30 50,76 4,30"/>
+      <polyline points="4,30 96,30"/>
+      <polyline points="20,6 35,30 50,6 65,30 80,6"/>
+      <polyline points="35,30 50,76 65,30"/>
+    </g>
   </symbol>
 </svg>
 
@@ -235,6 +243,7 @@ const SECRETS = [
 ].map(([a, b, img, fact]) => ({ a, b, img, fact, kind: "實景" }));
 // 實景找一找的內建題目（老師提供的照片，框選位置以百分比記錄；同一題可有多個框）
 const FIND_PRESETS = [
+  { id: "p25", src: "img/tabe7.jpg", boxes: [{ label: "Tabe! Tabe! 的鹿", x: 2.9, y: 37.5, w: 20.5, h: 30.8 }, { label: "Tabe! Tabe! 的野豬", x: 25.3, y: 55, w: 17.4, h: 14.2 }, { label: "Tabe! Tabe! 的犬", x: 45.8, y: 40.9, w: 18, h: 27.9 }, { label: "Tabe! Tabe! 的牛", x: 65.3, y: 54.7, w: 14.9, h: 13.3 }, { label: "Tabe! Tabe! 的蝸牛", x: 81.6, y: 50, w: 16.6, h: 16.4 }] },
   { id: "p17", src: "img/find17.jpg", boxes: [{ label: "許願鶴", x: 27.2, y: 21, w: 53.6, h: 73.2 }, { label: "梅花鹿", x: 6.4, y: 66.1, w: 2, h: 7.6 }, { label: "梅花鹿", x: 12.4, y: 66.8, w: 1.8, h: 5.7 }, { label: "梅花鹿", x: 17, y: 69.3, w: 2.3, h: 7.1 }, { label: "梅花鹿", x: 19.3, y: 69.3, w: 1.5, h: 3.9 }, { label: "梅花鹿", x: 22.8, y: 67.1, w: 2.8, h: 10.3 }, { label: "梅花鹿", x: 34.2, y: 69.3, w: 3.3, h: 10.3 }, { label: "SIRAYA 大字", x: 30.8, y: 71, w: 10, h: 7.8 }, { label: "遊客中心建築", x: 58.5, y: 55.4, w: 41.5, h: 14.7 }] },
   { id: "p10", src: "img/find10.jpg", boxes: [{ label: "入口的壺（圓弧形房間）", x: 57.3, y: 35.8, w: 14.6, h: 25 }, { label: "入口的壺（圓弧形房間）", x: 31.2, y: 36.9, w: 8, h: 17 }, { label: "入口的壺（圓弧形房間）", x: 48.6, y: 53.2, w: 16.7, h: 30.3 }, { label: "折板大屋頂", x: 18.4, y: 29.8, w: 42.7, h: 8.6 }, { label: "SIRAYA 大字", x: 45.5, y: 25.9, w: 8.7, h: 3.9 }, { label: "停車場上的草（覆土建築）", x: 11.1, y: 61.4, w: 36.8, h: 36.4 }] },
   { id: "p13", src: "img/find13.jpg", boxes: [{ label: "水圳", x: 26.4, y: 66.1, w: 43.8, h: 33.9 }, { label: "太陽能板", x: 65.3, y: 8, w: 9.4, h: 10.3 }, { label: "折板大屋頂", x: 23.3, y: 15.9, w: 26.7, h: 22.2 }, { label: "SIRAYA 大字", x: 67.7, y: 47.8, w: 9, h: 6.8 }] },
@@ -253,7 +262,7 @@ const GAMES = {
   route: { name: "三大主軸配對", lv: "分類", ds: "把展板上的 24 個景點，放進「水圳之源、湖丘時光、雲水之間」", ph: "img/hero-canal.jpg", run: routeSetup },
   clue: { name: "聽線索猜景點", lv: "推理", ds: "聽一句線索，從 4 張展板圖片中找出是哪個景點、屬於哪條路線", ph: "img/hill4.jpg", run: clueSetup },
   secret: { name: "建築師的祕密", lv: "因果配對", ds: "看遊客中心的照片：建築為什麼這樣蓋？找出設計的用意", ph: "img/s2.jpg", run: secretSetup },
-  tabe: { name: "Tabe! Tabe! 仙境西拉雅", lv: "公共藝術", ds: "草地上的五隻黑白動物：牠們是誰？代表西拉雅的什麼？", ph: "img/tabe3.jpg", run: tabeSetup },
+  tabe: { name: "Tabe! Tabe! 仙境西拉雅", lv: "公共藝術", ds: "草地上的五隻黑白動物：牠們是誰？代表西拉雅的什麼？", ph: "img/tabe7.jpg", run: tabeSetup },
   find: { name: "實景找一找", lv: "實景照片", ds: "在遊客中心的照片上，點出大屋頂、天窗、瀑布等設計", ph: "img/s5.jpg", run: findHome },
 };
 
@@ -301,7 +310,7 @@ const hintAfter = () => state.easy ? 1 : 2;
 const routeOf = k => ROUTES.find(r => r.k === k);
 function screen() { main.innerHTML = ""; const s = el("div", "screen"); main.append(s); return s; }
 const gem = (on = true) => `<svg class="gem${on ? "" : " off"}" viewBox="0 0 100 80" aria-hidden="true"><use href="#gemShape"/></svg>`;
-function renderStars() { const v = Object.values(state.done); $("#stars").innerHTML = v.map(gem).join(""); $("#stars").setAttribute("aria-label", `寶石 ${v.filter(Boolean).length} / ${v.length}`); }
+function renderStars() { const v = Object.values(state.done), n = v.filter(Boolean).length; $("#stars").textContent = "★".repeat(n) + "☆".repeat(v.length - n); $("#stars").setAttribute("aria-label", `完成 ${n} / ${v.length}`); }
 
 function finish(key, summary) {
   state.done[key] = true; renderStars(); save();
@@ -573,11 +582,11 @@ const TABE = {
   ],
   more: [
     { img: "img/tabe6.jpg", q: "狗狗身上的愛心代表什麼？", opts: ["熱情的人情味", "下雨的水滴", "高高的山", "吹來的風"], ans: "熱情的人情味", fact: "狗狗身上還有忙著招呼朋友的人、鞠躬說「歡迎光臨」的人" },
-    { img: "img/tabe3.jpg", q: "「Tabe」是西拉雅語，意思是什麼？", opts: ["你好", "再見", "謝謝", "好吃"], ans: "你好", fact: "Tabe 唸起來像「搭背」，意思是日安、你好、嗨" },
+    { img: "img/tabe7.jpg", q: "「Tabe」是西拉雅語，意思是什麼？", opts: ["你好", "再見", "謝謝", "好吃"], ans: "你好", fact: "Tabe 唸起來像「搭背」，意思是日安、你好、嗨" },
     { img: "img/tabe5.jpg", q: "雕塑的顏料裡加了官田的什麼？", opts: ["菱角殼", "芒果皮", "稻草", "龍眼殼"], ans: "菱角殼", fact: "官田是全台灣最大的菱角產地，菱角殼做成「菱殼炭粉」再利用" },
     { img: "img/tabe2.jpg", q: "牛頭上的角，是哪一種農產的造型？", opts: ["菱角", "香蕉", "芒果", "稻穗"], ans: "菱角", fact: "菱角長得像元寶，又叫「黑元寶」，9 到 11 月是產季" },
-    { img: "img/tabe3.jpg", q: "這組雕塑可以和朋友玩什麼遊戲？", opts: ["躲貓貓", "跳繩", "踢足球", "放風箏"], ans: "躲貓貓", fact: "旁邊有一支會數到 10 的「放送頭」：1、2、3……10，躲好了嗎？" },
-    { img: "img/tabe1.jpg", q: "這組雕塑只用了哪兩種顏色？", opts: ["黑和白", "紅和藍", "黃和綠", "粉紅和紫"], ans: "黑和白", fact: "黑白圖紋來自原住民編織紋、古代文字和符號" },
+    { img: "img/tabe7.jpg", q: "這組雕塑可以和朋友玩什麼遊戲？", opts: ["躲貓貓", "跳繩", "踢足球", "放風箏"], ans: "躲貓貓", fact: "旁邊有一支會數到 10 的「放送頭」：1、2、3……10，躲好了嗎？" },
+    { img: "img/tabe7.jpg", q: "這組雕塑只用了哪兩種顏色？", opts: ["黑和白", "紅和藍", "黃和綠", "粉紅和紫"], ans: "黑和白", fact: "黑白圖紋來自原住民編織紋、古代文字和符號" },
   ],
 };
 function tabeSetup() {
@@ -757,7 +766,7 @@ function save() { try { localStorage.setItem("siraya-game2", JSON.stringify({ do
 function start(data) {
   let saved = data && data.done ? data : null;
   if (!saved) try { saved = JSON.parse(localStorage.getItem("siraya-game2") || "null"); } catch (e) {}
-  if (saved) { Object.assign(state.done, saved.done || {}); state.easy = !!saved.easy; state.sound = saved.sound !== false; }
+  if (saved) { for (const k in state.done) state.done[k] = !!(saved.done || {})[k]; state.easy = !!saved.easy; state.sound = saved.sound !== false; }
   $("#bEasy").setAttribute("aria-pressed", state.easy); syncSound(); renderStars(); home();
 }
 window.claude?.hot?.snapshot?.(() => ({ done: state.done, easy: state.easy, sound: state.sound }));
