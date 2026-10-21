@@ -227,11 +227,12 @@ const FIND_LABELS = ["入口的壺（圓弧形房間）", "折板大屋頂", "�
 
 const $ = (s, r = document) => r.querySelector(s);
 const main = $("#main");
-const state = { done: { route: false, clue: false, secret: false, find: false }, easy: false, sound: true };
+const state = { done: { route: false, clue: false, secret: false, find: false, tabe: false }, easy: false, sound: true };
 const GAMES = {
   route: { name: "三大主軸配對", lv: "分類", ds: "把展板上的 24 個景點，放進「水圳之源、湖丘時光、雲水之間」", ph: "img/hero-canal.jpg", run: routeSetup },
   clue: { name: "聽線索猜景點", lv: "推理", ds: "聽一句線索，從 4 張展板圖片中找出是哪個景點、屬於哪條路線", ph: "img/hill4.jpg", run: clueSetup },
   secret: { name: "建築師的祕密", lv: "因果配對", ds: "看遊客中心的照片：建築為什麼這樣蓋？找出設計的用意", ph: "img/s2.jpg", run: secretSetup },
+  tabe: { name: "Tabe! Tabe! 仙境西拉雅", lv: "公共藝術", ds: "草地上的五隻黑白動物：牠們是誰？代表西拉雅的什麼？", ph: "img/tabe3.jpg", run: tabeSetup },
   find: { name: "實景找一找", lv: "實景照片", ds: "在遊客中心的照片上，點出大屋頂、天窗、瀑布等設計", ph: "img/s5.jpg", run: findHome },
 };
 
@@ -278,7 +279,7 @@ const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 const hintAfter = () => state.easy ? 1 : 2;
 const routeOf = k => ROUTES.find(r => r.k === k);
 function screen() { main.innerHTML = ""; const s = el("div", "screen"); main.append(s); return s; }
-function renderStars() { const n = Object.values(state.done).filter(Boolean).length; $("#stars").textContent = "★".repeat(n) + "☆".repeat(4 - n); }
+function renderStars() { const n = Object.values(state.done).filter(Boolean).length; $("#stars").textContent = "★".repeat(n) + "☆".repeat(Object.keys(state.done).length - n); }
 
 function finish(key, summary) {
   state.done[key] = true; renderStars(); save();
@@ -530,6 +531,78 @@ function secretPair({ n }) {
   speak("先點左邊的照片，再點右邊它的用意");
 }
 
+// ---------- 遊戲五：Tabe! Tabe! 仙境西拉雅（依作品教育訓練手冊） ----------
+const ANIMALS = ["鹿", "牛", "野豬", "蝸牛", "犬"];
+const ELEMENTS = ["風", "土", "山", "水", "人情味"];
+const TABE = {
+  animal: [
+    { img: "img/tabe4.jpg", q: "這隻是什麼動物？", opts: ANIMALS, ans: "鹿", fact: "鹿頭上有銀色鹿角，身上的神秘線條代表「風」" },
+    { img: "img/tabe2.jpg", q: "這隻是什麼動物？", opts: ANIMALS, ans: "牛", fact: "牛頭上的角是菱角的造型，身上的方格是「田」" },
+    { img: "img/tabe1.jpg", q: "這隻是什麼動物？", opts: ANIMALS, ans: "野豬", fact: "野豬身上畫滿了「山」，牠要帶大家去爬山" },
+    { img: "img/tabe5.jpg", q: "這隻是什麼動物？", opts: ANIMALS, ans: "蝸牛", fact: "蝸牛頭上的觸角是找水的雷達，身上布滿水滴" },
+  ],
+  element: [
+    { img: "img/tabe4.jpg", q: "鹿代表西拉雅的什麼？", opts: ELEMENTS, ans: "風", fact: "風帶來雲霧，在左鎮二寮可以看雲海和日出" },
+    { img: "img/tabe1.jpg", q: "野豬代表西拉雅的什麼？", opts: ELEMENTS, ans: "山", fact: "來梅嶺爬山走古道，讓身體和山一樣勇健" },
+    { img: "img/tabe2.jpg", q: "牛代表西拉雅的什麼？", opts: ELEMENTS, ans: "土", fact: "嘉南平原肥沃的土，種出讓人元氣滿滿的農產" },
+    { img: "img/tabe5.jpg", q: "蝸牛代表西拉雅的什麼？", opts: ELEMENTS, ans: "水", fact: "蝸牛揹著水庫，慢慢把水送到平原；西拉雅有五座有名的水庫" },
+    { img: "img/tabe3.jpg", q: "熱情的狗狗（犬）代表西拉雅的什麼？", opts: ELEMENTS, ans: "人情味", fact: "犬一大早就跑下山等大家，要帶大家去關子嶺泡溫泉" },
+  ],
+  more: [
+    { img: "img/tabe3.jpg", q: "「Tabe」是西拉雅語，意思是什麼？", opts: ["你好", "再見", "謝謝", "好吃"], ans: "你好", fact: "Tabe 唸起來像「搭背」，意思是日安、你好、嗨" },
+    { img: "img/tabe5.jpg", q: "雕塑的顏料裡加了官田的什麼？", opts: ["菱角殼", "芒果皮", "稻草", "龍眼殼"], ans: "菱角殼", fact: "官田是全台灣最大的菱角產地，菱角殼做成「菱殼炭粉」再利用" },
+    { img: "img/tabe2.jpg", q: "牛頭上的角，是哪一種農產的造型？", opts: ["菱角", "香蕉", "芒果", "稻穗"], ans: "菱角", fact: "菱角長得像元寶，又叫「黑元寶」，9 到 11 月是產季" },
+    { img: "img/tabe3.jpg", q: "這組雕塑可以和朋友玩什麼遊戲？", opts: ["躲貓貓", "跳繩", "踢足球", "放風箏"], ans: "躲貓貓", fact: "旁邊有一支會數到 10 的「放送頭」：1、2、3……10，躲好了嗎？" },
+    { img: "img/tabe1.jpg", q: "這組雕塑只用了哪兩種顏色？", opts: ["黑和白", "紅和藍", "黃和綠", "粉紅和紫"], ans: "黑和白", fact: "黑白圖紋來自原住民編織紋、古代文字和符號" },
+  ],
+};
+function tabeSetup() {
+  setupScreen("Tabe! Tabe! 仙境西拉雅", "Tabe 是西拉雅語的你好。先選擇題目", [
+    { label: "題目", key: "set", value: "both", options: [["animal", "認動物（4 題）"], ["element", "代表什麼（5 題）"], ["both", "認動物＋代表什麼"], ["all", "全部（14 題）"]] },
+    { label: "選項", key: "k", value: 3, options: [[2, "2 個"], [3, "3 個"], [4, "4 個"]] },
+  ], ({ set, k }) => {
+    const qs = set === "all" ? [...TABE.animal, ...TABE.element, ...shuffle(TABE.more)]
+      : set === "both" ? [...shuffle(TABE.animal), ...shuffle(TABE.element)]
+      : shuffle(TABE[set]);
+    photoQuiz(qs, k, "tabe");
+  });
+}
+// 一張照片配一個問題的通用選擇題
+function photoQuiz(qs, k, key) {
+  let i = 0, wrong = 0, lock = false, miss = 0;
+  const s = screen();
+  const p = el("div"), body = el("div", "sq"); s.append(p, body);
+  function ask() {
+    wrong = 0; lock = false;
+    const it = qs[i];
+    p.replaceChildren(promptEl(it.q, it.q, `${i + 1} / ${qs.length}`));
+    const fig = el("figure", "sqfig", `<div class="ph"><img src="${it.img}" alt=""></div>`);
+    const col = el("div", "sqopts");
+    const opts = shuffle([it.ans, ...shuffle(it.opts.filter(o => o !== it.ans)).slice(0, k - 1)]);
+    opts.forEach(o => {
+      const b = el("button", "pc", `<span class="tag">?</span><span>${o}</span>`);
+      if (o === it.ans) b.dataset.ok = 1;
+      b.onclick = () => {
+        if (lock || b.classList.contains("dimmed")) return;
+        if (o === it.ans) {
+          lock = true; b.classList.add("done"); b.querySelector(".tag").textContent = "✓";
+          col.querySelectorAll(".pc").forEach(x => x !== b && x.classList.add("dimmed"));
+          col.append(el("div", "fact", `小知識：${it.fact}`));
+          toast("答對了！", true, `答對了，是${o}。${it.fact}`);
+          setTimeout(() => { i++; i < qs.length ? ask() : finish(key, `${qs.length} 題，答錯 ${miss} 次`); }, 5200);
+        } else {
+          wrong++; miss++; b.classList.add("dimmed"); toast("再想想看", false);
+          if (wrong >= hintAfter()) col.querySelector("[data-ok]").classList.add("hint");
+        }
+      };
+      col.append(b);
+    });
+    body.replaceChildren(fig, col);
+    speak(it.q);
+  }
+  ask();
+}
+
 // ---------- 遊戲四：實景找一找（老師上傳照片） ----------
 // 照片與框選存在這台裝置的瀏覽器（IndexedDB）
 const DB = {
@@ -642,7 +715,7 @@ function findGame(qs) {
 // ---------- 證書 ----------
 function showCert() {
   const s = screen();
-  const c = el("div", "cert", `<h2>寶石鑑定「加」</h2><p>鑑定完 4 種西拉雅寶石，今天的知識又「加」了好多！</p><p>我認識了水圳之源、湖丘時光、雲水之間，也知道建築師的祕密</p><div class="big">★★★★</div>`);
+  const c = el("div", "cert", `<h2>寶石鑑定「加」</h2><p>鑑定完 ${Object.keys(state.done).length} 種西拉雅寶石，今天的知識又「加」了好多！</p><p>我認識了水圳之源、湖丘時光、雲水之間，知道建築師的祕密，也認識了 Tabe! Tabe! 的五隻動物</p><div class="big">${"★".repeat(Object.keys(state.done).length)}</div>`);
   const bar = el("div", "bar"); const b = el("button", "next alt", "重新開始");
   b.onclick = () => { for (const k in state.done) state.done[k] = false; renderStars(); save(); home(); };
   bar.append(b); c.append(bar); s.append(c);
