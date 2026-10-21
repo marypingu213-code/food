@@ -540,15 +540,17 @@ const TABE = {
     { img: "img/tabe2.jpg", q: "這隻是什麼動物？", opts: ANIMALS, ans: "牛", fact: "牛頭上的角是菱角的造型，身上的方格是「田」" },
     { img: "img/tabe1.jpg", q: "這隻是什麼動物？", opts: ANIMALS, ans: "野豬", fact: "野豬身上畫滿了「山」，牠要帶大家去爬山" },
     { img: "img/tabe5.jpg", q: "這隻是什麼動物？", opts: ANIMALS, ans: "蝸牛", fact: "蝸牛頭上的觸角是找水的雷達，身上布滿水滴" },
+    { img: "img/tabe6.jpg", q: "這隻是什麼動物？", opts: ANIMALS, ans: "犬", fact: "熱情的狗狗身上有愛心，還有很多「人」字" },
   ],
   element: [
     { img: "img/tabe4.jpg", q: "鹿代表西拉雅的什麼？", opts: ELEMENTS, ans: "風", fact: "風帶來雲霧，在左鎮二寮可以看雲海和日出" },
     { img: "img/tabe1.jpg", q: "野豬代表西拉雅的什麼？", opts: ELEMENTS, ans: "山", fact: "來梅嶺爬山走古道，讓身體和山一樣勇健" },
     { img: "img/tabe2.jpg", q: "牛代表西拉雅的什麼？", opts: ELEMENTS, ans: "土", fact: "嘉南平原肥沃的土，種出讓人元氣滿滿的農產" },
     { img: "img/tabe5.jpg", q: "蝸牛代表西拉雅的什麼？", opts: ELEMENTS, ans: "水", fact: "蝸牛揹著水庫，慢慢把水送到平原；西拉雅有五座有名的水庫" },
-    { img: "img/tabe3.jpg", q: "熱情的狗狗（犬）代表西拉雅的什麼？", opts: ELEMENTS, ans: "人情味", fact: "犬一大早就跑下山等大家，要帶大家去關子嶺泡溫泉" },
+    { img: "img/tabe6.jpg", q: "熱情的狗狗（犬）代表西拉雅的什麼？", opts: ELEMENTS, ans: "人情味", fact: "犬一大早就跑下山等大家，要帶大家去關子嶺泡溫泉" },
   ],
   more: [
+    { img: "img/tabe6.jpg", q: "狗狗身上的愛心代表什麼？", opts: ["熱情的人情味", "下雨的水滴", "高高的山", "吹來的風"], ans: "熱情的人情味", fact: "狗狗身上還有忙著招呼朋友的人、鞠躬說「歡迎光臨」的人" },
     { img: "img/tabe3.jpg", q: "「Tabe」是西拉雅語，意思是什麼？", opts: ["你好", "再見", "謝謝", "好吃"], ans: "你好", fact: "Tabe 唸起來像「搭背」，意思是日安、你好、嗨" },
     { img: "img/tabe5.jpg", q: "雕塑的顏料裡加了官田的什麼？", opts: ["菱角殼", "芒果皮", "稻草", "龍眼殼"], ans: "菱角殼", fact: "官田是全台灣最大的菱角產地，菱角殼做成「菱殼炭粉」再利用" },
     { img: "img/tabe2.jpg", q: "牛頭上的角，是哪一種農產的造型？", opts: ["菱角", "香蕉", "芒果", "稻穗"], ans: "菱角", fact: "菱角長得像元寶，又叫「黑元寶」，9 到 11 月是產季" },
@@ -558,7 +560,7 @@ const TABE = {
 };
 function tabeSetup() {
   setupScreen("Tabe! Tabe! 仙境西拉雅", "Tabe 是西拉雅語的你好。先選擇題目", [
-    { label: "題目", key: "set", value: "both", options: [["animal", "認動物（4 題）"], ["element", "代表什麼（5 題）"], ["both", "認動物＋代表什麼"], ["all", "全部（14 題）"]] },
+    { label: "題目", key: "set", value: "both", options: [["animal", "認動物（5 題）"], ["element", "代表什麼（5 題）"], ["both", "認動物＋代表什麼"], ["all", "全部（16 題）"]] },
     { label: "選項", key: "k", value: 3, options: [[2, "2 個"], [3, "3 個"], [4, "4 個"]] },
   ], ({ set, k }) => {
     const qs = set === "all" ? [...TABE.animal, ...TABE.element, ...shuffle(TABE.more)]
