@@ -3,18 +3,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@500;700;900&display=swap">
 <style>
-/* 版面：一個畫面的觸控遊戲；上方深綠工具列（像展板的深綠帶），下方大畫面舞台。刻意採單一亮色主題，教室電視上對比清楚。 */
+/* 版面：觸控電視用的單一畫面；深綠工具列呼應展板的深綠帶，圖片直接取自館內展板。刻意採單一亮色主題。 */
 :root {
-  --paper: #eef2f0;
+  --paper: #eef1ef;
   --card: #ffffff;
   --ink: #1f2a2a;
-  --muted: #55615f;
+  --muted: #5a6664;
   --band: #1f4a3e;
   --red: #e8452c;
   --blue: #2f5aa8;
   --mango: #f4b223;
-  --grass: #5aa05a;
   --ok: #2e8b57;
+  --line: #c5d0cd;
   --display: "Huninn", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --body: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
   color-scheme: light;
@@ -22,96 +22,115 @@
 html, body { height: 100%; }
 body { background: var(--paper); color: var(--ink); font-family: var(--body); overflow: hidden; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 button { font: inherit; color: inherit; cursor: pointer; }
-button:focus-visible, .hs:focus-visible rect:first-child { outline: 5px solid var(--mango); outline-offset: 4px; }
+button:focus-visible { outline: 5px solid var(--mango); outline-offset: 4px; }
 #app { height: 100%; display: flex; flex-direction: column; }
-header { background: var(--band); color: #fff; display: flex; align-items: center; gap: clamp(8px, 1.2vw, 20px); padding-block: clamp(8px, 1.2vh, 16px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); flex-wrap: wrap; }
-header h1 { font-family: var(--display); font-weight: 400; font-size: clamp(20px, 2.4vw, 44px); margin: 0; letter-spacing: .04em; flex: 1; min-width: 0; }
-.tbtn { background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.35); border-radius: 999px; color: #fff; padding: .35em .9em; font-size: clamp(14px, 1.3vw, 26px); font-weight: 700; white-space: nowrap; }
+header { background: var(--band); color: #fff; display: flex; align-items: center; gap: clamp(8px, 1vw, 18px); padding-block: clamp(6px, 1vh, 14px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); flex-wrap: wrap; }
+header h1 { font-family: var(--display); font-weight: 400; font-size: clamp(20px, 2.2vw, 42px); margin: 0; letter-spacing: .04em; flex: 1; min-width: 0; }
+.tbtn { background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.35); border-radius: 999px; color: #fff; padding: .3em .9em; font-size: clamp(14px, 1.2vw, 24px); font-weight: 700; white-space: nowrap; }
 .tbtn[aria-pressed="true"] { background: var(--mango); color: var(--ink); border-color: var(--mango); }
-.stars { font-size: clamp(18px, 1.8vw, 34px); letter-spacing: .1em; color: var(--mango); white-space: nowrap; }
-main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 2vh, 28px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; }
-.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: clamp(10px, 2vh, 24px); }
-.prompt { display: flex; align-items: center; gap: .5em; font-family: var(--display); font-size: clamp(24px, 3.4vw, 64px); line-height: 1.2; text-wrap: balance; }
-.prompt .say { flex: none; width: 1.6em; height: 1.6em; border-radius: 50%; border: 0; background: var(--blue); color: #fff; font-size: .7em; display: grid; place-items: center; }
-.prompt .pic { width: 1.6em; height: 1.6em; flex: none; }
-.prompt .pic svg { width: 100%; height: 100%; }
+.stars { font-size: clamp(18px, 1.7vw, 32px); letter-spacing: .1em; color: var(--mango); white-space: nowrap; }
+main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.8vh, 26px); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; }
+.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: clamp(8px, 1.6vh, 22px); }
+.prompt { display: flex; align-items: center; gap: .45em; font-family: var(--display); font-size: clamp(22px, 3vw, 58px); line-height: 1.25; text-wrap: balance; }
+.prompt .say { flex: none; width: 1.5em; height: 1.5em; border-radius: 50%; border: 0; background: var(--blue); color: #fff; font-size: .7em; display: grid; place-items: center; }
+.prompt .count { margin-left: auto; font-family: var(--body); font-size: .5em; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.next { background: var(--red); color: #fff; border: 0; border-radius: 999px; padding: .35em 1.3em; font-family: var(--display); font-size: clamp(20px, 2.3vw, 46px); box-shadow: 0 6px 0 rgba(0,0,0,.18); }
+.next.alt { background: var(--blue); }
+.next.ghost { background: var(--card); color: var(--ink); border: 3px solid var(--line); box-shadow: none; }
+.bar { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.tip { font-size: clamp(14px, 1.3vw, 24px); color: var(--muted); text-align: center; }
 
 /* 首頁 */
-.home { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: clamp(12px, 2vw, 32px); flex: 1; min-height: 0; align-content: center; }
-.gcard { background: var(--card); border: 0; border-radius: 28px; box-shadow: 0 6px 0 rgba(31,74,62,.18); padding: clamp(12px, 2vw, 32px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3em; min-height: clamp(160px, 30vh, 420px); transition: transform .15s; }
-.gcard:active { transform: scale(.97); }
-.gcard svg { width: min(60%, 26vh); height: auto; }
-.gcard .nm { font-family: var(--display); font-size: clamp(24px, 2.8vw, 54px); }
-.gcard .ds { font-size: clamp(14px, 1.3vw, 24px); color: var(--muted); }
-.gcard .st { font-size: clamp(22px, 2.2vw, 40px); color: var(--mango); min-height: 1.2em; }
+.home { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: clamp(12px, 1.8vw, 28px); align-content: center; }
+.gcard { background: var(--card); border: 0; border-radius: 24px; overflow: hidden; box-shadow: 0 6px 0 rgba(31,74,62,.18); display: flex; flex-direction: column; text-align: left; padding: 0; transition: transform .15s; }
+.gcard:active { transform: scale(.98); }
+.gcard .ph { aspect-ratio: 16 / 10; background: var(--paper) center / cover no-repeat; position: relative; }
+.gcard .lv { position: absolute; left: 12px; top: 12px; background: var(--band); color: #fff; border-radius: 999px; padding: .15em .7em; font-size: clamp(12px, 1vw, 20px); font-weight: 700; }
+.gcard .tx { padding: clamp(10px, 1.2vw, 22px); display: flex; flex-direction: column; gap: .2em; }
+.gcard .nm { font-family: var(--display); font-size: clamp(22px, 2.3vw, 46px); display: flex; justify-content: space-between; align-items: baseline; gap: .3em; }
+.gcard .st { color: var(--mango); }
+.gcard .ds { font-size: clamp(14px, 1.15vw, 22px); color: var(--muted); line-height: 1.45; }
 
-/* 認識好朋友 */
-.friends { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: clamp(12px, 2vw, 32px); }
-.friend { background: var(--card); border: 6px solid transparent; border-radius: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4em; padding: 16px; }
-.friend.on { border-color: var(--mango); }
-.friend svg { width: min(70%, 30vh); height: auto; overflow: visible; }
-.friend .nm { font-family: var(--display); font-size: clamp(48px, 7vw, 150px); line-height: 1; }
-.friend .ex { font-size: clamp(16px, 1.7vw, 32px); text-align: center; color: var(--muted); max-width: 18em; min-height: 3em; }
-.friend.on .ex { color: var(--ink); }
-.friend.on[data-k="sun"] svg { animation: spin 6s linear infinite; }
-.friend.on[data-k="wind"] svg { animation: blow 1.2s ease-in-out infinite; }
-.friend.on[data-k="water"] svg { animation: drop 1.2s ease-in infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes blow { 50% { transform: translateX(14%); } }
-@keyframes drop { 0% { transform: translateY(-12%); } 60% { transform: translateY(8%); } 100% { transform: translateY(-12%); } }
-
-/* 找一找 */
-.scene { flex: 1; min-height: 0; display: flex; justify-content: center; }
-.scene > svg { max-width: 100%; max-height: 100%; width: auto; height: 100%; border-radius: 24px; background: #dcecf3; }
-.hs { cursor: pointer; transition: filter .2s; outline: none; }
-.hs.hint { animation: pulse 1s ease-in-out infinite; }
-.hs.found { filter: drop-shadow(0 0 10px var(--mango)) drop-shadow(0 0 4px var(--mango)); }
-@keyframes pulse { 50% { filter: drop-shadow(0 0 16px var(--red)) drop-shadow(0 0 6px var(--red)); } }
-.wind-line { stroke-dasharray: 40 30; animation: flow 1.4s linear infinite; }
-.fall { stroke-dasharray: 12 10; animation: flow 0.8s linear infinite reverse; }
-@keyframes flow { to { stroke-dashoffset: -70; } }
-
-/* 顏色 */
-.colorq { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: clamp(16px, 5vw, 90px); flex-wrap: wrap; }
-.target { width: clamp(140px, 26vh, 360px); }
-.target svg { width: 100%; height: auto; }
-.opts { display: flex; gap: clamp(14px, 3vw, 48px); flex-wrap: wrap; justify-content: center; }
-.sw { width: clamp(110px, 20vh, 260px); aspect-ratio: 1; max-width: 100%; border-radius: 28px; border: 5px solid var(--ink); box-shadow: 0 6px 0 rgba(0,0,0,.15); }
-.sw.wrong { animation: shake .4s; }
-.sw.right { outline: 10px solid var(--mango); outline-offset: 6px; }
+/* 選項設定 */
+.setup { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: clamp(14px, 3vh, 40px); }
+.setup .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.setup .lb { font-size: clamp(18px, 1.8vw, 34px); font-weight: 700; min-width: 5em; text-align: right; }
+.chip { background: var(--card); border: 4px solid var(--line); border-radius: 18px; padding: .35em 1em; font-size: clamp(18px, 1.8vw, 34px); font-weight: 700; }
+.chip[aria-pressed="true"] { border-color: var(--red); background: #fdeae6; }
 
 /* 路線配對 */
-.route { flex: 1; min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: clamp(10px, 2vh, 24px); }
-.bins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 1.6vw, 28px); }
-.bin { background: var(--card); border: 5px dashed #b8c4c1; border-radius: 24px; padding: clamp(8px, 1.2vw, 20px); display: flex; flex-direction: column; align-items: center; gap: .2em; min-height: clamp(150px, 30vh, 380px); }
-.bin.over, .bin.hint { border-color: var(--red); border-style: solid; }
-.bin.hint { animation: pulseb 1s ease-in-out infinite; }
+.route { flex: 1; min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: clamp(8px, 1.6vh, 20px); }
+.bins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 1.4vw, 24px); }
+.bin { background: var(--card); border: 5px solid var(--line); border-radius: 22px; padding: 0; overflow: hidden; display: flex; flex-direction: column; text-align: left; }
+.bin .ph { height: clamp(70px, 17vh, 230px); background: center / cover no-repeat; }
+.bin .tx { padding: .3em .6em .5em; display: flex; flex-direction: column; gap: .2em; min-height: 0; }
+.bin .nm { font-family: var(--display); font-size: clamp(20px, 2.4vw, 48px); line-height: 1.1; }
+.bin .en { font-size: clamp(11px, .9vw, 18px); color: var(--muted); letter-spacing: .04em; }
+.bin .got { display: flex; flex-wrap: wrap; gap: 4px; }
+.bin .got img { width: clamp(34px, 4.4vw, 84px); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; }
+.bin.over { border-color: var(--blue); }
+.bin.hint { border-color: var(--red); animation: pulseb 1s ease-in-out infinite; }
 @keyframes pulseb { 50% { background: #fde3dd; } }
-.bin > svg { width: clamp(60px, 11vh, 150px); height: auto; }
-.bin .nm { font-family: var(--display); font-size: clamp(20px, 2.6vw, 52px); }
-.bin .got { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-.bin .got svg { width: clamp(36px, 6vh, 80px); height: auto; background: var(--paper); border-radius: 10px; }
-.deck { display: flex; align-items: center; justify-content: center; gap: 4vw; flex-wrap: wrap; }
-.item { background: var(--card); border-radius: 28px; box-shadow: 0 8px 0 rgba(31,74,62,.2); padding: clamp(10px, 1.6vw, 24px); display: flex; flex-direction: column; align-items: center; touch-action: none; width: clamp(150px, 28vh, 340px); cursor: grab; }
-.item svg { width: 80%; height: auto; pointer-events: none; }
-.item .nm { font-family: var(--display); font-size: clamp(22px, 2.6vw, 50px); pointer-events: none; }
+.deck { display: flex; align-items: center; justify-content: center; min-height: 0; }
+.item { background: var(--card); border-radius: 22px; box-shadow: 0 8px 0 rgba(31,74,62,.2); padding: clamp(8px, 1vw, 16px); display: flex; flex-direction: column; align-items: center; gap: .2em; touch-action: none; width: clamp(200px, 30vw, 520px); cursor: grab; }
+.item img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; pointer-events: none; }
+.item .nm { font-family: var(--display); font-size: clamp(22px, 2.6vw, 52px); text-align: center; pointer-events: none; padding: .4em 0; }
+.item.textonly { padding: clamp(18px, 3vh, 40px) clamp(16px, 2vw, 32px); }
 .item.drag { position: fixed; z-index: 50; cursor: grabbing; box-shadow: 0 16px 30px rgba(0,0,0,.25); }
-.item.wrong { animation: shake .4s; }
-.tip { font-size: clamp(14px, 1.4vw, 26px); color: var(--muted); text-align: center; }
+.shake { animation: shake .4s; }
 @keyframes shake { 25% { transform: translateX(-12px); } 75% { transform: translateX(12px); } }
 
+/* 線索猜景點 */
+.clue { background: var(--card); border-left: 10px solid var(--mango); border-radius: 0 18px 18px 0; padding: .5em .9em; font-size: clamp(22px, 2.6vw, 52px); font-family: var(--display); line-height: 1.35; }
+.opts { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(8px, 1.4vw, 24px); align-content: center; }
+.opt { background: var(--card); border: 5px solid transparent; border-radius: 20px; padding: clamp(6px, .7vw, 12px); display: flex; flex-direction: column; gap: .3em; box-shadow: 0 6px 0 rgba(31,74,62,.15); }
+.opt img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; }
+.opt .nm { font-size: clamp(16px, 1.7vw, 32px); font-weight: 700; text-align: center; }
+.opt.right { border-color: var(--ok); }
+.opt.dim { opacity: .3; }
+.reveal { font-size: clamp(16px, 1.6vw, 30px); color: var(--band); font-weight: 700; text-align: center; min-height: 1.5em; }
+
+/* 建築師的祕密 */
+.pairs { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(12px, 3vw, 60px); position: relative; }
+.col { display: flex; flex-direction: column; gap: clamp(6px, 1vh, 14px); justify-content: center; min-height: 0; }
+.pc { background: var(--card); border: 4px solid var(--line); border-radius: 16px; padding: .45em .7em; font-size: clamp(15px, 1.55vw, 30px); line-height: 1.35; text-align: left; display: flex; gap: .5em; align-items: center; }
+.pc .tag { flex: none; width: 1.8em; height: 1.8em; border-radius: 50%; display: grid; place-items: center; background: var(--paper); font-weight: 900; font-size: .85em; }
+.pc.sel { border-color: var(--blue); background: #e6edf9; }
+.pc.done { border-color: var(--ok); background: #e5f3ea; }
+.pc.done .tag { background: var(--ok); color: #fff; }
+.pc.hint { border-color: var(--red); animation: pulseb 1s ease-in-out infinite; }
+
+/* 找一找（實景照片） */
+.stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; }
+.photo { position: relative; max-width: 100%; max-height: 100%; touch-action: none; }
+.photo img { display: block; max-width: 100%; max-height: calc(100vh - 260px); border-radius: 16px; pointer-events: none; }
+.edit img { max-height: calc(100vh - 360px); }
+.box { position: absolute; border: 5px dashed transparent; border-radius: 12px; }
+.edit .box { border-color: var(--mango); background: rgba(244,178,35,.18); }
+.edit .box span { position: absolute; left: 0; top: 0; transform: translateY(-110%); background: var(--mango); padding: 2px 10px; border-radius: 8px; font-weight: 700; font-size: clamp(13px, 1.1vw, 20px); white-space: nowrap; }
+.box.hint { border-color: var(--red); animation: pulseb 1s ease-in-out infinite; }
+.box.found { border: 6px solid var(--mango); box-shadow: 0 0 0 6px rgba(244,178,35,.4); }
+.box.drawing { border-color: var(--blue); }
+.empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; }
+.empty h2 { font-family: var(--display); font-weight: 400; font-size: clamp(26px, 3vw, 56px); margin: 0; }
+.empty ol { text-align: left; font-size: clamp(16px, 1.5vw, 28px); line-height: 1.7; margin: 0; max-width: 34em; }
+.tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; }
+.tools .chip { font-size: clamp(14px, 1.3vw, 24px); border-width: 3px; }
+.tools input[type=text] { font: inherit; font-size: clamp(14px, 1.3vw, 24px); padding: .3em .6em; border: 3px solid var(--line); border-radius: 14px; width: 9em; }
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.thumbs button { border: 4px solid transparent; border-radius: 10px; padding: 0; overflow: hidden; background: none; position: relative; }
+.thumbs button[aria-pressed="true"] { border-color: var(--red); }
+.thumbs img { height: 54px; display: block; }
+
 /* 回饋與證書 */
-.toast { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; background: var(--ok); color: #fff; font-family: var(--display); font-size: clamp(36px, 6vw, 120px); padding: .2em .8em; border-radius: 999px; transition: .25s; z-index: 60; white-space: nowrap; }
+.toast { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; background: var(--ok); color: #fff; font-family: var(--display); font-size: clamp(32px, 5vw, 100px); padding: .2em .8em; border-radius: 999px; transition: .25s; z-index: 60; white-space: nowrap; }
 .toast.try { background: var(--blue); }
 .toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-.cert { flex: 1; min-height: 0; background: var(--card); border: 12px double var(--red); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3em; text-align: center; padding: 16px; }
-.cert svg { width: clamp(80px, 18vh, 240px); height: auto; animation: spin 12s linear infinite; }
-.cert h2 { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 6vw, 120px); margin: 0; color: var(--band); }
-.cert p { font-size: clamp(18px, 2.2vw, 44px); margin: 0; }
-.cert .big { font-size: clamp(40px, 5vw, 96px); color: var(--mango); letter-spacing: .1em; }
-.bar { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
-.next { background: var(--red); color: #fff; border: 0; border-radius: 999px; padding: .4em 1.4em; font-family: var(--display); font-size: clamp(22px, 2.6vw, 50px); box-shadow: 0 6px 0 rgba(0,0,0,.18); }
-.next.alt { background: var(--blue); }
+.cert { flex: 1; min-height: 0; background: var(--card); border: 12px double var(--red); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4em; text-align: center; padding: 16px; }
+.cert h2 { font-family: var(--display); font-weight: 400; font-size: clamp(36px, 5.5vw, 110px); margin: 0; color: var(--band); }
+.cert p { font-size: clamp(18px, 2vw, 40px); margin: 0; }
+.cert .big { font-size: clamp(36px, 4.5vw, 90px); color: var(--mango); letter-spacing: .1em; }
+@media (max-width: 700px) { .opts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pairs { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 
@@ -120,86 +139,79 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 2v
     <h1>西拉雅建築探險</h1>
     <span class="stars" id="stars" aria-label="星星"></span>
     <button class="tbtn" id="bHome">首頁</button>
-    <button class="tbtn" id="bEasy" aria-pressed="false">簡單模式</button>
+    <button class="tbtn" id="bEasy" aria-pressed="false">提示快一點</button>
     <button class="tbtn" id="bSound" aria-pressed="true">聲音 開</button>
     <button class="tbtn" id="bFull">全螢幕</button>
   </header>
   <main id="main"></main>
 </div>
-
-<template id="tScene">
-<svg viewBox="0 0 1200 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="西拉雅遊客中心建築">
-  <circle cx="1110" cy="80" r="44" fill="#e8452c"/>
-  <rect x="0" y="470" width="1200" height="90" fill="#8cc68c"/>
-  <!-- 草帽：覆土建築 -->
-  <g class="hs" data-k="grass" tabindex="0" aria-label="房子戴草帽">
-    <rect x="30" y="240" width="460" height="235" fill="transparent"/>
-    <path d="M30,472 Q230,230 480,300 L480,472 Z" fill="#5aa05a"/>
-    <g stroke="#2d7a2d" stroke-width="5" fill="none">
-      <path d="M150,330 l8,-22 l8,22"/><path d="M230,290 l8,-22 l8,22"/><path d="M320,282 l8,-22 l8,22"/><path d="M410,292 l8,-22 l8,22"/><path d="M100,380 l8,-22 l8,22"/>
-    </g>
-    <rect x="140" y="392" width="300" height="80" fill="#e4ebe9" stroke="#1f2a2a" stroke-width="4"/>
-    <rect x="170" y="408" width="40" height="64" fill="#2f5aa8"/>
-    <rect x="240" y="408" width="170" height="36" fill="#f4b223"/>
-  </g>
-  <!-- 一樓 -->
-  <rect x="480" y="320" width="440" height="150" fill="#ffffff" stroke="#1f2a2a" stroke-width="4"/>
-  <rect x="500" y="340" width="120" height="110" fill="#2f5aa8"/>
-  <rect x="640" y="340" width="120" height="110" fill="#1f2a2a"/>
-  <rect x="780" y="340" width="120" height="110" fill="#e8452c"/>
-  <rect x="440" y="296" width="520" height="24" fill="#1f2a2a"/>
-  <!-- 風：飛簷折板屋頂 -->
-  <g class="hs" data-k="roof" tabindex="0" aria-label="風跑過的大屋頂">
-    <rect x="390" y="90" width="590" height="205" fill="transparent"/>
-    <polygon points="390,170 460,110 530,170 600,110 670,170 740,110 810,170 880,110 950,170 980,150 980,184 390,184" fill="#e8452c" stroke="#1f2a2a" stroke-width="4" stroke-linejoin="round"/>
-    <rect x="450" y="184" width="16" height="112" fill="#1f2a2a"/>
-    <rect x="924" y="184" width="16" height="112" fill="#1f2a2a"/>
-    <path class="wind-line" d="M470,225 h420" stroke="#2f5aa8" stroke-width="8" stroke-linecap="round"/>
-    <path class="wind-line" d="M500,262 h360" stroke="#2f5aa8" stroke-width="8" stroke-linecap="round"/>
-  </g>
-  <!-- 光：八葉花天井 -->
-  <g class="hs" data-k="light" tabindex="0" aria-label="光的花">
-    <polygon points="650,150 720,150 770,294 600,294" fill="#f4b223" opacity=".4"/>
-    <g id="sceneFlowerTop"></g>
-    <ellipse cx="685" cy="292" rx="70" ry="10" fill="#f4b223"/>
-  </g>
-  <!-- 水：水池、瀑布、水圳 -->
-  <g class="hs" data-k="water" tabindex="0" aria-label="瀑布和水圳">
-    <rect x="940" y="300" width="80" height="230" fill="transparent"/>
-    <rect x="950" y="286" width="62" height="14" fill="#2f5aa8"/>
-    <rect x="980" y="300" width="30" height="175" fill="#7fb0e6"/>
-    <path class="fall" d="M988,300 v175 M1000,300 v175" stroke="#ffffff" stroke-width="4"/>
-    <rect x="0" y="490" width="1200" height="40" fill="#2f5aa8"/>
-    <path class="fall" d="M0,510 h1200" stroke="#8cc6ee" stroke-width="5"/>
-  </g>
-  <!-- 壺：入口三個弧形量體 -->
-  <g class="hs" data-k="jar" tabindex="0" aria-label="三個壺">
-    <rect x="1030" y="330" width="170" height="160" fill="transparent"/>
-    <g id="sceneJars"></g>
-  </g>
-</svg>
-</template>
-
 <div class="toast" id="toast"></div>
 
 <script>
-const ICON = {"sun": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"50\" cy=\"50\" r=\"20\" fill=\"#e8452c\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(0 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(30 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(60 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(90 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(120 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(150 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(180 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(210 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(240 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(270 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(300 50 50)\"/><line x1=\"50\" y1=\"14\" x2=\"50\" y2=\"24\" stroke=\"#e8452c\" stroke-width=\"5\" stroke-linecap=\"round\" transform=\"rotate(330 50 50)\"/></svg>", "wind": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M12,38 h50 q14,0 14,-10 q0,-9 -9,-9 q-8,0 -8,8\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M12,58 h64 q14,0 14,-10 q0,-9 -9,-9 q-8,0 -8,8\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"6\" stroke-linecap=\"round\"/><path d=\"M12,78 h40 q14,0 14,-10 q0,-9 -9,-9 q-8,0 -8,8\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"6\" stroke-linecap=\"round\"/></svg>", "water": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M50,10 q30,40 30,58 a30,30 0 0 1 -60,0 q0,-18 30,-58z\" fill=\"#2f5aa8\"/><path d=\"M36,66 a14,14 0 0 0 12,14\" stroke=\"#fff\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/></svg>", "jar": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(50 58) scale(1.35)\"><path d=\"M-9,-30 h18 v6 q16,8 16,28 q0,24 -25,26 q-25,-2 -25,-26 q0,-20 16,-28 z\" fill=\"#e8452c\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"-11\" y=\"-34\" width=\"22\" height=\"6\" rx=\"2\" fill=\"#1f2a2a\"/><path d=\"M-18,4 h36\" stroke=\"#fff\" stroke-width=\"3\"/></g></svg>", "flower": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(0 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(45 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(90 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(135 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(180 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(225 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(270 50 50)\"/><ellipse cx=\"50\" cy=\"28.0\" rx=\"8.8\" ry=\"18.0\" fill=\"#e8452c\" transform=\"rotate(315 50 50)\"/><circle cx=\"50\" cy=\"50\" r=\"7.199999999999999\" fill=\"#fff\"/></svg>", "rest": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"18\" y=\"30\" width=\"64\" height=\"44\" rx=\"8\" fill=\"#5aa05a\"/><rect x=\"26\" y=\"20\" width=\"48\" height=\"16\" rx=\"6\" fill=\"#5aa05a\"/><text x=\"50\" y=\"62\" font-size=\"18\" text-anchor=\"middle\" fill=\"#fff\">Z z z</text></svg>", "m1": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M10,62 q40,-34 80,0 z\" fill=\"#5aa05a\"/><rect x=\"18\" y=\"62\" width=\"64\" height=\"26\" fill=\"#ddd\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"30\" y=\"68\" width=\"12\" height=\"20\" fill=\"#2f5aa8\"/><rect x=\"56\" y=\"68\" width=\"16\" height=\"10\" fill=\"#f4b223\"/><path d=\"M30,50 l3,-8 l3,8\" stroke=\"#2d7a2d\" stroke-width=\"2\" fill=\"none\"/><path d=\"M44,50 l3,-8 l3,8\" stroke=\"#2d7a2d\" stroke-width=\"2\" fill=\"none\"/><path d=\"M58,50 l3,-8 l3,8\" stroke=\"#2d7a2d\" stroke-width=\"2\" fill=\"none\"/><path d=\"M70,50 l3,-8 l3,8\" stroke=\"#2d7a2d\" stroke-width=\"2\" fill=\"none\"/></svg>", "m2": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(22 62) scale(0.8)\"><path d=\"M-9,-30 h18 v6 q16,8 16,28 q0,24 -25,26 q-25,-2 -25,-26 q0,-20 16,-28 z\" fill=\"#2f5aa8\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"-11\" y=\"-34\" width=\"22\" height=\"6\" rx=\"2\" fill=\"#1f2a2a\"/><path d=\"M-18,4 h36\" stroke=\"#fff\" stroke-width=\"3\"/></g><g transform=\"translate(50 58) scale(0.95)\"><path d=\"M-9,-30 h18 v6 q16,8 16,28 q0,24 -25,26 q-25,-2 -25,-26 q0,-20 16,-28 z\" fill=\"#e8452c\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"-11\" y=\"-34\" width=\"22\" height=\"6\" rx=\"2\" fill=\"#1f2a2a\"/><path d=\"M-18,4 h36\" stroke=\"#fff\" stroke-width=\"3\"/></g><g transform=\"translate(78 62) scale(0.8)\"><path d=\"M-9,-30 h18 v6 q16,8 16,28 q0,24 -25,26 q-25,-2 -25,-26 q0,-20 16,-28 z\" fill=\"#1f2a2a\" stroke=\"#1f2a2a\" stroke-width=\"2\"/><rect x=\"-11\" y=\"-34\" width=\"22\" height=\"6\" rx=\"2\" fill=\"#1f2a2a\"/><path d=\"M-18,4 h36\" stroke=\"#fff\" stroke-width=\"3\"/></g></svg>", "m3": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M6,30 l22,-14 l22,14 l22,-14 l22,14\" fill=\"none\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><path d=\"M42,30 l-14,52 h44 l-14,-52z\" fill=\"#f4b223\" opacity=\".45\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(0 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(45 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(90 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(135 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(180 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(225 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(270 50 84)\"/><ellipse cx=\"50\" cy=\"75.2\" rx=\"3.52\" ry=\"7.2\" fill=\"#f4b223\" transform=\"rotate(315 50 84)\"/><circle cx=\"50\" cy=\"84\" r=\"2.88\" fill=\"#fff\"/></svg>", "m4": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M6,40 l22,-16 l22,16 l22,-16 l22,16\" fill=\"none\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><line x1=\"16\" y1=\"40\" x2=\"16\" y2=\"90\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><line x1=\"84\" y1=\"40\" x2=\"84\" y2=\"90\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><path d=\"M24,60 h40 q10,0 10,-7\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M24,74 h40 q10,0 10,-7\" fill=\"none\" stroke=\"#2f5aa8\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>", "m5": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"8\" y=\"20\" width=\"40\" height=\"12\" fill=\"#1f2a2a\"/><rect x=\"8\" y=\"32\" width=\"40\" height=\"58\" fill=\"#ccc\"/><rect x=\"48\" y=\"78\" width=\"46\" height=\"12\" fill=\"#2f5aa8\"/><path d=\"M44,24 q16,4 14,54\" stroke=\"#2f5aa8\" stroke-width=\"7\" fill=\"none\"/><path d=\"M14,26 h30\" stroke=\"#2f5aa8\" stroke-width=\"5\"/></svg>", "m6": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"10\" y=\"12\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#2f5aa8\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"38\" y=\"12\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#fff\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"66\" y=\"12\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#e8452c\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"10\" y=\"40\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#1f2a2a\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"38\" y=\"40\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#f4b223\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"66\" y=\"40\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#d9b44a\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"10\" y=\"68\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#5aa05a\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"38\" y=\"68\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#8cc6ee\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/><rect x=\"66\" y=\"68\" width=\"24\" height=\"24\" rx=\"4\" fill=\"#b07a45\" stroke=\"#1f2a2a\" stroke-width=\"1.5\"/></svg>", "bike": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"26\" cy=\"68\" r=\"16\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\"/><circle cx=\"76\" cy=\"68\" r=\"16\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\"/><path d=\"M26,68 l18,-26 h26 l6,26 M44,42 l12,26 l14,-26\" fill=\"none\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><circle cx=\"52\" cy=\"22\" r=\"7\" fill=\"#e8452c\"/><path d=\"M52,29 l-4,14 l10,8\" stroke=\"#2f5aa8\" stroke-width=\"5\" fill=\"none\"/></svg>", "hills": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0,70 q20,-40 40,-10 q20,-40 60,0 v30 h-100z\" fill=\"#5aa05a\"/><path d=\"M0,80 h100 v20 h-100z\" fill=\"#2f5aa8\"/><circle cx=\"80\" cy=\"22\" r=\"10\" fill=\"#e8452c\"/></svg>", "clouds": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0,60 l30,-30 l25,22 l20,-14 l25,22 v40 h-100z\" fill=\"#1f4a3e\"/><path d=\"M0,80 h100 v20 h-100z\" fill=\"#2f5aa8\"/><g fill=\"#fff\" stroke=\"#bbb\"><ellipse cx=\"30\" cy=\"48\" rx=\"22\" ry=\"8\"/><ellipse cx=\"72\" cy=\"40\" rx=\"18\" ry=\"7\"/></g></svg>", "cypress": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M12,55 l8,-40 l8,40z\" fill=\"#e8452c\"/><path d=\"M12,62 l8,32 l8,-32z\" fill=\"#e8452c\" opacity=\".45\"/><path d=\"M32,55 l8,-40 l8,40z\" fill=\"#2f5aa8\"/><path d=\"M32,62 l8,32 l8,-32z\" fill=\"#2f5aa8\" opacity=\".45\"/><path d=\"M52,55 l8,-40 l8,40z\" fill=\"#e8452c\"/><path d=\"M52,62 l8,32 l8,-32z\" fill=\"#e8452c\" opacity=\".45\"/><path d=\"M72,55 l8,-40 l8,40z\" fill=\"#2f5aa8\"/><path d=\"M72,62 l8,32 l8,-32z\" fill=\"#2f5aa8\" opacity=\".45\"/><line x1=\"0\" y1=\"58\" x2=\"100\" y2=\"58\" stroke=\"#2f5aa8\" stroke-width=\"2\"/></svg>", "caltrop": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M50,40 q-20,0 -40,-14 q12,20 6,34 q20,0 34,-6 q14,6 34,6 q-6,-14 6,-34 q-20,14 -40,14z\" fill=\"#1f2a2a\"/><rect x=\"0\" y=\"74\" width=\"100\" height=\"26\" fill=\"#2f5aa8\" opacity=\".5\"/></svg>", "statue": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"22\" y=\"76\" width=\"56\" height=\"16\" fill=\"#999\"/><circle cx=\"50\" cy=\"24\" r=\"10\" fill=\"#1f2a2a\"/><path d=\"M38,38 h24 l4,22 h10 v16 h-52 v-16 h10z\" fill=\"#e8452c\"/><path d=\"M40,60 l-6,16 M60,60 l6,16\" stroke=\"#1f2a2a\" stroke-width=\"5\"/></svg>", "fossil": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"50\" cy=\"82\" rx=\"38\" ry=\"8\" fill=\"#1f2a2a\"/><path d=\"M20,70 q10,-36 34,-36 q16,0 26,-14\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"5\"/><line x1=\"30\" y1=\"46\" x2=\"30\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"3\"/><line x1=\"38\" y1=\"40\" x2=\"38\" y2=\"54\" stroke=\"#e8452c\" stroke-width=\"3\"/><line x1=\"46\" y1=\"36\" x2=\"46\" y2=\"50\" stroke=\"#e8452c\" stroke-width=\"3\"/><line x1=\"54\" y1=\"36\" x2=\"54\" y2=\"50\" stroke=\"#e8452c\" stroke-width=\"3\"/><path d=\"M30,58 v20 M58,40 v38\" stroke=\"#e8452c\" stroke-width=\"4\"/></svg>", "ice": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M14,52 h72 q-6,30 -36,32 q-30,-2 -36,-32z\" fill=\"#2f5aa8\"/><rect x=\"24\" y=\"32\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 24 32)\"/><rect x=\"42\" y=\"26\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 42 26)\"/><rect x=\"58\" y=\"34\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 58 34)\"/><rect x=\"36\" y=\"40\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 36 40)\"/><rect x=\"52\" y=\"42\" width=\"14\" height=\"14\" fill=\"#f4b223\" stroke=\"#e8452c\" stroke-width=\"1.5\" transform=\"rotate(15 52 42)\"/><circle cx=\"50\" cy=\"20\" r=\"9\" fill=\"#e8452c\"/></svg>", "bridge": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"0\" y=\"74\" width=\"100\" height=\"26\" fill=\"#2f5aa8\"/><line x1=\"22\" y1=\"20\" x2=\"22\" y2=\"74\" stroke=\"#1f2a2a\" stroke-width=\"5\"/><line x1=\"78\" y1=\"20\" x2=\"78\" y2=\"74\" stroke=\"#1f2a2a\" stroke-width=\"5\"/><path d=\"M0,40 q22,-20 22,-20 q28,40 56,0 q22,20 22,20\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"3\"/><line x1=\"0\" y1=\"60\" x2=\"100\" y2=\"60\" stroke=\"#1f2a2a\" stroke-width=\"4\"/><line x1=\"30\" y1=\"45.09090909090909\" x2=\"30\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"38\" y1=\"41.45454545454545\" x2=\"38\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"46\" y1=\"37.81818181818182\" x2=\"46\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"54\" y1=\"37.81818181818182\" x2=\"54\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"62\" y1=\"41.45454545454545\" x2=\"62\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/><line x1=\"70\" y1=\"45.09090909090909\" x2=\"70\" y2=\"60\" stroke=\"#e8452c\" stroke-width=\"1.5\"/></svg>", "horse": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M24,40 h40 l10,-20 l12,6 l-6,10 l-6,4 v20 h-58z\" fill=\"#e8452c\"/><rect x=\"24\" y=\"60\" width=\"7\" height=\"28\" fill=\"#1f2a2a\"/><rect x=\"34\" y=\"60\" width=\"7\" height=\"28\" fill=\"#1f2a2a\"/><rect x=\"50\" y=\"60\" width=\"7\" height=\"28\" fill=\"#1f2a2a\"/><rect x=\"60\" y=\"60\" width=\"7\" height=\"28\" fill=\"#1f2a2a\"/><rect x=\"30\" y=\"44\" width=\"8\" height=\"8\" fill=\"#2f5aa8\"/><rect x=\"46\" y=\"44\" width=\"8\" height=\"8\" fill=\"#1f2a2a\"/><rect x=\"38\" y=\"52\" width=\"8\" height=\"8\" fill=\"#2f5aa8\"/><rect x=\"56\" y=\"50\" width=\"8\" height=\"8\" fill=\"#2f5aa8\"/><rect x=\"70\" y=\"28\" width=\"8\" height=\"8\" fill=\"#1f2a2a\"/></svg>", "gate": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"8\" y=\"22\" width=\"84\" height=\"12\" fill=\"#e8452c\"/><path d=\"M4,22 l10,-10 h72 l10,10z\" fill=\"#1f2a2a\"/><rect x=\"16\" y=\"34\" width=\"10\" height=\"56\" fill=\"#e8452c\"/><rect x=\"74\" y=\"34\" width=\"10\" height=\"56\" fill=\"#e8452c\"/><ellipse cx=\"50\" cy=\"72\" rx=\"22\" ry=\"14\" fill=\"#2f5aa8\"/><text x=\"50\" y=\"80\" font-size=\"22\" text-anchor=\"middle\" fill=\"#fff\" font-weight=\"bold\">佛</text></svg>", "hotspring": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse cx=\"50\" cy=\"72\" rx=\"40\" ry=\"16\" fill=\"#1f2a2a\"/><ellipse cx=\"50\" cy=\"72\" rx=\"30\" ry=\"10\" fill=\"#8cc6ee\"/><path d=\"M36,54 q-8,-10 0,-20 q8,-10 0,-22\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M50,54 q-8,-10 0,-20 q8,-10 0,-22\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\" stroke-linecap=\"round\"/><path d=\"M64,54 q-8,-10 0,-20 q8,-10 0,-22\" fill=\"none\" stroke=\"#e8452c\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>", "dam": "<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0,40 l30,-20 l20,14 l20,-10 l30,16 v20 h-100z\" fill=\"#1f4a3e\"/><rect x=\"0\" y=\"54\" width=\"100\" height=\"16\" fill=\"#2f5aa8\"/><path d=\"M0,70 h100 l-14,26 h-72z\" fill=\"#bbb\" stroke=\"#1f2a2a\" stroke-width=\"2\"/></svg>"};
+// ---------- 資料：三大主軸與 24 個景點（取自館內常設展展板） ----------
+const ROUTES = [
+  { k: "canal", nm: "水圳之源", en: "Source of water canal", sub: "官田・六甲・烏山頭・八田與一" },
+  { k: "hill", nm: "湖丘時光", en: "Hills & Lake in Time", sub: "南化・左鎮・玉井・新化・虎頭埤" },
+  { k: "cloud", nm: "雲水之間", en: "Between Clouds and Water", sub: "中埔・大埔・曾文水庫・楠西" },
+];
+const SPOTS = [
+  ["canal", 1, "官田遊客中心", "我們今天戶外教學來的地方，屋頂上長了草"],
+  ["canal", 2, "六甲落羽松森林", "一整排高高的樹倒映在水面上，秋冬葉子會變紅"],
+  ["canal", 3, "南元花園休閒農場", null],
+  ["canal", 4, "尖山埤江南渡假村", "湖邊的渡假村，可以坐船遊湖"],
+  ["canal", 5, "八田與一紀念園區", "紀念帶大家蓋烏山頭水庫和嘉南大圳的工程師"],
+  ["canal", 6, "烏山頭水庫", "湖面彎彎曲曲像珊瑚，所以又叫「珊瑚潭」"],
+  ["canal", 7, "山上花園水道博物館", "以前把水變乾淨、送給台南人喝的地方"],
+  ["canal", 8, "官田菱角田", "水田裡長著有角的果實，水雉鳥會來這裡"],
+  ["hill", 1, "南化遊客中心", null],
+  ["hill", 2, "大坑休閒農場", null],
+  ["hill", 3, "左鎮化石園區", "可以看到很久很久以前動物的骨頭化石"],
+  ["hill", 4, "玉井芒果冰", "夏天最受歡迎的冰，上面有黃色的水果"],
+  ["hill", 5, "新化老街", "一整排漂亮的老房子，牆上有雕花"],
+  ["hill", 6, "虎頭埤水庫", "台灣第一座水庫，湖上有長長的吊橋"],
+  ["hill", 7, "二寮觀日平臺", "天還沒亮就要來，看日出和雲海"],
+  ["hill", 8, "走馬瀨農場", "有大草原的農場，名字裡有一種動物"],
+  ["cloud", 1, "中埔遊客中心", null],
+  ["cloud", 2, "石硦林場", null],
+  ["cloud", 3, "大埔同心橋", "在大埔情人公園裡，跨過溪流的大橋"],
+  ["cloud", 4, "曾文水庫", "台灣最大的水庫"],
+  ["cloud", 5, "梅嶺風景區", "冬天山上會開滿白色梅花"],
+  ["cloud", 6, "玄空法寺", "寺廟門口有一塊寫著「佛」字的大石頭"],
+  ["cloud", 7, "鹿陶洋江家聚落", "同一個家族的人住在一起的古老三合院"],
+  ["cloud", 8, "龜丹溫泉", "可以泡溫泉、讓身體暖呼呼的地方"],
+].map(([r, n, nm, clue]) => ({ r, nm, clue, img: `img/${r}${n}.jpg` }));
+// 建築師的祕密：設計 ↔ 用意（依建築師設計概念導覽）
+const SECRETS = [
+  ["屋頂上鋪滿草坡（覆土建築）", "房子藏進山坡裡，比較涼，停車場也藏起來"],
+  ["像飛鳥翅膀的折板大屋頂", "幫大家遮太陽，屋頂下空空的讓南風吹過"],
+  ["屋頂上的八葉花形天窗", "陽光照進來，地上出現西拉雅刺繡的花影"],
+  ["入口三個圓弧形的房間", "像西拉雅人祭拜用的「壺」"],
+  ["二樓水池流到一樓的瀑布", "像水庫的溢洪道，把阿立祖的「水」帶進來"],
+  ["房子圍著廣場、面向水邊", "像西拉雅聚落面向水、在戶外聚會"],
+  ["外牆用藍、白、紅、黑", "西拉雅傳統服飾的顏色"],
+  ["加上芒果黃、稻穗黃", "這裡的農產：玉井芒果和嘉南平原的稻子"],
+];
+const FIND_LABELS = ["房子戴草帽（草坡屋頂）", "入口的三個壺", "八葉花天窗", "地上的光影", "折板大屋頂", "水池瀑布", "水圳", "西拉雅顏色的牆", "瞭望台"];
+
 const $ = (s, r = document) => r.querySelector(s);
 const main = $("#main");
-const state = { done: { learn: false, find: false, color: false, route: false }, easy: false, sound: true };
+const state = { done: { route: false, clue: false, secret: false, find: false }, easy: false, sound: true };
+const GAMES = {
+  route: { name: "三大主軸配對", lv: "分類", ds: "把展板上的 24 個景點，放進「水圳之源、湖丘時光、雲水之間」", ph: "img/hero-canal.jpg", run: routeSetup },
+  clue: { name: "聽線索猜景點", lv: "推理", ds: "聽一句線索，從 4 張展板圖片中找出是哪個景點、屬於哪條路線", ph: "img/hill4.jpg", run: clueSetup },
+  secret: { name: "建築師的祕密", lv: "因果配對", ds: "建築為什麼這樣蓋？把設計和它的用意連起來", ph: "img/canal1.jpg", run: secretSetup },
+  find: { name: "實景找一找", lv: "實景照片", ds: "用老師拍的遊客中心照片，找出草帽屋頂、壺、天窗等設計", ph: "img/hero-hill.jpg", run: findHome },
+};
 
-// ---------- 聲音 ----------
+// ---------- 聲音與回饋 ----------
 let actx;
 function chime(ok) {
   if (!state.sound) return;
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    const notes = ok ? [523, 659, 784] : [392, 330];
-    notes.forEach((f, i) => {
-      const o = actx.createOscillator(), g = actx.createGain();
-      o.type = "sine"; o.frequency.value = f;
-      const t = actx.currentTime + i * 0.12;
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    (ok ? [523, 659, 784] : [392, 330]).forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + i * 0.12;
+      o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.22, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
       o.connect(g).connect(actx.destination); o.start(t); o.stop(t + 0.4);
     });
   } catch (e) {}
@@ -208,318 +220,378 @@ function speak(text) {
   if (!state.sound) return;
   try {
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
+    const u = new SpeechSynthesisUtterance(text.replace(/[「」（）]/g, " "));
     u.lang = "zh-TW"; u.rate = 0.85;
-    const v = speechSynthesis.getVoices().find(v => /zh[-_]TW/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^zh/i.test(v.lang));
+    const vs = speechSynthesis.getVoices();
+    const v = vs.find(v => /zh[-_]TW/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang));
     if (v) u.voice = v;
     speechSynthesis.speak(u);
   } catch (e) {}
 }
 let toastT;
-function toast(text, ok = true) {
+function toast(text, ok = true, say = text) {
   const t = $("#toast");
   t.textContent = text; t.className = "toast show" + (ok ? "" : " try");
-  clearTimeout(toastT); toastT = setTimeout(() => t.className = "toast", 1100);
-  chime(ok); speak(text);
+  clearTimeout(toastT); toastT = setTimeout(() => t.className = "toast", 1200);
+  chime(ok); speak(say);
 }
-function prompt(text, icon, spoken) {
+function promptEl(text, spoken, count) {
   const d = document.createElement("div"); d.className = "prompt";
-  d.innerHTML = `<button class="say" aria-label="再聽一次">▶</button>${icon ? `<span class="pic">${ICON[icon]}</span>` : ""}<span>${text}</span>`;
+  d.innerHTML = `<button class="say" aria-label="再聽一次">▶</button><span>${text}</span>${count ? `<span class="count">${count}</span>` : ""}`;
   d.querySelector(".say").onclick = () => speak(spoken || text);
   return d;
 }
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const hintAfter = () => state.easy ? 1 : 2;
-function renderStars() {
-  const n = Object.values(state.done).filter(Boolean).length;
-  $("#stars").textContent = "★".repeat(n) + "☆".repeat(4 - n);
-}
-function finish(key, name) {
-  state.done[key] = true; renderStars(); snapshot();
+const routeOf = k => ROUTES.find(r => r.k === k);
+function screen() { main.innerHTML = ""; const s = el("div", "screen"); main.append(s); return s; }
+function renderStars() { const n = Object.values(state.done).filter(Boolean).length; $("#stars").textContent = "★".repeat(n) + "☆".repeat(4 - n); }
+
+function finish(key, summary) {
+  state.done[key] = true; renderStars(); save();
+  const s = screen();
+  const c = el("div", "cert", `<p>完成「${GAMES[key].name}」</p><div class="big">★ 得到一顆星 ★</div><p>${summary}</p>`);
+  const bar = el("div", "bar");
   const all = Object.values(state.done).every(Boolean);
-  main.innerHTML = "";
-  const s = document.createElement("div"); s.className = "screen";
-  s.innerHTML = `<div class="cert">${ICON.flower}<p>完成「${name}」</p><div class="big">★ 得到一顆星 ★</div><div class="bar"></div></div>`;
-  const bar = s.querySelector(".bar");
-  const b1 = document.createElement("button"); b1.className = "next"; b1.textContent = all ? "看我的證書" : "回到首頁";
-  b1.onclick = all ? showCert : home;
-  const b2 = document.createElement("button"); b2.className = "next alt"; b2.textContent = "再玩一次";
-  b2.onclick = GAMES[key].run;
-  bar.append(b1, b2); main.append(s);
-  speak(`完成${name}，得到一顆星`); chime(true);
+  const b1 = el("button", "next", all ? "看我的證書" : "回到首頁"); b1.onclick = all ? showCert : home;
+  const b2 = el("button", "next alt", "再玩一次"); b2.onclick = GAMES[key].run;
+  bar.append(b1, b2); c.append(bar); s.append(c);
+  speak(`完成${GAMES[key].name}，得到一顆星`); chime(true);
+}
+
+// 選項設定畫面：rows = [{label, key, options:[[value,text]], value}]
+function setupScreen(title, say, rows, onStart) {
+  const s = screen();
+  s.append(promptEl(title, say));
+  const box = el("div", "setup");
+  const val = {};
+  rows.forEach(r => {
+    val[r.key] = r.value;
+    const row = el("div", "row"); row.append(el("span", "lb", r.label));
+    r.options.forEach(([v, t]) => {
+      const b = el("button", "chip", t); b.setAttribute("aria-pressed", v === r.value);
+      b.onclick = () => { val[r.key] = v; row.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+      row.append(b);
+    });
+    box.append(row);
+  });
+  const go = el("button", "next", "開始"); go.onclick = () => onStart(val);
+  box.append(go); s.append(box);
+  speak(say);
 }
 
 // ---------- 首頁 ----------
-const GAMES = {
-  learn: { name: "認識好朋友", icon: "sun", ds: "光・風・水", run: learn },
-  find: { name: "找一找", icon: "m1", ds: "在建築裡找答案", run: find },
-  color: { name: "顏色配對", icon: "m6", ds: "西拉雅的顏色", run: color },
-  route: { name: "路線配對", icon: "bike", ds: "三條旅遊路線", run: route },
-};
 function home() {
-  main.innerHTML = "";
-  const s = document.createElement("div"); s.className = "screen";
-  s.append(prompt("今天要玩哪一個？", null, "今天要玩哪一個？請點一下"));
-  const g = document.createElement("div"); g.className = "home";
+  const s = screen();
+  s.append(promptEl("選一個遊戲", "請選一個遊戲"));
+  const g = el("div", "home");
   for (const [k, v] of Object.entries(GAMES)) {
-    const b = document.createElement("button"); b.className = "gcard";
-    b.innerHTML = `${ICON[v.icon]}<span class="nm">${v.name}</span><span class="ds">${v.ds}</span><span class="st">${state.done[k] ? "★" : ""}</span>`;
+    const b = el("button", "gcard", `<div class="ph" style="background-image:url('${v.ph}')"><span class="lv">${v.lv}</span></div><div class="tx"><span class="nm">${v.name}<span class="st">${state.done[k] ? "★" : ""}</span></span><span class="ds">${v.ds}</span></div>`);
     b.onclick = v.run; g.append(b);
   }
   s.append(g);
-  if (Object.values(state.done).every(Boolean)) {
-    const bar = document.createElement("div"); bar.className = "bar";
-    const b = document.createElement("button"); b.className = "next"; b.textContent = "看我的證書"; b.onclick = showCert;
-    bar.append(b); s.append(bar);
-  }
-  main.append(s);
+  if (Object.values(state.done).every(Boolean)) { const bar = el("div", "bar"); const b = el("button", "next", "看我的證書"); b.onclick = showCert; bar.append(b); s.append(bar); }
 }
 
-// ---------- 遊戲一：認識好朋友 ----------
-function learn() {
-  const F = [
-    { k: "sun", nm: "光", ex: "太陽從花形的窗照進來，地上有花的影子", act: "雙手張開，像太陽" },
-    { k: "wind", nm: "風", ex: "大屋頂下面是空的，風跑來跑去，好涼快", act: "手在臉前扇一扇" },
-    { k: "water", nm: "水", ex: "水從二樓的水池流下來，變成瀑布", act: "手指由上往下晃" },
-  ];
-  const seen = new Set();
-  main.innerHTML = "";
-  const s = document.createElement("div"); s.className = "screen";
-  s.append(prompt("點一點，認識三個好朋友", null));
-  const g = document.createElement("div"); g.className = "friends";
-  F.forEach(f => {
-    const b = document.createElement("button"); b.className = "friend"; b.dataset.k = f.k;
-    b.innerHTML = `${ICON[f.k]}<span class="nm">${f.nm}</span><span class="ex">點我</span>`;
-    b.onclick = () => {
-      g.querySelectorAll(".friend").forEach(x => x.classList.remove("on"));
-      b.classList.add("on");
-      b.querySelector(".ex").innerHTML = `${f.ex}<br><b>動作：${f.act}</b>`;
-      speak(`${f.nm}。${f.ex}。一起做動作：${f.act}`);
-      seen.add(f.k);
-      if (seen.size === F.length && !s.querySelector(".bar")) {
-        const bar = document.createElement("div"); bar.className = "bar";
-        const n = document.createElement("button"); n.className = "next"; n.textContent = "我認識了！";
-        n.onclick = () => finish("learn", "認識好朋友");
-        bar.append(n); s.append(bar);
-      }
-    };
-    g.append(b);
-  });
-  s.append(g); main.append(s);
-  speak("點一點，認識三個好朋友：光、風、水");
+// ---------- 遊戲一：三大主軸配對 ----------
+function routeSetup() {
+  setupScreen("三大主軸配對", "把景點放進對的路線。先選擇玩法", [
+    { label: "卡片", key: "mode", value: "pic", options: [["pic", "圖片＋名字"], ["name", "只有名字"]] },
+    { label: "數量", key: "n", value: 12, options: [[6, "6 張"], [12, "12 張"], [24, "全部 24 張"]] },
+  ], v => routeGame(v));
 }
-
-// ---------- 遊戲二：找一找 ----------
-function find() {
-  const all = [
-    { k: "light", q: "找到「光的花」", say: "請找到光的花，太陽照進來的地方", icon: "flower" },
-    { k: "jar", q: "找到「三個壺」", say: "請找到三個壺", icon: "jar" },
-    { k: "grass", q: "找到「房子的草帽」", say: "請找到房子的草帽，草蓋在房子上面", icon: "m1" },
-    { k: "roof", q: "找到「風跑過的大屋頂」", say: "請找到風跑過的大屋頂", icon: "wind" },
-    { k: "water", q: "找到「瀑布和水圳」", say: "請找到瀑布和水圳", icon: "water" },
-  ];
-  const qs = shuffle(all).slice(0, state.easy ? 3 : 5);
-  let i = 0, wrong = 0, lock = false;
-  main.innerHTML = "";
-  const s = document.createElement("div"); s.className = "screen";
-  const p = document.createElement("div"); s.append(p);
-  const sc = document.createElement("div"); sc.className = "scene";
-  sc.append($("#tScene").content.cloneNode(true));
-  s.append(sc); main.append(s);
-  const svgEl = sc.querySelector("svg");
-  // 把共用圖示放進場景
-  const flowerTop = new DOMParser().parseFromString(ICON.flower, "image/svg+xml").documentElement;
-  flowerTop.setAttribute("x", 655); flowerTop.setAttribute("y", 108); flowerTop.setAttribute("width", 60); flowerTop.setAttribute("height", 60);
-  svgEl.querySelector("#sceneFlowerTop").append(document.importNode(flowerTop, true));
-  [[1035, 360, 60], [1090, 340, 80], [1150, 360, 60]].forEach(([x, y, w], n) => {
-    const j = new DOMParser().parseFromString(ICON.jar, "image/svg+xml").documentElement;
-    j.setAttribute("x", x - w / 2 + 10); j.setAttribute("y", y); j.setAttribute("width", w + 20); j.setAttribute("height", w + 40);
-    svgEl.querySelector("#sceneJars").append(document.importNode(j, true));
+function routeGame({ mode, n }) {
+  const per = n / 3;
+  const qs = shuffle(ROUTES.flatMap(r => shuffle(SPOTS.filter(x => x.r === r.k)).slice(0, per)));
+  let i = 0, wrong = 0, lock = false, miss = 0, card;
+  const s = screen();
+  const p = el("div"); s.append(p);
+  const r = el("div", "route");
+  const bins = el("div", "bins");
+  ROUTES.forEach(rt => {
+    const b = el("button", "bin", `<div class="ph" style="background-image:url('img/hero-${rt.k}.jpg')"></div><div class="tx"><span class="nm">${rt.nm}</span><span class="en">${rt.en}</span><span class="got"></span></div>`);
+    b.dataset.k = rt.k; b.onclick = () => drop(b); bins.append(b);
   });
-  function ask() {
-    wrong = 0; lock = false;
-    svgEl.querySelectorAll(".hs").forEach(h => h.classList.remove("hint", "found"));
-    p.replaceChildren(prompt(`${qs[i].q}（${i + 1}/${qs.length}）`, qs[i].icon, qs[i].say));
-    speak(qs[i].say);
-  }
-  svgEl.querySelectorAll(".hs").forEach(h => {
-    const go = () => {
-      if (lock) return;
-      const want = qs[i].k;
-      if (h.dataset.k === want) {
-        lock = true; h.classList.remove("hint"); h.classList.add("found");
-        toast("答對了！");
-        setTimeout(() => { i++; i < qs.length ? ask() : finish("find", "找一找"); }, 1500);
-      } else {
-        wrong++; toast("再試試看", false);
-        if (wrong >= hintAfter()) svgEl.querySelector(`.hs[data-k="${want}"]`).classList.add("hint");
-      }
-    };
-    h.addEventListener("click", go);
-    h.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
-  });
-  ask();
-}
-
-// ---------- 遊戲三：顏色配對 ----------
-function color() {
-  const C = [
-    { nm: "藍色", c: "#2f5aa8" }, { nm: "白色", c: "#ffffff" }, { nm: "紅色", c: "#e8452c" },
-    { nm: "黑色", c: "#1f2a2a" }, { nm: "芒果黃", c: "#f4b223" }, { nm: "稻穗黃", c: "#d9b44a" },
-  ];
-  const extra = [{ nm: "草綠", c: "#5aa05a" }, { nm: "天空藍", c: "#8cc6ee" }, { nm: "木頭色", c: "#b07a45" }, { nm: "粉紅", c: "#f2a7c3" }];
-  const qs = shuffle(C).slice(0, state.easy ? 4 : 6);
-  let i = 0, wrong = 0, lock = false;
-  main.innerHTML = "";
-  const s = document.createElement("div"); s.className = "screen";
-  const p = document.createElement("div"); s.append(p);
-  const box = document.createElement("div"); box.className = "colorq"; s.append(box);
-  main.append(s);
-  function ask() {
-    wrong = 0; lock = false;
-    const t = qs[i];
-    p.replaceChildren(prompt(`八葉花是什麼顏色？找一樣的（${i + 1}/${qs.length}）`, null, `八葉花是${t.nm}，請找到一樣的顏色`));
-    // 選項避開和答案太像的顏色
-    const pool = shuffle([...C, ...extra].filter(x => x.c !== t.c && !(t.nm.includes("黃") && x.nm.includes("黃"))));
-    const opts = shuffle([t, ...pool.slice(0, state.easy ? 1 : 2)]);
-    const flower = ICON.flower.replace(/#e8452c/g, t.c).replace(/<ellipse /g, '<ellipse stroke="#1f2a2a" stroke-width="1.5" ');
-    box.innerHTML = `<div class="target">${flower}</div><div class="opts"></div>`;
-    const o = box.querySelector(".opts");
-    opts.forEach(x => {
-      const b = document.createElement("button"); b.className = "sw"; b.style.background = x.c; b.setAttribute("aria-label", x.nm);
-      b.onclick = () => {
-        if (lock) return;
-        if (x.c === t.c) {
-          lock = true; b.classList.add("right"); toast(`${t.nm}，答對了！`);
-          setTimeout(() => { i++; i < qs.length ? ask() : finish("color", "顏色配對"); }, 1500);
-        } else {
-          wrong++; b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); toast("再試試看", false);
-          if (wrong >= hintAfter()) o.querySelectorAll(".sw").forEach(y => { if (y.getAttribute("aria-label") !== t.nm) y.style.opacity = .25; });
-        }
-      };
-      o.append(b);
-    });
-    speak(`八葉花是${t.nm}，請找到一樣的顏色`);
-  }
-  ask();
-}
-
-// ---------- 遊戲四：路線配對 ----------
-function route() {
-  const BINS = [
-    { k: "canal", nm: "水圳之源", icon: "bike" },
-    { k: "hill", nm: "湖丘時光", icon: "hills" },
-    { k: "cloud", nm: "雲水之間", icon: "clouds" },
-  ];
-  const ITEMS = [
-    { nm: "八田與一", icon: "statue", b: "canal" }, { nm: "落羽松", icon: "cypress", b: "canal" }, { nm: "菱角", icon: "caltrop", b: "canal" },
-    { nm: "化石", icon: "fossil", b: "hill" }, { nm: "芒果冰", icon: "ice", b: "hill" }, { nm: "吊橋", icon: "bridge", b: "hill" }, { nm: "走馬瀨的馬", icon: "horse", b: "hill" },
-    { nm: "曾文水庫", icon: "dam", b: "cloud" }, { nm: "玄空法寺", icon: "gate", b: "cloud" }, { nm: "龜丹溫泉", icon: "hotspring", b: "cloud" },
-  ];
-  let items = ITEMS;
-  if (state.easy) items = BINS.flatMap(b => ITEMS.filter(x => x.b === b.k).slice(0, 2));
-  const qs = shuffle(items);
-  let i = 0, wrong = 0, lock = false;
-  main.innerHTML = "";
-  const s = document.createElement("div"); s.className = "screen";
-  const p = document.createElement("div"); s.append(p);
-  const r = document.createElement("div"); r.className = "route";
-  const bins = document.createElement("div"); bins.className = "bins";
-  BINS.forEach(b => {
-    const el = document.createElement("button"); el.className = "bin"; el.dataset.k = b.k;
-    el.innerHTML = `${ICON[b.icon]}<span class="nm">${b.nm}</span><span class="got"></span>`;
-    el.onclick = () => drop(el);
-    bins.append(el);
-  });
-  const deck = document.createElement("div"); deck.className = "deck";
-  r.append(bins, deck); s.append(r);
-  const tip = document.createElement("div"); tip.className = "tip"; tip.textContent = "把卡片拖到對的路線，或直接點路線";
-  s.append(tip); main.append(s);
-  let card;
+  const deck = el("div", "deck");
+  r.append(bins, deck); s.append(r, el("div", "tip", "把卡片拖到對的路線，或直接點路線"));
   function ask() {
     wrong = 0; lock = false;
     bins.querySelectorAll(".bin").forEach(b => b.classList.remove("hint"));
     const it = qs[i];
-    p.replaceChildren(prompt(`「${it.nm}」在哪一條路線？（${i + 1}/${qs.length}）`, null, `${it.nm}，在哪一條路線？`));
-    card = document.createElement("div"); card.className = "item";
-    card.innerHTML = `${ICON[it.icon]}<span class="nm">${it.nm}</span>`;
-    deck.replaceChildren(card);
-    makeDrag(card);
-    speak(`${it.nm}，在哪一條路線？`);
+    p.replaceChildren(promptEl(`「${it.nm}」屬於哪一條路線？`, `${it.nm}，屬於哪一條路線？`, `${i + 1} / ${qs.length}`));
+    card = el("div", "item" + (mode === "name" ? " textonly" : ""), (mode === "pic" ? `<img src="${it.img}" alt="">` : "") + `<span class="nm">${it.nm}</span>`);
+    deck.replaceChildren(card); makeDrag(card);
+    speak(`${it.nm}，屬於哪一條路線？`);
   }
-  function drop(binEl) {
-    if (lock || !binEl) return;
+  function drop(b) {
+    if (lock || !b) return;
     const it = qs[i];
-    if (binEl.dataset.k === it.b) {
+    if (b.dataset.k === it.r) {
       lock = true;
-      binEl.querySelector(".got").insertAdjacentHTML("beforeend", ICON[it.icon]);
-      card.remove(); toast(`答對了！是${binEl.querySelector(".nm").textContent}`);
-      setTimeout(() => { i++; i < qs.length ? ask() : finish("route", "路線配對"); }, 1500);
+      b.querySelector(".got").append(Object.assign(document.createElement("img"), { src: it.img, alt: it.nm }));
+      card.remove(); toast(`答對了！${routeOf(it.r).nm}`);
+      setTimeout(() => { i++; i < qs.length ? ask() : finish("route", `${qs.length} 個景點，答錯 ${miss} 次`); }, 1400);
     } else {
-      wrong++; resetCard(); card.classList.remove("wrong"); void card.offsetWidth; card.classList.add("wrong");
-      toast("再試試看", false);
-      if (wrong >= hintAfter()) bins.querySelector(`.bin[data-k="${it.b}"]`).classList.add("hint");
+      wrong++; miss++; resetCard(); card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+      toast("再想想看", false);
+      if (wrong >= hintAfter()) bins.querySelector(`.bin[data-k="${it.r}"]`).classList.add("hint");
     }
   }
   function resetCard() { card.classList.remove("drag"); card.style.left = card.style.top = card.style.width = ""; }
-  function makeDrag(el) {
-    let ox, oy, moved = false;
-    el.addEventListener("pointerdown", e => {
+  function binAt(x, y) { return [...bins.children].find(b => { const q = b.getBoundingClientRect(); return x >= q.left && x <= q.right && y >= q.top && y <= q.bottom; }); }
+  function makeDrag(c) {
+    c.addEventListener("pointerdown", e => {
       if (lock) return;
-      const rc = el.getBoundingClientRect();
-      ox = e.clientX - rc.left; oy = e.clientY - rc.top; moved = false;
-      el.setPointerCapture(e.pointerId);
-      el.style.width = rc.width + "px";
-      el.onpointermove = ev => {
+      const q = c.getBoundingClientRect(), ox = e.clientX - q.left, oy = e.clientY - q.top; let moved = false;
+      c.setPointerCapture(e.pointerId);
+      c.onpointermove = ev => {
         if (!moved && Math.hypot(ev.clientX - e.clientX, ev.clientY - e.clientY) < 8) return;
-        moved = true; el.classList.add("drag");
-        el.style.left = ev.clientX - ox + "px"; el.style.top = ev.clientY - oy + "px";
-        const under = binAt(ev.clientX, ev.clientY);
-        bins.querySelectorAll(".bin").forEach(b => b.classList.toggle("over", b === under));
+        if (!moved) { c.style.width = q.width + "px"; c.classList.add("drag"); }
+        moved = true; c.style.left = ev.clientX - ox + "px"; c.style.top = ev.clientY - oy + "px";
+        const u = binAt(ev.clientX, ev.clientY); [...bins.children].forEach(b => b.classList.toggle("over", b === u));
       };
-      el.onpointerup = ev => {
-        el.onpointermove = el.onpointerup = null;
-        bins.querySelectorAll(".bin").forEach(b => b.classList.remove("over"));
-        if (!moved) { resetCard(); return; }
-        const under = binAt(ev.clientX, ev.clientY);
-        if (under) drop(under); else resetCard();
+      c.onpointerup = ev => {
+        c.onpointermove = c.onpointerup = null; [...bins.children].forEach(b => b.classList.remove("over"));
+        if (!moved) return;
+        const u = binAt(ev.clientX, ev.clientY); u ? drop(u) : resetCard();
       };
     });
   }
-  function binAt(x, y) {
-    return [...bins.querySelectorAll(".bin")].find(b => { const r = b.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; });
+  ask();
+}
+
+// ---------- 遊戲二：聽線索猜景點 ----------
+function clueSetup() {
+  setupScreen("聽線索猜景點", "聽線索，找出是哪個景點。先選擇玩法", [
+    { label: "選項", key: "names", value: true, options: [[true, "圖片＋名字"], [false, "只有圖片"]] },
+    { label: "題數", key: "n", value: 8, options: [[5, "5 題"], [8, "8 題"], [17, "全部 17 題"]] },
+    { label: "加碼", key: "route", value: false, options: [[false, "只猜景點"], [true, "再猜路線"]] },
+  ], v => clueGame(v));
+}
+function clueGame({ names, n, route }) {
+  const pool = SPOTS.filter(x => x.clue);
+  const qs = shuffle(pool).slice(0, n);
+  let i = 0, wrong = 0, lock = false, miss = 0;
+  const s = screen();
+  const p = el("div"), clue = el("div", "clue"), opts = el("div", "opts"), rev = el("div", "reveal");
+  s.append(p, clue, opts, rev);
+  function ask() {
+    wrong = 0; lock = false; rev.textContent = "";
+    const it = qs[i];
+    p.replaceChildren(promptEl("這是哪一個景點？", `線索：${it.clue}。這是哪一個景點？`, `${i + 1} / ${qs.length}`));
+    clue.textContent = `線索：${it.clue}`;
+    const others = shuffle(SPOTS.filter(x => x !== it)).slice(0, 3);
+    opts.replaceChildren(...shuffle([it, ...others]).map(o => {
+      const b = el("button", "opt", `<img src="${o.img}" alt="${names ? "" : o.nm}">${names ? `<span class="nm">${o.nm}</span>` : ""}`);
+      b.onclick = () => pick(b, o); return b;
+    }));
+    speak(`線索：${it.clue}。這是哪一個景點？`);
+  }
+  function pick(b, o) {
+    if (lock) return;
+    const it = qs[i];
+    if (o === it) {
+      lock = true; b.classList.add("right");
+      opts.querySelectorAll(".opt").forEach(x => x !== b && x.classList.add("dim"));
+      if (route) return askRoute(it);
+      rev.textContent = `${it.nm}　屬於「${routeOf(it.r).nm}」`;
+      toast("答對了！", true, `答對了，是${it.nm}，屬於${routeOf(it.r).nm}`);
+      setTimeout(nextQ, 2600);
+    } else {
+      wrong++; miss++; b.classList.add("dim"); toast("再想想看", false);
+      if (wrong >= hintAfter() + 1) opts.querySelectorAll(".opt").forEach(x => { if (!x.classList.contains("dim") && x !== b && Math.random() < .5 && x.querySelector("img").getAttribute("src") !== it.img) x.classList.add("dim"); });
+    }
+  }
+  function askRoute(it) {
+    rev.replaceChildren();
+    toast("答對了！", true, `答對了，是${it.nm}。它屬於哪一條路線？`);
+    const row = el("div", "bar");
+    ROUTES.forEach(rt => {
+      const b = el("button", "next ghost", rt.nm);
+      b.onclick = () => {
+        if (rt.k === it.r) { row.querySelectorAll("button").forEach(x => x.disabled = true); b.style.borderColor = "var(--ok)"; toast(`${rt.nm}，答對了！`); setTimeout(nextQ, 1800); }
+        else { miss++; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); toast("再想想看", false); }
+      };
+      row.append(b);
+    });
+    rev.append(row);
+  }
+  function nextQ() { i++; i < qs.length ? ask() : finish("clue", `${qs.length} 題，答錯 ${miss} 次`); }
+  ask();
+}
+
+// ---------- 遊戲三：建築師的祕密 ----------
+function secretSetup() {
+  setupScreen("建築師的祕密", "建築為什麼這樣蓋？把設計和用意連起來。先選擇數量", [
+    { label: "組數", key: "n", value: 5, options: [[3, "3 組"], [5, "5 組"], [8, "全部 8 組"]] },
+  ], v => secretGame(v));
+}
+function secretGame({ n }) {
+  const set = shuffle(SECRETS).slice(0, n).map((x, i) => ({ id: i, a: x[0], b: x[1] }));
+  let sel = null, matched = 0, miss = 0, wrong = 0;
+  const s = screen();
+  s.append(promptEl("先點左邊的設計，再點右邊的用意", "先點左邊的設計，再點右邊它的用意", `0 / ${n}`));
+  const pairs = el("div", "pairs"), L = el("div", "col"), R = el("div", "col");
+  pairs.append(L, R); s.append(pairs);
+  const count = () => s.querySelector(".count").textContent = `${matched} / ${n}`;
+  set.forEach(x => {
+    const b = el("button", "pc", `<span class="tag">?</span><span>${x.a}</span>`); b.dataset.id = x.id;
+    b.onclick = () => { if (b.classList.contains("done")) return; L.querySelectorAll(".pc").forEach(y => y.classList.remove("sel")); b.classList.add("sel"); sel = x; wrong = 0; R.querySelectorAll(".pc").forEach(y => y.classList.remove("hint")); speak(x.a); };
+    L.append(b);
+  });
+  shuffle(set).forEach(x => {
+    const b = el("button", "pc", `<span class="tag">?</span><span>${x.b}</span>`); b.dataset.id = x.id;
+    b.onclick = () => {
+      if (b.classList.contains("done")) return;
+      if (!sel) { toast("先點左邊的設計", false); return; }
+      if (sel.id === x.id) {
+        matched++; const no = matched;
+        [L.querySelector(`[data-id="${x.id}"]`), b].forEach(y => { y.classList.remove("sel", "hint"); y.classList.add("done"); y.querySelector(".tag").textContent = no; });
+        toast("配對成功！", true, `${sel.a}，${x.b}`); sel = null; count();
+        if (matched === n) setTimeout(() => finish("secret", `${n} 組設計，答錯 ${miss} 次`), 2600);
+      } else {
+        wrong++; miss++; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); toast("再想想看", false);
+        if (wrong >= hintAfter()) R.querySelector(`[data-id="${sel.id}"]`).classList.add("hint");
+      }
+    };
+    R.append(b);
+  });
+  speak("先點左邊的設計，再點右邊它的用意");
+}
+
+// ---------- 遊戲四：實景找一找（老師上傳照片） ----------
+// 照片與框選存在這台裝置的瀏覽器（IndexedDB）
+const DB = {
+  mem: [],
+  open() { return new Promise((res, rej) => { try { const r = indexedDB.open("siraya-find", 1); r.onupgradeneeded = () => r.result.createObjectStore("photos", { keyPath: "id" }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } }); },
+  async all() { try { const db = await this.open(); return await new Promise(res => { const q = db.transaction("photos").objectStore("photos").getAll(); q.onsuccess = () => res(q.result.sort((a, b) => a.id - b.id)); q.onerror = () => res(this.mem); }); } catch (e) { return this.mem; } },
+  async put(p) { const i = this.mem.findIndex(x => x.id === p.id); i < 0 ? this.mem.push(p) : this.mem[i] = p; try { const db = await this.open(); db.transaction("photos", "readwrite").objectStore("photos").put(p); } catch (e) {} },
+  async del(id) { this.mem = this.mem.filter(x => x.id !== id); try { const db = await this.open(); db.transaction("photos", "readwrite").objectStore("photos").delete(id); } catch (e) {} },
+};
+function shrink(file) {
+  return new Promise((res, rej) => {
+    const img = new Image(); const url = URL.createObjectURL(file);
+    img.onload = () => { const k = Math.min(1, 1600 / Math.max(img.width, img.height)); const c = document.createElement("canvas"); c.width = img.width * k; c.height = img.height * k; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg", .82)); };
+    img.onerror = rej; img.src = url;
+  });
+}
+async function findHome() {
+  const photos = await DB.all();
+  const targets = photos.flatMap(p => p.boxes.map(b => ({ p, b })));
+  const s = screen();
+  s.append(promptEl("實景找一找", "用遊客中心的照片，找出建築的設計"));
+  if (!targets.length) {
+    s.append(el("div", "empty", `<h2>還沒有照片</h2><ol><li>按「老師設定」，加入遊客中心的照片（事前勘查或網路上的官方照片）。</li><li>選一個題目，例如「入口的三個壺」，在照片上拖曳框出答案的位置。</li><li>回到這裡按「開始」，學生點照片找答案。</li></ol><p class="tip">照片只存在這台電腦的瀏覽器裡，不會上傳。</p>`));
+  } else {
+    s.append(el("div", "empty", `<h2>已設定 ${photos.length} 張照片、${targets.length} 個題目</h2><p class="tip">學生點照片上的位置找答案；答錯 ${hintAfter()} 次會閃爍提示。</p>`));
+  }
+  const bar = el("div", "bar");
+  if (targets.length) { const g = el("button", "next", "開始"); g.onclick = () => findGame(targets); bar.append(g); }
+  const t = el("button", "next alt", "老師設定"); t.onclick = () => findEdit(0); bar.append(t);
+  s.append(bar);
+}
+async function findEdit(idx) {
+  let photos = await DB.all();
+  const s = screen();
+  s.append(promptEl("老師設定：先選題目，再在照片上拖曳框出答案", "老師設定"));
+  const tools = el("div", "tools");
+  const up = el("label", "chip", `加入照片<input type="file" id="findUpload" accept="image/*" multiple hidden>`);
+  tools.append(up);
+  const thumbs = el("div", "thumbs"); tools.append(thumbs);
+  s.append(tools);
+  const labels = el("div", "tools"); s.append(labels);
+  const stage = el("div", "stage"); s.append(stage);
+  const bar = el("div", "bar"); const done = el("button", "next", "完成"); done.onclick = findHome; bar.append(done); s.append(bar);
+  let label = FIND_LABELS[0];
+  FIND_LABELS.forEach(t => { const b = el("button", "chip", t); b.setAttribute("aria-pressed", t === label); b.onclick = () => { label = t; labels.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === b)); custom.value = ""; }; labels.append(b); });
+  const custom = el("input"); custom.type = "text"; custom.id = "findCustom"; custom.placeholder = "自訂題目"; custom.oninput = () => { if (custom.value.trim()) { label = custom.value.trim(); labels.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", false)); } };
+  labels.append(custom);
+  $("#findUpload", up).onchange = async e => {
+    for (const f of e.target.files) { try { await DB.put({ id: Date.now() + Math.random(), src: await shrink(f), boxes: [] }); } catch (err) { toast("這張照片讀不到", false); } }
+    findEdit((await DB.all()).length - 1);
+  };
+  function drawThumbs() {
+    thumbs.replaceChildren(...photos.map((p, j) => { const b = el("button", "", `<img src="${p.src}" alt="照片 ${j + 1}">`); b.setAttribute("aria-pressed", j === idx); b.onclick = () => findEdit(j); return b; }));
+  }
+  drawThumbs();
+  const cur = photos[idx];
+  if (!cur) { stage.append(el("div", "empty", "<h2>按「加入照片」開始</h2>")); return; }
+  const ph = el("div", "photo edit", `<img src="${cur.src}" alt="">`); stage.append(ph);
+  const del = el("button", "chip", "刪除這張照片"); del.onclick = async () => { await DB.del(cur.id); findEdit(0); }; tools.append(del);
+  function drawBoxes() {
+    ph.querySelectorAll(".box").forEach(b => b.remove());
+    cur.boxes.forEach((b, j) => {
+      const d = el("div", "box", `<span>${b.label}　✕</span>`); Object.assign(d.style, { left: b.x + "%", top: b.y + "%", width: b.w + "%", height: b.h + "%" });
+      d.querySelector("span").onpointerdown = ev => { ev.stopPropagation(); cur.boxes.splice(j, 1); DB.put(cur); drawBoxes(); };
+      ph.append(d);
+    });
+  }
+  drawBoxes();
+  ph.onpointerdown = e => {
+    const q = ph.getBoundingClientRect(); const x0 = (e.clientX - q.left) / q.width * 100, y0 = (e.clientY - q.top) / q.height * 100;
+    const d = el("div", "box drawing"); ph.append(d); ph.setPointerCapture(e.pointerId);
+    let r = { x: x0, y: y0, w: 0, h: 0 };
+    ph.onpointermove = ev => {
+      const x1 = Math.max(0, Math.min(100, (ev.clientX - q.left) / q.width * 100)), y1 = Math.max(0, Math.min(100, (ev.clientY - q.top) / q.height * 100));
+      r = { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) };
+      Object.assign(d.style, { left: r.x + "%", top: r.y + "%", width: r.w + "%", height: r.h + "%" });
+    };
+    ph.onpointerup = () => {
+      ph.onpointermove = ph.onpointerup = null; d.remove();
+      if (r.w < 2 || r.h < 2) return;
+      cur.boxes.push({ ...r, label }); DB.put(cur); drawBoxes();
+    };
+  };
+}
+function findGame(all) {
+  const qs = shuffle(all);
+  let i = 0, wrong = 0, lock = false, miss = 0;
+  const s = screen();
+  const p = el("div"), stage = el("div", "stage"); s.append(p, stage);
+  function ask() {
+    wrong = 0; lock = false;
+    const { p: ph, b } = qs[i];
+    p.replaceChildren(promptEl(`找到「${b.label}」`, `請在照片上找到${b.label}`, `${i + 1} / ${qs.length}`));
+    const wrap = el("div", "photo", `<img src="${ph.src}" alt="遊客中心照片">`);
+    const box = el("div", "box"); Object.assign(box.style, { left: b.x + "%", top: b.y + "%", width: b.w + "%", height: b.h + "%" });
+    wrap.append(box); stage.replaceChildren(wrap);
+    wrap.onclick = e => {
+      if (lock) return;
+      const q = wrap.getBoundingClientRect(), x = (e.clientX - q.left) / q.width * 100, y = (e.clientY - q.top) / q.height * 100, pad = 3;
+      if (x >= b.x - pad && x <= b.x + b.w + pad && y >= b.y - pad && y <= b.y + b.h + pad) {
+        lock = true; box.classList.remove("hint"); box.classList.add("found"); toast("找到了！");
+        setTimeout(() => { i++; i < qs.length ? ask() : finish("find", `找到 ${qs.length} 個設計，答錯 ${miss} 次`); }, 1500);
+      } else { wrong++; miss++; toast("再找找看", false); if (wrong >= hintAfter()) box.classList.add("hint"); }
+    };
+    speak(`請在照片上找到${b.label}`);
   }
   ask();
 }
 
 // ---------- 證書 ----------
 function showCert() {
-  main.innerHTML = "";
-  const s = document.createElement("div"); s.className = "screen";
-  s.innerHTML = `<div class="cert">${ICON.flower}<h2>西拉雅建築師</h2><p>完成 4 個建築探險遊戲！</p><p>我認識了 光、風、水 三個好朋友</p><div class="big">★★★★</div><div class="bar"></div></div>`;
-  const b = document.createElement("button"); b.className = "next alt"; b.textContent = "重新開始";
-  b.onclick = () => { for (const k in state.done) state.done[k] = false; renderStars(); snapshot(); home(); };
-  s.querySelector(".bar").append(b); main.append(s);
+  const s = screen();
+  const c = el("div", "cert", `<h2>西拉雅建築師</h2><p>完成 4 個建築探險遊戲！</p><p>我認識了水圳之源、湖丘時光、雲水之間，也知道建築師的祕密</p><div class="big">★★★★</div>`);
+  const bar = el("div", "bar"); const b = el("button", "next alt", "重新開始");
+  b.onclick = () => { for (const k in state.done) state.done[k] = false; renderStars(); save(); home(); };
+  bar.append(b); c.append(bar); s.append(c);
   speak("恭喜你，成為西拉雅建築師！"); chime(true);
 }
 
-// ---------- 工具列 ----------
+// ---------- 工具列與狀態 ----------
 $("#bHome").onclick = home;
-$("#bEasy").onclick = e => { state.easy = !state.easy; e.currentTarget.setAttribute("aria-pressed", state.easy); snapshot(); };
-$("#bSound").onclick = e => { state.sound = !state.sound; e.currentTarget.setAttribute("aria-pressed", state.sound); e.currentTarget.textContent = state.sound ? "聲音 開" : "聲音 關"; if (!state.sound) try { speechSynthesis.cancel(); } catch (_) {} snapshot(); };
-$("#bFull").onclick = async () => {
-  try { document.fullscreenElement ? await document.exitFullscreen() : await document.documentElement.requestFullscreen(); } catch (e) { toast("這個畫面不能全螢幕", false); }
-};
-try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => {}; } catch (e) {}
-
-function snapshot() { try { localStorage.setItem("siraya-game", JSON.stringify({ done: state.done, easy: state.easy, sound: state.sound })); } catch (e) {} }
+$("#bEasy").onclick = e => { state.easy = !state.easy; e.currentTarget.setAttribute("aria-pressed", state.easy); save(); };
+$("#bSound").onclick = e => { state.sound = !state.sound; syncSound(); if (!state.sound) try { speechSynthesis.cancel(); } catch (_) {} save(); };
+$("#bFull").onclick = async () => { try { document.fullscreenElement ? await document.exitFullscreen() : await document.documentElement.requestFullscreen(); } catch (e) { toast("這個畫面不能全螢幕", false); } };
+function syncSound() { $("#bSound").setAttribute("aria-pressed", state.sound); $("#bSound").textContent = state.sound ? "聲音 開" : "聲音 關"; }
+try { speechSynthesis.getVoices(); } catch (e) {}
+function save() { try { localStorage.setItem("siraya-game2", JSON.stringify({ done: state.done, easy: state.easy, sound: state.sound })); } catch (e) {} }
 function start(data) {
   let saved = data && data.done ? data : null;
-  if (!saved) try { saved = JSON.parse(localStorage.getItem("siraya-game") || "null"); } catch (e) {}
+  if (!saved) try { saved = JSON.parse(localStorage.getItem("siraya-game2") || "null"); } catch (e) {}
   if (saved) { Object.assign(state.done, saved.done || {}); state.easy = !!saved.easy; state.sound = saved.sound !== false; }
-  $("#bEasy").setAttribute("aria-pressed", state.easy);
-  $("#bSound").setAttribute("aria-pressed", state.sound); $("#bSound").textContent = state.sound ? "聲音 開" : "聲音 關";
-  renderStars(); home();
+  $("#bEasy").setAttribute("aria-pressed", state.easy); syncSound(); renderStars(); home();
 }
 window.claude?.hot?.snapshot?.(() => ({ done: state.done, easy: state.easy, sound: state.sound }));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
