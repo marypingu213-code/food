@@ -48,13 +48,14 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .home { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: clamp(12px, 1.8vw, 28px); align-content: center; }
 .gcard { background: var(--card); border: 0; border-radius: 24px; overflow: hidden; box-shadow: 0 6px 0 rgba(31,74,62,.18); display: flex; flex-direction: column; text-align: left; padding: 0; transition: transform .15s; }
 .gcard:active { transform: scale(.98); }
-.gcard .ph { aspect-ratio: 16 / 10; background: var(--paper) center / cover no-repeat; position: relative; }
+.gcard .ph { aspect-ratio: 5 / 2; background: var(--paper) center / cover no-repeat; position: relative; }
 .gcard .lv { position: absolute; left: 12px; top: 12px; background: var(--band); color: #fff; border-radius: 999px; padding: .15em .7em; font-size: clamp(12px, 1vw, 20px); font-weight: 700; }
 .gcard .tx { padding: clamp(10px, 1.2vw, 22px); display: flex; flex-direction: column; gap: .2em; }
 .gcard .nm { font-family: var(--display); font-size: clamp(22px, 2.3vw, 46px); display: flex; justify-content: space-between; align-items: baseline; gap: .3em; }
 .gcard .st { display: inline-flex; }
 .gcard .ds { font-size: clamp(14px, 1.15vw, 22px); color: var(--muted); line-height: 1.45; }
 
+@media (min-width: 900px) { .home { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* 選項設定 */
 .setup { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: clamp(14px, 3vh, 40px); }
 .setup .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
@@ -121,6 +122,25 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .col.photos .pc .tag { position: absolute; right: 8px; top: 8px; }
 .sq { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); }
 @media (max-width: 700px) { .sq { grid-template-columns: 1fr; } }
+/* 套色印章 */
+.stampwrap { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(14px, 3vw, 56px); align-items: center; }
+.pcard { position: relative; width: 100%; max-height: calc(100vh - 300px); background: #fbfaf6; border-radius: 10px; box-shadow: 0 10px 28px rgba(31,42,42,.18), 0 0 0 1px var(--line); margin: 0 auto; }
+.pcard .layer { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .5s; mix-blend-mode: multiply; pointer-events: none; }
+.pcard .layer.on { opacity: 1; }
+.pcard.thump { animation: thump .35s; }
+@keyframes thump { 30% { transform: scale(.97); } }
+.stamps { display: flex; flex-direction: column; gap: clamp(10px, 2vh, 24px); }
+.stampbtn { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; align-items: center; gap: 4px 16px; background: var(--card); border: 4px solid var(--line); border-radius: 20px; padding: 10px 14px; text-align: left; }
+.stampbtn .handle { grid-row: span 2; width: clamp(80px, 8vw, 150px); aspect-ratio: 4 / 3; background: #e3262f; border-radius: 14px 14px 8px 8px; box-shadow: inset 0 -8px 0 rgba(0,0,0,.18); display: grid; place-items: center; transition: transform .15s; }
+.stampbtn .no { background: #fff; color: var(--ink); border-radius: 50%; width: 1.6em; height: 1.6em; display: grid; place-items: center; font-weight: 900; font-size: clamp(18px, 1.8vw, 34px); }
+.stampbtn .pad { height: clamp(56px, 10vh, 130px); background: #e9ecea; border-radius: 8px; display: flex; justify-content: center; overflow: hidden; }
+.stampbtn .pad img { height: 100%; width: auto; }
+.stampbtn .ink { font-size: clamp(16px, 1.6vw, 30px); font-weight: 900; }
+.stampbtn.press .handle { animation: press .35s; }
+@keyframes press { 40% { transform: translateY(14px) scale(.96); } }
+.stampbtn.used { opacity: .45; }
+.stampbtn.hint { border-color: var(--red); animation: pulseb 1s ease-in-out infinite; }
+@media (max-width: 700px) { .stampwrap { grid-template-columns: 1fr; } }
 /* 找一找（實景照片） */
 .stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; }
 .photo { position: relative; max-width: 100%; max-height: 100%; touch-action: none; }
@@ -257,12 +277,13 @@ const FIND_LABELS = ["入口的壺（圓弧形房間）", "折板大屋頂", "�
 
 const $ = (s, r = document) => r.querySelector(s);
 const main = $("#main");
-const state = { done: { route: false, clue: false, secret: false, find: false, tabe: false }, easy: false, sound: true };
+const state = { done: { route: false, clue: false, secret: false, find: false, tabe: false, stamp: false }, easy: false, sound: true };
 const GAMES = {
   route: { name: "三大主軸配對", lv: "分類", ds: "把展板上的 24 個景點，放進「水圳之源、湖丘時光、雲水之間」", ph: "img/hero-canal.jpg", run: routeSetup },
   clue: { name: "聽線索猜景點", lv: "推理", ds: "聽一句線索，從 4 張展板圖片中找出是哪個景點、屬於哪條路線", ph: "img/hill4.jpg", run: clueSetup },
   secret: { name: "建築師的祕密", lv: "因果配對", ds: "看遊客中心的照片：建築為什麼這樣蓋？找出設計的用意", ph: "img/s2.jpg", run: secretSetup },
   tabe: { name: "Tabe! Tabe! 仙境西拉雅", lv: "公共藝術", ds: "草地上的五隻黑白動物：牠們是誰？代表西拉雅的什麼？", ph: "img/tabe7.jpg", run: tabeSetup },
+  stamp: { name: "套色印章明信片", lv: "蓋章", ds: "照順序蓋 1、2、3 號印章，三種顏色疊起來變成一張明信片", ph: "img/stamp/erliao.jpg", run: stampSetup },
   find: { name: "實景找一找", lv: "實景照片", ds: "在遊客中心的照片上，點出大屋頂、天窗、瀑布等設計", ph: "img/s5.jpg", run: findHome },
 };
 
@@ -636,6 +657,95 @@ function photoQuiz(qs, k, key) {
   ask();
 }
 
+// ---------- 遊戲六：套色印章明信片（仿館內三色疊印章活動） ----------
+const STAMP_INKS = [
+  { no: 1, nm: "黃色", c: "#f2c230" },
+  { no: 2, nm: "橘色", c: "#f08054" },
+  { no: 3, nm: "藍色", c: "#347acc" },
+];
+const STAMP_CARDS = [
+  { k: "erliao", ratio: "900 / 512", layers: ["img/stamp/erliao-y.png", "img/stamp/erliao-r.png", "img/stamp/erliao-b.png"], spot: "二寮觀日平臺", route: "hill", fact: "二寮是全台灣海拔最低、可以看雲海和日出的地方", others: ["曾文水庫", "八田與一紀念園區", "虎頭埤水庫"] },
+  { k: "zengwen", ratio: "900 / 527", layers: ["img/stamp/zengwen-y.png", "img/stamp/zengwen-r.png", "img/stamp/zengwen-b.png"], spot: "曾文水庫", route: "cloud", fact: "曾文水庫是台灣最大的水庫", others: ["二寮觀日平臺", "八田與一紀念園區", "玄空法寺"] },
+  { k: "hatta", ratio: "900 / 520", layers: ["img/stamp/hatta-y.png", "img/stamp/hatta-r.png", "img/stamp/hatta-b.png"], spot: "八田與一紀念園區", route: "canal", fact: "八田與一帶大家蓋了烏山頭水庫和嘉南大圳", others: ["二寮觀日平臺", "曾文水庫", "新化老街"] },
+];
+function stampSetup() {
+  setupScreen("套色印章明信片", "用三個印章，蓋出一張明信片。先選擇玩法", [
+    { label: "明信片", key: "which", value: "all", options: [["all", "三張都蓋"], ["erliao", "第 1 張"], ["zengwen", "第 2 張"], ["hatta", "第 3 張"]] },
+    { label: "蓋章", key: "order", value: true, options: [[true, "照順序 1→2→3"], [false, "自由蓋"]] },
+  ], ({ which, order }) => stampGame(which === "all" ? STAMP_CARDS : STAMP_CARDS.filter(c => c.k === which), order));
+}
+function stampGame(cards, order) {
+  let ci = 0, miss = 0;
+  const s = screen();
+  const p = el("div"), body = el("div", "stampwrap"), below = el("div", "reveal");
+  s.append(p, body, below);
+  function stampSound() {
+    if (!state.sound) return;
+    try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime; o.type = "triangle"; o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(60, t + .18); g.gain.setValueAtTime(.4, t); g.gain.exponentialRampToValueAtTime(.001, t + .25); o.connect(g).connect(actx.destination); o.start(t); o.stop(t + .3); } catch (e) {}
+  }
+  function play() {
+    const c = cards[ci];
+    let next = 0; const done = new Set();
+    const say = order ? "先蓋 1 號黃色印章" : "三個印章都蓋上去，看看會變成什麼";
+    p.replaceChildren(promptEl(order ? "照順序蓋印章：1 → 2 → 3" : "把三個印章都蓋上去", say, `${ci + 1} / ${cards.length}`));
+    below.replaceChildren();
+    const paper = el("div", "pcard"); paper.style.aspectRatio = c.ratio;
+    const layers = c.layers.map(src => { const im = el("img", "layer"); im.src = src; im.alt = ""; paper.append(im); return im; });
+    const stamps = el("div", "stamps");
+    STAMP_INKS.forEach((ink, j) => {
+      const b = el("button", "stampbtn", `<span class="handle"><span class="no">${ink.no}</span></span><span class="pad"><img src="${c.layers[j]}" alt=""></span><span class="ink" style="color:${ink.c}">${ink.no} 號・${ink.nm}</span>`);
+      b.onclick = () => {
+        if (done.has(j)) { toast("這個已經蓋過了", false); return; }
+        if (order && j !== next) { miss++; toast(`先蓋 ${next + 1} 號`, false, `先蓋 ${next + 1} 號${STAMP_INKS[next].nm}印章`); stamps.children[next].classList.add("hint"); return; }
+        done.add(j); next++;
+        b.classList.add("used", "press"); stamps.querySelectorAll(".stampbtn").forEach(x => x.classList.remove("hint"));
+        paper.classList.remove("thump"); void paper.offsetWidth; paper.classList.add("thump");
+        layers[j].classList.add("on"); stampSound();
+        if (done.size === 3) setTimeout(reveal, 1200);
+        else speak(order ? `蓋好了！再蓋 ${next + 1} 號${STAMP_INKS[next].nm}` : "蓋好了！");
+      };
+      stamps.append(b);
+    });
+    body.replaceChildren(paper, stamps);
+    speak(say);
+  }
+  function reveal() {
+    const c = cards[ci];
+    toast("明信片完成了！", true, "明信片完成了！這是哪個景點？");
+    p.replaceChildren(promptEl("這是哪個景點？", "這是哪個景點？", `${ci + 1} / ${cards.length}`));
+    const row = el("div", "bar");
+    shuffle([c.spot, ...shuffle(c.others).slice(0, 2)]).forEach(o => {
+      const b = el("button", "next ghost", o);
+      b.onclick = () => {
+        if (o !== c.spot) { miss++; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); toast("再想想看", false); return; }
+        row.querySelectorAll("button").forEach(x => x.disabled = true); b.style.borderColor = "var(--ok)";
+        toast("答對了！", true, `答對了，是${c.spot}。它屬於哪一條路線？`);
+        setTimeout(askRoute, 1500);
+      };
+      row.append(b);
+    });
+    below.replaceChildren(row);
+  }
+  function askRoute() {
+    const c = cards[ci];
+    p.replaceChildren(promptEl(`「${c.spot}」屬於哪一條路線？`, `${c.spot}屬於哪一條路線？`, `${ci + 1} / ${cards.length}`));
+    const row = el("div", "bar");
+    ROUTES.forEach(rt => {
+      const b = el("button", "next ghost", rt.nm);
+      b.onclick = () => {
+        if (rt.k !== c.route) { miss++; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); toast("再想想看", false); return; }
+        row.querySelectorAll("button").forEach(x => x.disabled = true); b.style.borderColor = "var(--ok)";
+        below.append(el("div", "fact", `小知識：${c.fact}`));
+        toast(`${rt.nm}，答對了！`, true, `答對了，是${rt.nm}。${c.fact}`);
+        setTimeout(() => { ci++; ci < cards.length ? play() : finish("stamp", `蓋好 ${cards.length} 張明信片，答錯 ${miss} 次`); }, 4200);
+      };
+      row.append(b);
+    });
+    below.replaceChildren(row);
+  }
+  play();
+}
+
 // ---------- 遊戲四：實景找一找（老師上傳照片） ----------
 // 照片與框選存在這台裝置的瀏覽器（IndexedDB）
 const DB = {
@@ -748,7 +858,7 @@ function findGame(qs) {
 // ---------- 證書 ----------
 function showCert() {
   const s = screen();
-  const c = el("div", "cert", `<h2>寶石鑑定「加」</h2><p>鑑定完 ${Object.keys(state.done).length} 種西拉雅寶石，今天的知識又「加」了好多！</p><p>我認識了水圳之源、湖丘時光、雲水之間，知道建築師的祕密，也認識了 Tabe! Tabe! 的五隻動物</p><div class="big">${Object.keys(state.done).map(() => gem()).join("")}</div>`);
+  const c = el("div", "cert", `<h2>寶石鑑定「加」</h2><p>鑑定完 ${Object.keys(state.done).length} 種西拉雅寶石，今天的知識又「加」了好多！</p><p>我認識了水圳之源、湖丘時光、雲水之間，知道建築師的祕密，認識了 Tabe! Tabe! 的五隻動物，還完成了自己的套色明信片</p><div class="big">${Object.keys(state.done).map(() => gem()).join("")}</div>`);
   const bar = el("div", "bar"); const b = el("button", "next alt", "重新開始");
   b.onclick = () => { for (const k in state.done) state.done[k] = false; renderStars(); save(); home(); };
   bar.append(b); c.append(bar); s.append(c);
