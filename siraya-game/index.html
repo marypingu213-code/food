@@ -44,6 +44,10 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .bar { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
 .tip { font-size: clamp(14px, 1.3vw, 24px); color: var(--muted); text-align: center; }
 
+/* 依剩下空間自動等比縮放：外框量空間，內容用 --r（寬/高）決定大小 */
+.fitbox { container-type: size; min-width: 0; min-height: 0; display: grid; place-items: center; }
+.fitted { width: min(100cqw, calc(100cqh * (var(--r)))); aspect-ratio: var(--r); }
+
 /* 首頁 */
 .home { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: clamp(12px, 1.8vw, 28px); align-content: center; }
 .gcard { background: var(--card); border: 0; border-radius: 24px; overflow: hidden; box-shadow: 0 6px 0 rgba(31,74,62,.18); display: flex; flex-direction: column; text-align: left; padding: 0; transition: transform .15s; }
@@ -114,10 +118,13 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .pc.done .tag { background: var(--ok); color: #fff; }
 .pc.hint { border-color: var(--red); animation: pulseb 1s ease-in-out infinite; }
 
-.sq { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(12px, 2.4vw, 44px); align-items: center; }
-.sqfig { margin: 0; display: flex; flex-direction: column; gap: .4em; min-height: 0; }
-.sqfig .ph { position: relative; }
-.sqfig img { width: 100%; max-height: calc(100vh - 300px); object-fit: contain; border-radius: 18px; background: var(--card); display: block; }
+.sq { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(12px, 2.4vw, 44px); align-items: stretch; }
+.sq .sqopts { align-self: center; }
+.sqfig { margin: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: .4em; min-height: 0; height: 100%; }
+.sqfig .ph { min-height: 0; }
+.sqfig .fitted { position: relative; }
+.sqfig img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sqfig img { border-radius: 18px; }
 .sqfig .kind { position: absolute; left: 12px; top: 12px; background: var(--band); color: #fff; border-radius: 999px; padding: .1em .7em; font-size: clamp(12px, 1vw, 20px); font-weight: 700; }
 .sqfig figcaption { font-family: var(--display); font-size: clamp(22px, 2.6vw, 52px); text-align: center; }
 .sqopts { display: flex; flex-direction: column; gap: clamp(8px, 1.6vh, 20px); }
@@ -132,8 +139,9 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .sq { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); }
 @media (max-width: 700px) { .sq { grid-template-columns: 1fr; } }
 /* 套色印章 */
-.stampwrap { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(14px, 3vw, 56px); align-items: center; }
-.pcard { position: relative; width: 100%; max-height: calc(100vh - 300px); background: #fbfaf6; border-radius: 10px; box-shadow: 0 10px 28px rgba(31,42,42,.18), 0 0 0 1px var(--line); margin: 0 auto; }
+.stampwrap { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(14px, 3vw, 56px); align-items: stretch; }
+.stampwrap .stamps { align-self: center; }
+.pcard { position: relative; background: #fbfaf6; border-radius: 10px; box-shadow: 0 10px 28px rgba(31,42,42,.18), 0 0 0 1px var(--line); margin: 0 auto; }
 .pcard .layer { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .5s; mix-blend-mode: multiply; pointer-events: none; }
 .pcard .layer.on { opacity: 1; }
 .pcard .layer.seal { inset: auto 2% 2% auto; width: 27%; height: auto; transform: rotate(-8deg); }
@@ -152,10 +160,9 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .stampbtn.hint { border-color: var(--red); animation: pulseb 1s ease-in-out infinite; }
 @media (max-width: 700px) { .stampwrap { grid-template-columns: 1fr; } }
 /* 找一找（實景照片） */
-.stage { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; }
-.photo { position: relative; max-width: 100%; max-height: 100%; touch-action: none; }
-.photo img { display: block; max-width: 100%; max-height: calc(100vh - 260px); border-radius: 16px; pointer-events: none; }
-.edit img { max-height: calc(100vh - 360px); }
+.stage { flex: 1; }
+.photo { position: relative; touch-action: none; }
+.photo img { display: block; width: 100%; height: 100%; border-radius: 16px; pointer-events: none; }
 .box { position: absolute; border: 5px dashed transparent; border-radius: 12px; }
 .edit .box { border-color: var(--mango); background: rgba(244,178,35,.18); }
 .edit .box span { position: absolute; left: 0; top: 0; transform: translateY(-110%); background: var(--mango); padding: 2px 10px; border-radius: 8px; font-weight: 700; font-size: clamp(13px, 1.1vw, 20px); white-space: nowrap; }
@@ -182,6 +189,18 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .cert p { font-size: clamp(18px, 2vw, 40px); margin: 0; }
 .cert .big { font-size: clamp(36px, 4.5vw, 90px); color: var(--band); display: flex; align-items: center; gap: .2em; flex-wrap: wrap; justify-content: center; font-family: var(--display); }
 @media (max-width: 700px) { .opts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pairs { grid-template-columns: 1fr; } }
+@media (orientation: portrait) {
+  .sq, .stampwrap { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
+  .stamps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stampbtn .pad { height: clamp(40px, 6vh, 90px); }
+  .opts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .opt img { aspect-ratio: 16 / 10; }
+  .setup { grid-template-columns: 1fr; align-content: center; }
+  .setup .intro { display: grid; grid-template-columns: 38% 1fr; gap: 0 16px; align-items: center; }
+  .setup .intro .ph { grid-row: span 2; aspect-ratio: 4 / 3; }
+  .home { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bins .bin .ph { height: clamp(60px, 10vh, 160px); }
+}
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 
@@ -339,6 +358,23 @@ const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls)
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const hintAfter = () => state.easy ? 1 : 2;
 const routeOf = k => ROUTES.find(r => r.k === k);
+function fitPhoto(box) {
+  const img = box.querySelector("img"), set = () => img.naturalWidth && box.style.setProperty("--r", `${img.naturalWidth} / ${img.naturalHeight}`);
+  box.style.setProperty("--r", "4 / 3"); img.complete ? set() : img.addEventListener("load", set);
+}
+// 保險：版面仍放不下時，把整個畫面等比縮小，避免需要捲動才能按到答案
+let fitRaf;
+function fitScreen() {
+  cancelAnimationFrame(fitRaf);
+  fitRaf = requestAnimationFrame(() => {
+    const s = main.querySelector(".screen"); if (!s) return;
+    s.style.zoom = "";
+    const over = Math.max(s.scrollHeight / s.clientHeight, s.scrollWidth / s.clientWidth);
+    if (over > 1.01) s.style.zoom = Math.max(0.6, 1 / over).toFixed(3);
+  });
+}
+new MutationObserver(fitScreen).observe(main, { childList: true, subtree: true });
+addEventListener("resize", fitScreen);
 function screen() { main.innerHTML = ""; const s = el("div", "screen"); main.append(s); return s; }
 const gem = (on = true) => `<svg class="gem${on ? "" : " off"}" viewBox="0 0 100 80" aria-hidden="true"><use href="#gemShape"/></svg>`;
 function renderStars() { const v = Object.values(state.done), n = v.filter(Boolean).length; $("#stars").textContent = "★".repeat(n) + "☆".repeat(v.length - n); $("#stars").setAttribute("aria-label", `完成 ${n} / ${v.length}`); }
@@ -538,7 +574,7 @@ function secretQuiz({ n, k }) {
     wrong = 0; lock = false;
     const it = qs[i];
     p.replaceChildren(promptEl(`建築師為什麼要這樣設計？`, `${it.a}。建築師為什麼要這樣設計？`, `${i + 1} / ${qs.length}`));
-    const fig = el("figure", "sqfig", `<div class="ph"><img src="${it.img}" alt="${it.a}"><span class="kind">${it.kind}</span></div><figcaption>${it.a}</figcaption>`);
+    const fig = el("figure", "sqfig", `<div class="ph fitbox"><div class="fitted"><img src="${it.img}" alt="${it.a}"><span class="kind">${it.kind}</span></div></div><figcaption>${it.a}</figcaption>`); fitPhoto(fig.querySelector(".fitted"));
     const col = el("div", "sqopts");
     const opts = shuffle([it, ...shuffle(SECRETS.filter(x => x !== it)).slice(0, k - 1)]);
     opts.forEach(o => {
@@ -645,7 +681,7 @@ function photoQuiz(qs, k, key) {
     wrong = 0; lock = false;
     const it = qs[i];
     p.replaceChildren(promptEl(it.q, it.q, `${i + 1} / ${qs.length}`));
-    const fig = el("figure", "sqfig", `<div class="ph"><img src="${it.img}" alt=""></div>`);
+    const fig = el("figure", "sqfig", `<div class="ph fitbox"><div class="fitted"><img src="${it.img}" alt=""></div></div>`); fitPhoto(fig.querySelector(".fitted"));
     const col = el("div", "sqopts");
     const opts = shuffle([it.ans, ...shuffle(it.opts.filter(o => o !== it.ans)).slice(0, k - 1)]);
     opts.forEach(o => {
@@ -709,7 +745,8 @@ function stampGame(cards, order, withSeal) {
     const say = order ? `先蓋 1 號${inks[0].nm}印章` : `${total} 個印章都蓋上去，看看會變成什麼`;
     p.replaceChildren(promptEl(order ? `照順序蓋印章：${seq}` : `把 ${total} 個印章都蓋上去`, say, `${ci + 1} / ${cards.length}`));
     below.replaceChildren();
-    const paper = el("div", "pcard"); paper.style.aspectRatio = c.ratio;
+    const paper = el("div", "pcard fitted"); paper.style.setProperty("--r", c.ratio);
+    const pbox = el("div", "fitbox"); pbox.append(paper);
     const layers = inks.map(ink => { const im = el("img", ink === inks[3] ? "layer seal" : "layer"); im.src = ink.src; im.alt = ""; paper.append(im); return im; });
     const stamps = el("div", "stamps");
     inks.forEach((ink, j) => {
@@ -726,7 +763,7 @@ function stampGame(cards, order, withSeal) {
       };
       stamps.append(b);
     });
-    body.replaceChildren(paper, stamps);
+    body.replaceChildren(pbox, stamps);
     speak(say);
   }
   function reveal() {
@@ -825,7 +862,7 @@ async function findEdit(idx) {
   drawThumbs();
   const cur = photos[idx];
   if (!cur) { stage.append(el("div", "empty", "<h2>按「加入照片」開始</h2>")); return; }
-  const ph = el("div", "photo edit", `<img src="${cur.src}" alt="">`); stage.append(ph);
+  const ph = el("div", "photo edit fitted", `<img src="${cur.src}" alt="">`); stage.classList.add("fitbox"); stage.append(ph); fitPhoto(ph);
   const del = el("button", "chip", "刪除這張照片"); del.onclick = async () => { await DB.del(cur.id); findEdit(0); }; tools.append(del);
   function drawBoxes() {
     ph.querySelectorAll(".box").forEach(b => b.remove());
@@ -861,7 +898,7 @@ function findGame(qs) {
     const { p: ph, label, rects } = qs[i];
     const many = rects.length > 1 ? `（有 ${rects.length} 個，找到一個就可以）` : "";
     p.replaceChildren(promptEl(`找到「${label}」${many}`, `請在照片上找到${label}`, `${i + 1} / ${qs.length}`));
-    const wrap = el("div", "photo", `<img src="${ph.src}" alt="遊客中心照片">`);
+    const wrap = el("div", "photo fitted", `<img src="${ph.src}" alt="遊客中心照片">`); stage.classList.add("fitbox"); fitPhoto(wrap);
     const boxes = rects.map(b => { const d = el("div", "box"); Object.assign(d.style, { left: b.x + "%", top: b.y + "%", width: b.w + "%", height: b.h + "%" }); wrap.append(d); return d; });
     stage.replaceChildren(wrap);
     wrap.onclick = e => {
