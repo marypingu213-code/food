@@ -812,17 +812,17 @@ function stampGame(cards, order, withSeal) {
 // ---------- 遊戲七：湖丘之物（館內植物標本展示櫃，標本採自虎頭埤及左鎮周邊） ----------
 const PLANTS = [
   { nm: "桃花心木", img: "img/plants/mahogany.svg", part: "種子", feat: "種子有一片翅膀，掉下來會像直升機一樣轉圈圈" },
-  { nm: "大花紫薇", img: "img/plants/crapemyrtle.svg", part: "果實", feat: "夏天開紫色的花，花謝後結出一串圓圓的果實" },
+  { nm: "大花紫薇", img: "img/plants/crapemyrtle-dry.jpg", photos: ["img/plants/crapemyrtle-green.jpg"], part: "果實", feat: "夏天開紫色的花，花謝後結出一串圓圓的果實，果實會從綠色變成咖啡色" },
   { nm: "羊蹄甲", img: "img/plants/orchidtree.svg", part: "葉子", feat: "葉子前端裂成兩半，很像羊的腳蹄" },
   { nm: "馬拉巴栗", img: "img/plants/moneytree.svg", part: "種子", feat: "常被種成盆栽放在家裡，又叫「發財樹」" },
-  { nm: "火焰木", img: "img/plants/tuliptree.svg", part: "果實", feat: "開橘紅色的大花像火焰，果實像一艘小船" },
+  { nm: "火焰木", img: "img/plants/tuliptree-photo.jpg", part: "果實", feat: "開橘紅色的大花像火焰，果實像一艘小船" },
   { nm: "阿勃勒", img: "img/plants/goldenshower.svg", part: "果實", feat: "夏天開一串串黃花像下「黃金雨」，果實是長長的黑色棍子" },
   { nm: "油桐", img: "img/plants/tung.svg", part: "種子", feat: "春天開白花，花掉下來像下雪，叫做「五月雪」" },
   { nm: "桂花", img: "img/plants/osmanthus.svg", part: "花", feat: "花小小的，但是非常非常香" },
   { nm: "銀樺", img: "img/plants/silveroak.svg", part: "葉子", feat: "葉子分成很多細細的條，像一根羽毛" },
   { nm: "茄苳", img: "img/plants/bishopwood.svg", part: "果實", feat: "一根葉柄上長三片小葉子，很多老樹都是茄苳" },
   { nm: "樟樹", img: "img/plants/camphor.svg", part: "樹幹切片", feat: "葉子揉一揉會有樟腦的香味，樹幹切開可以數年輪" },
-  { nm: "大葉欖仁", img: "img/plants/almond.svg", part: "葉子", feat: "葉子大大的，冬天會變紅再掉光" },
+  { nm: "大葉欖仁", img: "img/plants/almond-photo.jpg", part: "葉子", feat: "葉子大大的，冬天會變紅再掉光，春天再長出綠色新葉" },
 ];
 function plantSetup() {
   setupScreen("湖丘之物：認識植物", "看看植物的種子、果實和葉子。先選擇玩法", [
@@ -831,7 +831,7 @@ function plantSetup() {
     { label: "每題答案數", key: "k", value: 3, options: [[2, "2 個"], [3, "3 個"], [4, "4 個"]] },
   ], ({ mode, n, k }) => {
     const qs = shuffle(PLANTS).slice(0, n);
-    if (mode === "look") photoQuiz(qs.map(x => ({ img: x.img, q: `這是哪一種植物的${x.part}？`, opts: PLANTS.map(y => y.nm), ans: x.nm, fact: `${x.nm}：${x.feat}` })), k, "plant");
+    if (mode === "look") photoQuiz(qs.map(x => ({ img: shuffle([x.img, ...(x.photos || [])])[0], q: `這是哪一種植物的${x.part}？`, opts: PLANTS.map(y => y.nm), ans: x.nm, fact: `${x.nm}：${x.feat}` })), k, "plant");
     else plantClue(qs, k);
   });
 }
