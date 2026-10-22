@@ -8,7 +8,9 @@ cache = {}
 def data_uri(name):
     if name not in cache:
         path = os.path.join(root, "img", name)
-        if name.endswith(".png"):
+        if name.endswith(".svg"):
+            cache[name] = "data:image/svg+xml;base64," + base64.b64encode(open(path, "rb").read()).decode()
+        elif name.endswith(".png"):
             cache[name] = "data:image/png;base64," + base64.b64encode(open(path, "rb").read()).decode()
         else:
             im = Image.open(path).convert("RGB")
@@ -26,7 +28,7 @@ for a, b in dynamic.items():
     src = src.replace(a, b)
 names = sorted(f for f in os.listdir(os.path.join(root, "img")) if re.match(r"(canal|hill|cloud)\d|hero-", f))
 table = "<script>const IMG = {" + ",".join(f'"img/{n}":"{data_uri(n)}"' for n in names) + "};</script>\n"
-body = table + re.sub(r"img/([\w/-]+\.(?:jpg|png))", lambda m: data_uri(m.group(1)), src.replace("IMG[`img/", "IMG[`IMGPATH/"))
+body = table + re.sub(r"img/([\w/-]+\.(?:jpg|png|svg))", lambda m: data_uri(m.group(1)), src.replace("IMG[`img/", "IMG[`IMGPATH/"))
 body = body.replace("IMG[`IMGPATH/", "IMG[`img/")
 html = ('<!doctype html>\n<html lang="zh-Hant">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'

@@ -59,7 +59,7 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .gcard .st { display: inline-flex; }
 .gcard .ds { font-size: clamp(14px, 1.15vw, 22px); color: var(--muted); line-height: 1.45; }
 
-@media (min-width: 900px) { .home { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .home { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* 選項設定 */
 .setup { flex: 1; min-height: 0; width: 100%; max-width: 1600px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: clamp(16px, 3vw, 56px); align-items: center; }
 .setup .intro { display: flex; flex-direction: column; gap: .5em; min-width: 0; }
@@ -106,6 +106,9 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 .opt .nm { font-size: clamp(16px, 1.7vw, 32px); font-weight: 700; text-align: center; }
 .opt.right { border-color: var(--ok); }
 .opt.dim { opacity: .3; }
+.opts[style*="--k"] { grid-template-columns: repeat(var(--k), minmax(0, 1fr)); }
+@media (orientation: portrait) { .opts[style*="--k"] { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.opt.hintb { border-color: var(--red); animation: pulseb 1s ease-in-out infinite; }
 .reveal { font-size: clamp(16px, 1.6vw, 30px); color: var(--band); font-weight: 700; text-align: center; min-height: 1.5em; }
 
 /* 建築師的祕密 */
@@ -306,13 +309,14 @@ const FIND_LABELS = ["入口的壺（圓弧形房間）", "折板大屋頂", "�
 
 const $ = (s, r = document) => r.querySelector(s);
 const main = $("#main");
-const state = { done: { route: false, clue: false, secret: false, find: false, tabe: false, stamp: false }, easy: false, sound: true };
+const state = { done: { route: false, clue: false, secret: false, find: false, tabe: false, stamp: false, plant: false }, easy: false, sound: true };
 const GAMES = {
   route: { name: "三大主軸配對", lv: "分類", ds: "把展板上的 24 個景點，放進「水圳之源、湖丘時光、雲水之間」", ph: "img/hero-canal.jpg", run: routeSetup },
   clue: { name: "聽線索猜景點", lv: "推理", ds: "聽一句線索，從 4 張展板圖片中找出是哪個景點、屬於哪條路線", ph: "img/hill4.jpg", run: clueSetup },
   secret: { name: "建築師的祕密", lv: "因果配對", ds: "看遊客中心的照片：建築為什麼這樣蓋？找出設計的用意", ph: "img/s2.jpg", run: secretSetup },
   tabe: { name: "Tabe! Tabe! 仙境西拉雅", lv: "公共藝術", ds: "草地上的五隻黑白動物：牠們是誰？代表西拉雅的什麼？", ph: "img/tabe7.jpg", run: tabeSetup },
   stamp: { name: "套色印章明信片", lv: "蓋章", ds: "照順序蓋 1、2、3 號印章，三種顏色疊成一張明信片，最後蓋上官田遊客中心紀念章", ph: "img/stamp/erliao.jpg", run: stampSetup },
+  plant: { name: "湖丘之物：認識植物", lv: "植物", ds: "館內展示櫃的種子、果實和葉子：看特徵，認出 12 種常見植物", ph: "img/plants/orchidtree.svg", run: plantSetup },
   find: { name: "實景找一找", lv: "實景照片", ds: "在遊客中心的照片上，點出大屋頂、天窗、瀑布等設計", ph: "img/s5.jpg", run: findHome },
 };
 
@@ -423,7 +427,7 @@ function home() {
   s.append(promptEl("選一個遊戲", "請選一個遊戲"));
   const g = el("div", "home");
   for (const [k, v] of Object.entries(GAMES)) {
-    const b = el("button", "gcard", `<div class="ph" style="background-image:url('${v.ph}')"><span class="lv">${v.lv}</span></div><div class="tx"><span class="nm">${v.name}<span class="st">${state.done[k] ? gem() : ""}</span></span><span class="ds">${v.ds}</span></div>`);
+    const b = el("button", "gcard", `<div class="ph" style="background-image:url('${v.ph}')${v.ph.endsWith(".svg") ? ";background-size:contain;background-color:#f7f4ec" : ""}"><span class="lv">${v.lv}</span></div><div class="tx"><span class="nm">${v.name}<span class="st">${state.done[k] ? gem() : ""}</span></span><span class="ds">${v.ds}</span></div>`);
     b.onclick = v.run; g.append(b);
   }
   s.append(g);
@@ -805,6 +809,64 @@ function stampGame(cards, order, withSeal) {
   play();
 }
 
+// ---------- 遊戲七：湖丘之物（館內植物標本展示櫃，標本採自虎頭埤及左鎮周邊） ----------
+const PLANTS = [
+  { nm: "桃花心木", img: "img/plants/mahogany.svg", part: "種子", feat: "種子有一片翅膀，掉下來會像直升機一樣轉圈圈" },
+  { nm: "大花紫薇", img: "img/plants/crapemyrtle.svg", part: "果實", feat: "夏天開紫色的花，花謝後結出一串圓圓的果實" },
+  { nm: "羊蹄甲", img: "img/plants/orchidtree.svg", part: "葉子", feat: "葉子前端裂成兩半，很像羊的腳蹄" },
+  { nm: "馬拉巴栗", img: "img/plants/moneytree.svg", part: "種子", feat: "常被種成盆栽放在家裡，又叫「發財樹」" },
+  { nm: "火焰木", img: "img/plants/tuliptree.svg", part: "果實", feat: "開橘紅色的大花像火焰，果實像一艘小船" },
+  { nm: "阿勃勒", img: "img/plants/goldenshower.svg", part: "果實", feat: "夏天開一串串黃花像下「黃金雨」，果實是長長的黑色棍子" },
+  { nm: "油桐", img: "img/plants/tung.svg", part: "種子", feat: "春天開白花，花掉下來像下雪，叫做「五月雪」" },
+  { nm: "桂花", img: "img/plants/osmanthus.svg", part: "花", feat: "花小小的，但是非常非常香" },
+  { nm: "銀樺", img: "img/plants/silveroak.svg", part: "葉子", feat: "葉子分成很多細細的條，像一根羽毛" },
+  { nm: "茄苳", img: "img/plants/bishopwood.svg", part: "果實", feat: "一根葉柄上長三片小葉子，很多老樹都是茄苳" },
+  { nm: "樟樹", img: "img/plants/camphor.svg", part: "樹幹切片", feat: "葉子揉一揉會有樟腦的香味，樹幹切開可以數年輪" },
+  { nm: "大葉欖仁", img: "img/plants/almond.svg", part: "葉子", feat: "葉子大大的，冬天會變紅再掉光" },
+];
+function plantSetup() {
+  setupScreen("湖丘之物：認識植物", "看看植物的種子、果實和葉子。先選擇玩法", [
+    { label: "玩法", key: "mode", value: "look", options: [["look", "看標本\n猜植物"], ["clue", "聽特徵\n找標本"]] },
+    { label: "題目數量", key: "n", value: 6, options: [[4, "4 題"], [6, "6 題"], [12, "12 題"]] },
+    { label: "每題答案數", key: "k", value: 3, options: [[2, "2 個"], [3, "3 個"], [4, "4 個"]] },
+  ], ({ mode, n, k }) => {
+    const qs = shuffle(PLANTS).slice(0, n);
+    if (mode === "look") photoQuiz(qs.map(x => ({ img: x.img, q: `這是哪一種植物的${x.part}？`, opts: PLANTS.map(y => y.nm), ans: x.nm, fact: `${x.nm}：${x.feat}` })), k, "plant");
+    else plantClue(qs, k);
+  });
+}
+function plantClue(qs, k) {
+  let i = 0, wrong = 0, lock = false, miss = 0;
+  const s = screen();
+  const p = el("div"), clue = el("div", "clue"), opts = el("div", "opts"), rev = el("div", "reveal");
+  s.append(p, clue, opts, rev);
+  function ask() {
+    wrong = 0; lock = false; rev.textContent = "";
+    const it = qs[i];
+    p.replaceChildren(promptEl("聽特徵，找出是哪一種植物", `特徵：${it.feat}。是哪一種植物？`, `${i + 1} / ${qs.length}`));
+    clue.textContent = `特徵：${it.feat}`;
+    opts.style.setProperty("--k", k);
+    opts.replaceChildren(...shuffle([it, ...shuffle(PLANTS.filter(x => x !== it)).slice(0, k - 1)]).map(o => {
+      const b = el("button", "opt", `<img src="${o.img}" alt=""><span class="nm">${o.nm}</span>`);
+      b.onclick = () => {
+        if (lock || b.classList.contains("dim")) return;
+        if (o === it) {
+          lock = true; b.classList.add("right"); opts.querySelectorAll(".opt").forEach(x => x !== b && x.classList.add("dim"));
+          rev.textContent = `這是${it.nm}的${it.part}`;
+          toast("答對了！", true, `答對了，是${it.nm}`);
+          setTimeout(() => { i++; i < qs.length ? ask() : finish("plant", `${qs.length} 題，答錯 ${miss} 次`); }, 2600);
+        } else {
+          wrong++; miss++; b.classList.add("dim"); toast("再想想看", false);
+          if (wrong >= hintAfter()) [...opts.children].find(x => x.querySelector(".nm").textContent === it.nm).classList.add("hintb");
+        }
+      };
+      return b;
+    }));
+    speak(`特徵：${it.feat}。是哪一種植物？`);
+  }
+  ask();
+}
+
 // ---------- 遊戲四：實景找一找（老師上傳照片） ----------
 // 照片與框選存在這台裝置的瀏覽器（IndexedDB）
 const DB = {
@@ -917,7 +979,7 @@ function findGame(qs) {
 // ---------- 證書 ----------
 function showCert() {
   const s = screen();
-  const c = el("div", "cert", `<h2>寶石鑑定「加」</h2><p>鑑定完 ${Object.keys(state.done).length} 種西拉雅寶石，今天的知識又「加」了好多！</p><p>我認識了水圳之源、湖丘時光、雲水之間，知道建築師的祕密，認識了 Tabe! Tabe! 的五隻動物，還完成了自己的套色明信片</p><div class="big">${Object.keys(state.done).map(() => gem()).join("")}</div>`);
+  const c = el("div", "cert", `<h2>寶石鑑定「加」</h2><p>鑑定完 ${Object.keys(state.done).length} 種西拉雅寶石，今天的知識又「加」了好多！</p><p>我認識了水圳之源、湖丘時光、雲水之間，知道建築師的祕密，認識了 Tabe! Tabe! 的五隻動物，完成了自己的套色明信片，也認識了湖丘的植物</p><div class="big">${Object.keys(state.done).map(() => gem()).join("")}</div>`);
   const bar = el("div", "bar"); const b = el("button", "next alt", "重新開始");
   b.onclick = () => { for (const k in state.done) state.done[k] = false; renderStars(); save(); home(); };
   bar.append(b); c.append(bar); s.append(c);
