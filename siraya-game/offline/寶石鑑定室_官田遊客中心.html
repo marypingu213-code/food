@@ -66,9 +66,18 @@ main { flex: 1; min-height: 0; position: relative; padding-block: clamp(10px, 1.
 
 @media (min-width: 900px) { .home { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* 選項設定 */
-.setup { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: clamp(14px, 3vh, 40px); }
-.setup .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
-.setup .lb { font-size: clamp(18px, 1.8vw, 34px); font-weight: 700; min-width: 5em; text-align: right; }
+.setup { flex: 1; min-height: 0; width: 100%; max-width: 1600px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: clamp(16px, 3vw, 56px); align-items: center; }
+.setup .intro { display: flex; flex-direction: column; gap: .5em; min-width: 0; }
+.setup .intro .ph { width: 100%; aspect-ratio: 4 / 3; max-height: calc(100vh - 360px); background: var(--card) center / cover no-repeat; border-radius: 24px; box-shadow: 0 6px 0 rgba(31,74,62,.18); }
+.setup .intro h2 { font-family: var(--display); font-weight: 400; font-size: clamp(28px, 3.2vw, 64px); margin: .2em 0 0; line-height: 1.15; }
+.setup .intro p { margin: 0; font-size: clamp(16px, 1.5vw, 28px); color: var(--muted); line-height: 1.5; }
+.setup .panel { background: var(--card); border-radius: 24px; box-shadow: 0 6px 0 rgba(31,74,62,.12); padding: clamp(16px, 2.2vw, 40px); display: flex; flex-direction: column; gap: clamp(14px, 2.6vh, 34px); min-width: 0; }
+.setup .group { display: flex; flex-direction: column; gap: .5em; }
+.setup .lb { font-size: clamp(16px, 1.5vw, 28px); font-weight: 700; color: var(--muted); letter-spacing: .08em; }
+.setup .choices { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: clamp(8px, .9vw, 16px); }
+.setup .chip { white-space: pre-line; width: 100%; min-height: 2.6em; padding: .3em .5em; font-size: clamp(16px, 1.6vw, 30px); line-height: 1.25; text-align: center; border-width: 4px; }
+.setup .next { width: 100%; margin-top: .2em; }
+@media (max-width: 800px) { header h1 { flex-basis: 100%; } .setup { grid-template-columns: 1fr; } .setup .intro .ph { aspect-ratio: 16 / 7; } .setup .choices { --cols: 2 !important; } }
 .chip { background: var(--card); border: 4px solid var(--line); border-radius: 18px; padding: .35em 1em; font-size: clamp(18px, 1.8vw, 34px); font-weight: 700; }
 .chip[aria-pressed="true"] { border-color: var(--red); background: #fdeae6; }
 
@@ -356,23 +365,28 @@ function finish(key, summary) {
 }
 
 // 選項設定畫面：rows = [{label, key, options:[[value,text]], value}]
+// 選項設定：左邊是遊戲圖片與說明，右邊是設定面板（每組選項標題在上、按鈕等寬排列）
 function setupScreen(title, say, rows, onStart) {
   const s = screen();
-  s.append(promptEl(title, say));
+  s.append(promptEl("選擇玩法", say));
+  const g = Object.values(GAMES).find(x => x.name === title) || {};
   const box = el("div", "setup");
+  box.append(el("div", "intro", `<div class="ph" style="background-image:url('${g.ph || ""}')"></div><h2>${title}</h2><p>${g.ds || ""}</p>`));
+  const panel = el("div", "panel");
   const val = {};
   rows.forEach(r => {
     val[r.key] = r.value;
-    const row = el("div", "row"); row.append(el("span", "lb", r.label));
+    const grp = el("div", "group"); grp.append(el("span", "lb", r.label));
+    const ch = el("div", "choices"); ch.style.setProperty("--cols", Math.min(r.options.length, 4));
     r.options.forEach(([v, t]) => {
       const b = el("button", "chip", t); b.setAttribute("aria-pressed", v === r.value);
-      b.onclick = () => { val[r.key] = v; row.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === b)); };
-      row.append(b);
+      b.onclick = () => { val[r.key] = v; ch.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === b)); };
+      ch.append(b);
     });
-    box.append(row);
+    grp.append(ch); panel.append(grp);
   });
   const go = el("button", "next", "開始"); go.onclick = () => onStart(val);
-  box.append(go); s.append(box);
+  panel.append(go); box.append(panel); s.append(box);
   speak(say);
 }
 
@@ -392,8 +406,8 @@ function home() {
 // ---------- 遊戲一：三大主軸配對 ----------
 function routeSetup() {
   setupScreen("三大主軸配對", "把景點放進對的路線。先選擇玩法", [
-    { label: "卡片", key: "mode", value: "pic", options: [["pic", "圖片＋名字"], ["name", "只有名字"]] },
-    { label: "數量", key: "n", value: 12, options: [[6, "6 張"], [12, "12 張"], [24, "全部 24 張"]] },
+    { label: "卡片上顯示", key: "mode", value: "pic", options: [["pic", "圖片＋名字"], ["name", "只有名字"]] },
+    { label: "卡片數量", key: "n", value: 12, options: [[6, "6 張"], [12, "12 張"], [24, "24 張"]] },
   ], v => routeGame(v));
 }
 function routeGame({ mode, n }) {
@@ -459,9 +473,9 @@ function routeGame({ mode, n }) {
 // ---------- 遊戲二：聽線索猜景點 ----------
 function clueSetup() {
   setupScreen("聽線索猜景點", "聽線索，找出是哪個景點。先選擇玩法", [
-    { label: "選項", key: "names", value: true, options: [[true, "圖片＋名字"], [false, "只有圖片"]] },
-    { label: "題數", key: "n", value: 8, options: [[5, "5 題"], [8, "8 題"], [17, "全部 17 題"]] },
-    { label: "加碼", key: "route", value: false, options: [[false, "只猜景點"], [true, "再猜路線"]] },
+    { label: "答案卡顯示", key: "names", value: true, options: [[true, "圖片＋名字"], [false, "只有圖片"]] },
+    { label: "題目數量", key: "n", value: 8, options: [[5, "5 題"], [8, "8 題"], [17, "17 題"]] },
+    { label: "答對後", key: "route", value: false, options: [[false, "直接下一題"], [true, "再猜是哪條路線"]] },
   ], v => clueGame(v));
 }
 function clueGame({ names, n, route }) {
@@ -520,8 +534,8 @@ function clueGame({ names, n, route }) {
 function secretSetup() {
   setupScreen("建築師的祕密", "看照片，想一想建築為什麼這樣蓋。先選擇玩法", [
     { label: "玩法", key: "mode", value: "quiz", options: [["quiz", "一題一題"], ["pair", "全部配對"]] },
-    { label: "題數", key: "n", value: 5, options: [[3, "3 題"], [5, "5 題"], [8, "8 題"], [12, "全部 12 題"]] },
-    { label: "選項", key: "k", value: 3, options: [[2, "2 個"], [3, "3 個"], [4, "4 個"]] },
+    { label: "題目數量", key: "n", value: 5, options: [[3, "3 題"], [5, "5 題"], [8, "8 題"], [12, "12 題"]] },
+    { label: "每題答案數", key: "k", value: 3, options: [[2, "2 個"], [3, "3 個"], [4, "4 個"]] },
   ], v => v.mode === "quiz" ? secretQuiz(v) : secretPair(v));
 }
 function secretQuiz({ n, k }) {
@@ -622,8 +636,8 @@ const TABE = {
 };
 function tabeSetup() {
   setupScreen("Tabe! Tabe! 仙境西拉雅", "Tabe 是西拉雅語的你好。先選擇題目", [
-    { label: "題目", key: "set", value: "both", options: [["animal", "認動物（5 題）"], ["element", "代表什麼（5 題）"], ["both", "認動物＋代表什麼"], ["all", "全部（16 題）"]] },
-    { label: "選項", key: "k", value: 3, options: [[2, "2 個"], [3, "3 個"], [4, "4 個"]] },
+    { label: "題目內容", key: "set", value: "both", options: [["animal", "認動物\n5 題"], ["element", "代表什麼\n5 題"], ["both", "都玩\n10 題"], ["all", "全部\n16 題"]] },
+    { label: "每題答案數", key: "k", value: 3, options: [[2, "2 個"], [3, "3 個"], [4, "4 個"]] },
   ], ({ set, k }) => {
     const qs = set === "all" ? [...TABE.animal, ...TABE.element, ...shuffle(TABE.more)]
       : set === "both" ? [...shuffle(TABE.animal), ...shuffle(TABE.element)]
@@ -681,9 +695,9 @@ const STAMP_CARDS = [
 ];
 function stampSetup() {
   setupScreen("套色印章明信片", "用三個印章，蓋出一張明信片。先選擇玩法", [
-    { label: "明信片", key: "which", value: "3", options: [["3", "隨機 3 張"], ["all", "全部 6 張"], ...STAMP_CARDS.map((c, i) => [c.k, `第 ${i + 1} 張`])] },
-    { label: "蓋章", key: "order", value: true, options: [[true, "照順序"], [false, "自由蓋"]] },
-    { label: "紀念章", key: "seal", value: true, options: [[true, "最後加蓋"], [false, "不蓋"]] },
+    { label: "要蓋哪幾張明信片", key: "which", value: "3", options: [["3", "隨機 3 張"], ["all", "6 張全蓋"], ...STAMP_CARDS.map((c, i) => [c.k, `第 ${i + 1} 張`])] },
+    { label: "蓋章方式", key: "order", value: true, options: [[true, "照順序 1→2→3"], [false, "自由蓋"]] },
+    { label: "最後加蓋紀念章", key: "seal", value: true, options: [[true, "要"], [false, "不要"]] },
   ], ({ which, order, seal }) => stampGame(which === "all" ? STAMP_CARDS : which === "3" ? shuffle(STAMP_CARDS).slice(0, 3) : STAMP_CARDS.filter(c => c.k === which), order, seal));
 }
 function stampGame(cards, order, withSeal) {
