@@ -871,7 +871,7 @@
             ],
             // 句型造句框架（格式同短語仿寫）
             write: [
-                [{ role: "遇到什麼困難", bank: ["外面下著大雨", "功課非常多", "跑得很累", "題目很難"] }, "，", { role: "誰", bank: ["我", "弟弟", "小明", "大家"] }, "還是", { role: "堅持做什麼", bank: ["準時去上學", "把功課寫完", "繼續往前跑", "認真想答案"] }, "。"],
+                ["即使", { role: "遇到什麼困難", bank: ["外面下著大雨", "功課非常多", "跑得很累", "題目很難"] }, "，", { role: "誰", bank: ["我", "弟弟", "小明", "大家"] }, "還是", { role: "堅持做什麼", bank: ["準時去上學", "把功課寫完", "繼續往前跑", "認真想答案"] }, "。"],
                 [{ role: "誰", bank: ["我", "媽媽", "老師", "哥哥"] }, "先", { role: "做什麼", bank: ["洗好手", "打開電腦", "把書包放好", "換上球鞋"] }, "，接著", { role: "再做什麼", bank: ["開始吃飯", "開始上課", "拿出作業", "跑到操場"] }, "。"],
                 [{ role: "誰", bank: ["我", "妹妹", "全班同學", "爸爸"] }, { role: "心情或做了什麼", bank: ["很開心", "哭了起來", "大聲歡呼", "提早回家"] }, "，因為", { role: "原因", bank: ["今天是我的生日", "玩具壞掉了", "我們得到第一名", "外面下大雨"] }, "。"],
                 [{ role: "要記得做什麼", bank: ["出門要帶雨傘", "過馬路要看紅綠燈", "睡前要刷牙", "上課要專心"] }, "，不然", { role: "會發生什麼事", bank: ["會被雨淋濕", "可能會發生危險", "牙齒會蛀掉", "會聽不懂"] }, "。"],
@@ -1970,17 +1970,24 @@
                     const frameBox = $('frame');
                     frameBox.innerHTML = '';
                     let blankNo = 0;
+                    let lastInputWrap = null; // 標點符號黏在前一個空格後面，不會單獨換行
                     frame.forEach((part, i) => {
                         if (typeof part === 'string') {
                             const span = document.createElement('span');
                             span.textContent = part;
-                            frameBox.appendChild(span);
+                            if (lastInputWrap && /^[，。、！？]/.test(part)) {
+                                lastInputWrap.appendChild(span);
+                            } else {
+                                frameBox.appendChild(span);
+                            }
+                            lastInputWrap = null;
                         } else if (part.mirror !== undefined) {
                             const span = document.createElement('span');
                             span.className = "imitate-mirror text-gray-400";
                             span.dataset.mirror = part.mirror;
                             span.textContent = draft[part.mirror] || '○';
                             frameBox.appendChild(span);
+                            lastInputWrap = null;
                         } else {
                             const c = roleColors[blankNo % roleColors.length];
                             const input = document.createElement('input');
@@ -1995,7 +2002,11 @@
                                 draft[i] = input.value.trim();
                                 updateMirrors();
                             };
-                            frameBox.appendChild(input);
+                            const wrap = document.createElement('span');
+                            wrap.className = "inline-flex items-center gap-2 max-w-full";
+                            wrap.appendChild(input);
+                            frameBox.appendChild(wrap);
+                            lastInputWrap = wrap;
                             blankNo++;
                         }
                     });
@@ -2006,7 +2017,26 @@
                     // 標籤統一寬度，讓每一排語詞卡的起點切齊
                     const labelText = part => part.role + (part.len ? `（${part.len}個字）` : part.double && !part.role.includes('疊字') ? '（疊字）' : '');
                     const labelWidth = Math.max(...blanksOf(frame).map(({ part }) => [...labelText(part)].length));
-                    blanksOf(frame).forEach(({ part, i }, n) => {
+
+                    // 語詞卡每排各自打亂，且任兩排不會在同一欄出現原本配好的一組，避免學生照欄位直接選
+                    const blankList = blanksOf(frame);
+                    const clashes = (a, b) => a.some((v, col) => col < b.length && b[col] === v);
+                    let orders = [];
+                    for (let restart = 0; restart < 50 && orders.length < blankList.length; restart++) {
+                        orders = [];
+                        for (const { part } of blankList) {
+                            let row = null;
+                            for (let tries = 0; tries < 300; tries++) {
+                                const candidate = shuffleArray(part.bank.map((_, j) => j));
+                                if (!orders.some(prev => clashes(prev, candidate))) { row = candidate; break; }
+                            }
+                            if (!row) break;
+                            orders.push(row);
+                        }
+                    }
+                    if (orders.length < blankList.length) orders = blankList.map(({ part }) => shuffleArray(part.bank.map((_, j) => j)));
+
+                    blankList.forEach(({ part, i }, n) => {
                         const c = roleColors[n % roleColors.length];
                         const row = document.createElement('div');
                         row.className = "flex items-start gap-2";
@@ -2018,7 +2048,7 @@
                         const chips = document.createElement('div');
                         chips.className = "flex flex-wrap gap-2";
                         row.appendChild(chips);
-                        part.bank.forEach(word => {
+                        orders[n].map(j => part.bank[j]).forEach(word => {
                             const chip = document.createElement('button');
                             chip.className = "bg-white border-2 border-gray-200 hover:border-teal-400 hover:bg-teal-50 font-bold px-3 py-1 rounded-xl text-base transition";
                             chip.textContent = word;
