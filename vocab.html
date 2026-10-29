@@ -69,7 +69,16 @@
             header, .no-print { display: none !important; }
             main > div:not(.printing) { display: none !important; }
             .printing > div:not(.print-portfolio) { display: none !important; }
-            .print-portfolio { border: none !important; box-shadow: none !important; max-width: none !important; }
+            .print-portfolio { border: none !important; box-shadow: none !important; max-width: none !important; padding: 0 !important; margin: 0 !important; }
+            /* 精簡版面：12 題印在同一頁 */
+            @page { size: A4; margin: 12mm; }
+            .print-portfolio h2 { font-size: 16pt !important; }
+            .print-portfolio > div:first-child { margin-bottom: 4pt !important; }
+            .print-name { font-size: 12pt !important; margin-bottom: 6pt !important; }
+            .print-name input { padding: 0 4pt !important; }
+            .print-portfolio ol > li { margin: 0 !important; padding: 5pt 4pt !important; border: none !important; border-bottom: 1px solid #d1d5db !important; border-radius: 0 !important; background: none !important; break-inside: avoid; }
+            .work-label { font-size: 9pt !important; }
+            .work-text { font-size: 13pt !important; margin-top: 1pt !important; }
         }
         .drop-target.incorrect {
             border-color: #ef4444 !important;
@@ -1918,7 +1927,7 @@
                                 <button onclick="imitateGames.${k}.print()" class="px-4 py-2 bg-amber-500 text-amber-950 rounded-xl font-black hover:bg-amber-400 transition">🖨️ 列印給老師看</button>
                             </div>
                         </div>
-                        <p class="text-lg font-bold text-gray-700 mb-4">姓名：<input id="${k}-name" type="text" class="border-b-2 border-gray-400 bg-transparent px-2 py-1 font-black text-gray-900 w-48 outline-none" placeholder="寫上名字"></p>
+                        <p class="print-name text-lg font-bold text-gray-700 mb-4">姓名：<input id="${k}-name" type="text" class="border-b-2 border-gray-400 bg-transparent px-2 py-1 font-black text-gray-900 w-48 outline-none" placeholder="寫上名字"></p>
                         <ol id="${k}-works" class="space-y-3"></ol>
                         <p id="${k}-works-empty" class="text-gray-400 font-bold">還沒有作品喔，寫好一題按「✅ 寫好了」就會放到這裡。</p>
                     </div>`;
@@ -2119,7 +2128,7 @@
                     keys.forEach(n => {
                         const li = document.createElement('li');
                         li.className = "p-3 rounded-xl border border-amber-200 bg-amber-50/60";
-                        li.innerHTML = `<p class="text-sm text-gray-500 font-bold"></p><p class="text-xl font-black text-gray-900 mt-1"></p>`;
+                        li.innerHTML = `<p class="work-label text-sm text-gray-500 font-bold"></p><p class="work-text text-xl font-black text-gray-900 mt-1"></p>`;
                         li.children[0].textContent = `第 ${n + 1} 題　${cfg.workLabel(n)}`;
                         li.children[1].textContent = `✏️ ${works[n]}`;
                         list.appendChild(li);
