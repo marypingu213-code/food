@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>作文小幫手：那次，我流下眼淚</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@500;700;900&display=swap">
+<style>
+:root {
+  --paper: #fdf8ef;
+  --card: #ffffff;
+  --ink: #2a2622;
+  --muted: #6b6259;
+  --accent: #2f6db5;
+  --accent-soft: #e4eefa;
+  --warm: #f2a93b;
+  --warm-soft: #fff1d9;
+  --ok: #2e8b57;
+  --ok-soft: #e2f4ea;
+  --rec: #d6362b;
+  --line: #e2d8c8;
+  --display: "Huninn", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --body: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 20px; line-height: 1.6; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, textarea:focus-visible, input:focus-visible { outline: 4px solid var(--warm); outline-offset: 2px; }
+
+header.top { background: var(--card); border-bottom: 4px solid var(--accent); padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+header.top h1 { font-family: var(--display); font-size: 1.3rem; margin: 0; flex: 1 1 auto; }
+.save-state { font-size: .85rem; color: var(--muted); }
+
+nav.steps { display: flex; gap: 6px; padding: 12px 16px 0; max-width: 980px; margin: 0 auto; overflow-x: auto; }
+nav.steps button { flex: 1 0 auto; border: 2px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: .85rem; white-space: nowrap; }
+nav.steps button.done { border-color: var(--ok); background: var(--ok-soft); }
+nav.steps button.current { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+
+main { max-width: 980px; margin: 0 auto; padding: 16px 16px 120px; }
+.card { background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 20px; margin-bottom: 18px; }
+.step-title { font-family: var(--display); font-size: 1.6rem; margin: 0 0 6px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.step-title .emoji { font-size: 2.2rem; }
+.lead { font-size: 1.1rem; margin: 0 0 4px; }
+.tip { background: var(--warm-soft); border-left: 6px solid var(--warm); border-radius: 10px; padding: 10px 14px; margin: 12px 0; }
+
+.topic-box { border: 3px dashed var(--accent); border-radius: 16px; padding: 18px; text-align: center; background: var(--accent-soft); }
+.topic-box .t { font-family: var(--display); font-size: 2.2rem; margin: 0; }
+ol.simple { padding-left: 1.4em; margin: 8px 0; }
+ol.simple li { margin: 6px 0; }
+
+label.name { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-weight: 700; margin-top: 14px; }
+label.name input { font: inherit; padding: 8px 12px; border: 2px solid var(--line); border-radius: 10px; min-width: 0; flex: 1 1 200px; }
+
+.types { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 12px; }
+.type { border: 3px solid var(--line); border-radius: 16px; background: var(--card); padding: 14px; text-align: center; }
+.type .e { font-size: 2.6rem; display: block; }
+.type b { font-size: 1.2rem; display: block; }
+.type small { color: var(--muted); display: block; font-size: .85rem; }
+.type[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px var(--accent) inset; }
+
+.q { border-top: 2px dashed var(--line); padding-top: 14px; margin-top: 14px; }
+.q:first-of-type { border-top: 0; margin-top: 4px; padding-top: 4px; }
+.q-head { display: flex; align-items: flex-start; gap: 8px; }
+.q-head .num { background: var(--accent); color: #fff; border-radius: 50%; min-width: 34px; height: 34px; display: grid; place-items: center; font-weight: 700; }
+.q-head .text { flex: 1; font-size: 1.15rem; font-weight: 700; }
+.q-hint { color: var(--muted); font-size: .9rem; margin: 2px 0 6px 42px; }
+.icon-btn { border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 4px 10px; font-size: 1rem; white-space: nowrap; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.chip { border: 2px solid var(--warm); background: var(--warm-soft); border-radius: 999px; padding: 4px 14px; font-size: 1rem; }
+.chip:active { transform: scale(.96); }
+.chips.event .chip { border-color: var(--accent); background: var(--accent-soft); }
+.chips-label { font-size: .85rem; color: var(--muted); margin-top: 6px; }
+
+.answer { display: flex; gap: 8px; align-items: stretch; }
+.answer textarea { flex: 1; font: inherit; font-size: 1.15rem; line-height: 1.8; min-height: 110px; padding: 10px 12px; border: 2px solid var(--line); border-radius: 12px; resize: vertical; background: #fffdf9; }
+.mic { width: 78px; border: 3px solid var(--accent); background: var(--accent-soft); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: .85rem; font-weight: 700; padding: 6px 4px; }
+.mic .m { font-size: 2rem; line-height: 1; }
+.mic.on { border-color: var(--rec); background: #fde3e1; color: var(--rec); animation: pulse 1.2s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(214,54,43,.5); } 50% { box-shadow: 0 0 0 10px rgba(214,54,43,0); } }
+.interim { color: var(--muted); font-size: .95rem; min-height: 1.4em; margin: 4px 0 0; }
+.punct { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.punct button { border: 2px solid var(--line); background: var(--card); border-radius: 10px; min-width: 44px; padding: 2px 10px; font-size: 1.1rem; }
+.punct .clr { margin-left: auto; font-size: .85rem; color: var(--muted); }
+
+details.example { margin-top: 14px; background: var(--ok-soft); border-radius: 12px; padding: 10px 14px; }
+details.example summary { cursor: pointer; font-weight: 700; color: var(--ok); }
+details.example p { margin: 8px 0 0; text-indent: 2em; }
+
+.bank { margin-top: 10px; }
+.bank h3 { font-size: 1rem; margin: 10px 0 0; }
+
+.para-edit h3 { margin: 14px 0 6px; font-size: 1.05rem; color: var(--accent); }
+.para-edit textarea { width: 100%; font: inherit; font-size: 1.2rem; line-height: 2; min-height: 140px; padding: 10px 14px; border: 2px solid var(--line); border-radius: 12px; text-indent: 2em; background: #fffdf9; }
+.count { font-weight: 700; }
+.checklist { list-style: none; padding: 0; margin: 8px 0; }
+.checklist li { padding: 4px 0; }
+.checklist input { width: 22px; height: 22px; vertical-align: middle; margin-right: 8px; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.btn { border: 0; border-radius: 14px; padding: 12px 20px; font-weight: 700; font-size: 1.05rem; background: var(--accent); color: #fff; }
+.btn.secondary { background: var(--card); color: var(--accent); border: 3px solid var(--accent); }
+.btn.ok { background: var(--ok); }
+.btn.warn { background: var(--card); color: var(--rec); border: 2px solid var(--rec); font-size: .9rem; padding: 8px 14px; }
+
+footer.nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 3px solid var(--line); padding: 10px 16px; display: flex; justify-content: space-between; gap: 10px; z-index: 10; }
+footer.nav .btn { min-width: 130px; font-size: 1.15rem; }
+footer.nav .btn[disabled] { opacity: .35; cursor: default; }
+
+.toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 20px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
+.toast.show { opacity: 1; }
+
+details.teacher { font-size: .9rem; color: var(--muted); }
+details.teacher summary { cursor: pointer; }
+
+#printArea { display: none; }
+
+@media (max-width: 560px) {
+  body { font-size: 18px; }
+  .mic { width: 64px; }
+  footer.nav .btn { min-width: 0; flex: 1; }
+}
+
+@media print {
+  @page { size: A4 portrait; margin: 14mm; }
+  body { background: #fff; font-size: 14pt; }
+  header.top, nav.steps, main, footer.nav, .toast { display: none !important; }
+  #printArea { display: block; color: #000; }
+  .p-title { text-align: center; font-family: "DFKai-SB", "BiauKai", "標楷體", "Kaiti TC", serif; font-size: 22pt; margin: 0 0 4mm; }
+  .p-meta { display: flex; justify-content: space-between; font-size: 12pt; margin-bottom: 6mm; border-bottom: 1px solid #000; padding-bottom: 2mm; }
+  .p-lined p { font-family: "DFKai-SB", "BiauKai", "標楷體", "Kaiti TC", serif; font-size: 16pt; line-height: 13mm; text-indent: 2em; margin: 0;
+    background-image: linear-gradient(to bottom, transparent calc(13mm - 1px), #999 calc(13mm - 1px)); background-size: 100% 13mm; }
+  .p-grid { display: grid; grid-template-columns: repeat(20, 1fr); border-left: 1px solid #555; border-top: 1px solid #555; }
+  .p-grid span { aspect-ratio: 1 / 1; border-right: 1px solid #555; border-bottom: 1px solid #555; display: grid; place-items: center;
+    font-family: "DFKai-SB", "BiauKai", "標楷體", "Kaiti TC", serif; font-size: 15pt; break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>✏️ 作文小幫手：那次，我流下眼淚</h1>
+  <span class="save-state" id="saveState">會自動儲存在這台裝置</span>
+</header>
+<nav class="steps" id="stepNav" aria-label="寫作步驟"></nav>
+<main id="main"></main>
+<footer class="nav">
+  <button class="btn secondary" id="prevBtn">⬅ 上一步</button>
+  <button class="btn" id="nextBtn">下一步 ➡</button>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="printArea"></div>
+
+<script>
+(() => {
+const TITLE = '那次，我流下眼淚';
+const STORE = 'essay-tears-v1';
+
+/* ---------- 內容資料 ---------- */
+const TYPES = {
+  sad:     { e: '😢', name: '難過的眼淚', sub: '失敗、失去、分開',
+             events: ['比賽輸了', '考試沒考好', '寵物生病或離開', '和好朋友吵架', '好朋友轉學'] },
+  wronged: { e: '😣', name: '委屈的眼淚', sub: '被誤會、被冤枉',
+             events: ['被同學誤會', '不是我做的卻被罵', '被別人笑', '東西被弄壞了', '說實話沒人相信'] },
+  moved:   { e: '🥹', name: '感動的眼淚', sub: '家人、朋友對我好',
+             events: ['生病時家人照顧我', '朋友幫助我', '收到生日驚喜', '阿公阿嬤來看我', '老師鼓勵我'] },
+  happy:   { e: '😭🎉', name: '開心的眼淚', sub: '努力很久終於成功',
+             events: ['學會騎腳踏車', '比賽得獎', '考試進步了', '終於學會游泳', '表演成功了'] }
+};
+
+const EXAMPLES = {
+  sad: [
+    '三年級的運動會，我和同學在操場上參加大隊接力。我們練習了一個多月，大家都很想得到第一名。',
+    '比賽開始了，我拿到棒子用力往前跑。沒想到，我的腳一滑，整個人摔在跑道上。我看見其他班的同學一個個超過我，聽見大家「唉——」的聲音。',
+    '那一刻，我的膝蓋好痛，眼眶也紅了。眼淚像斷了線的珍珠，一顆一顆掉下來。我心想：「都是我害大家輸了。」',
+    '我會哭，是因為我覺得對不起同學。後來，好朋友拍拍我的肩膀說：「沒關係，我們明年再一起努力！」這次流淚讓我明白了，失敗不可怕，只要不放棄就好。'
+  ],
+  wronged: [
+    '上個星期三，在教室裡，同學的鉛筆盒不見了。',
+    '一開始，大家都在找。接著，有一位同學指著我說：「是你拿的吧！」我看見全班都轉頭看我，聽見有人小聲地說話。',
+    '那一刻，我的臉一下子變得好燙，喉嚨像被東西卡住，說不出話。眼淚在眼睛裡打轉。我心裡想：「明明不是我，為什麼大家都不相信我？」',
+    '我會哭，是因為我覺得好委屈。後來，鉛筆盒在置物櫃找到了，同學也跟我說對不起。這次流淚讓我明白了，不要隨便誤會別人，因為被冤枉的感覺真的很難受。'
+  ],
+  moved: [
+    '去年冬天的晚上，我在家裡發高燒，媽媽一直陪在我身邊。',
+    '一開始，我全身發燙、頭好暈。接著，媽媽幫我量體溫、用毛巾幫我擦臉。我看見媽媽的眼睛紅紅的，她整個晚上都沒有睡覺。',
+    '第二天早上，我醒來看見媽媽趴在床邊睡著了。那一刻，我的鼻子酸酸的，眼淚忍不住流了下來。我心想：「媽媽好辛苦，她好愛我。」',
+    '我會哭，是因為我被媽媽的愛感動了。後來，我抱著媽媽說：「謝謝妳。」這次流淚讓我明白了，家人的愛是最溫暖的，我也要好好照顧媽媽。'
+  ],
+  happy: [
+    '二年級的暑假，我在公園裡和爸爸一起練習騎腳踏車。',
+    '一開始，我一直摔倒，膝蓋都破皮了。接著，爸爸在後面扶著我，一次又一次地陪我練習。我聽見爸爸說：「加油！你可以的！」',
+    '那天下午，我終於自己騎了好遠。那一刻，我開心得大叫，眼淚卻一直流下來。我心想：「我做到了！」',
+    '我會哭，是因為我努力了好久終於成功了。後來，爸爸給了我一個大大的擁抱。這次流淚讓我明白了，只要不放棄，就一定會成功。'
+  ]
+};
+
+const WORD_BANK = [
+  { h: '👀 眼睛', w: ['眼眶紅了', '眼淚在眼睛裡打轉', '淚水像斷了線的珍珠，一顆一顆掉下來', '眼前變得模糊', '眼淚忍不住流了下來', '哭得眼睛都腫了'] },
+  { h: '🙂 臉和身體', w: ['鼻子酸酸的', '喉嚨像被東西卡住', '肩膀一直發抖', '低著頭不說話', '緊緊咬著嘴唇', '用手擦眼淚', '撲進媽媽的懷裡', '臉一下子變得好燙'] },
+  { h: '💗 心裡的感覺', w: ['難過', '委屈', '感動', '開心', '後悔', '溫暖', '驕傲', '心好像被針刺了一下', '心裡暖暖的', '心裡像有一顆大石頭', '心跳得好快'] }
+];
+
+const STEPS = [
+  { id: 'intro', nav: '1 認識題目' },
+  { id: 'type',  nav: '2 選事件' },
+  { id: 'p1', nav: '3 開頭', emoji: '🌱', title: '第一段：開頭（起因）',
+    lead: '告訴讀者：這件事在什麼時候、什麼地方、和誰、發生了什麼事。',
+    qs: [
+      { k: 'p1a', q: '什麼時候？在哪裡？和誰在一起？', hint: '例如：去年暑假，我和媽媽在家裡。',
+        s: ['去年暑假，', '三年級的時候，', '有一天放學後，', '上個星期六，', '我和媽媽', '我和好朋友', '在學校的操場上', '在家裡', '在教室裡'] },
+      { k: 'p1b', q: '發生了什麼事？', hint: '用一兩句話說說看是什麼事。',
+        s: ['那天，', '我們正在', '我要參加', '突然，'] }
+    ] },
+  { id: 'p2', nav: '4 經過', emoji: '🚶', title: '第二段：事情的經過',
+    lead: '按照順序說：先發生什麼，再發生什麼。也說說你看見、聽見了什麼。',
+    qs: [
+      { k: 'p2a', q: '一開始發生了什麼？', hint: '用「一開始」說說看。', s: ['一開始，', '剛開始的時候，'] },
+      { k: 'p2b', q: '接著又發生了什麼？', hint: '用「接著」、「然後」、「沒想到」接下去。', s: ['接著，', '然後，', '沒想到，', '過了一會兒，'] },
+      { k: 'p2c', q: '你看見了什麼？聽見了什麼？', hint: '把當時的畫面和聲音說出來。', s: ['我看見', '我聽見', '他對我說：「', '媽媽說：「', '大家都'] }
+    ] },
+  { id: 'p3', nav: '5 流淚那一刻', emoji: '💧', title: '第三段：流下眼淚的那一刻',
+    lead: '這段最重要！仔細寫出你的表情、動作、說的話和心裡的想法。',
+    bank: true,
+    qs: [
+      { k: 'p3a', q: '流淚的時候，你的眼睛、臉、身體是什麼樣子？', hint: '可以點下面「好詞寶庫」的詞語。', s: ['那一刻，', '我的眼眶', '我忍不住'] },
+      { k: 'p3b', q: '你說了什麼話？或是別人說了什麼？', hint: '說的話要放在「」裡面。', s: ['我說：「', '我小聲地說：「', '媽媽抱著我說：「', '老師對我說：「'] },
+      { k: 'p3c', q: '你的心裡有什麼感覺？心裡在想什麼？', hint: '例如：難過、委屈、感動、開心。', s: ['我的心裡覺得', '我心想：「', '我好像'] }
+    ] },
+  { id: 'p4', nav: '6 結尾', emoji: '🌈', title: '第四段：結尾（體會）',
+    lead: '寫出你為什麼哭，後來怎麼了，還有這次經驗讓你明白了什麼。',
+    qs: [
+      { k: 'p4a', q: '你為什麼會哭？', hint: '不要只寫「我哭了」，要寫出原因。', s: ['我會哭，是因為', '我流下眼淚，是因為'] },
+      { k: 'p4b', q: '後來怎麼樣了？', hint: '事情最後的結果。', s: ['後來，', '最後，', '從那天起，'] },
+      { k: 'p4c', q: '這次流淚讓你明白了什麼？有什麼改變？', hint: '寫出你學到的事。', s: ['這次流淚讓我明白了', '我學會了', '從此以後，我', '我以後要'] }
+    ] },
+  { id: 'final', nav: '7 完成作文' }
+];
+const PARA_STEPS = STEPS.filter(s => s.qs);
+
+/* ---------- 狀態與儲存 ---------- */
+let state = { step: 0, name: '', type: '', event: '', ans: {}, paras: null, checks: {} };
+try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s && typeof s === 'object') state = Object.assign(state, s); } catch (e) {}
+let saveTimer = null;
+function save(now) {
+  clearTimeout(saveTimer);
+  const go = () => {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); $('saveState').textContent = '✅ 已自動儲存 ' + new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }); }
+    catch (e) { $('saveState').textContent = '⚠️ 這台裝置無法自動儲存，請記得下載'; }
+  };
+  now ? go() : (saveTimer = setTimeout(go, 400));
+}
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200); }
+
+/* ---------- 朗讀 ---------- */
+function speak(text) {
+  if (!('speechSynthesis' in window)) { toast('這個瀏覽器不能朗讀'); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-TW'; u.rate = 0.85;
+  const v = speechSynthesis.getVoices().find(v => /zh[-_]TW/i.test(v.lang)) || speechSynthesis.getVoices().find(v => /^zh/i.test(v.lang));
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- 語音輸入 ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, recBtn = null, recTa = null;
+function stopRec() { if (rec) { try { rec.stop(); } catch (e) {} } }
+function startRec(btn, ta) {
+  if (!SR) {
+    alert('這個瀏覽器不支援網頁語音輸入。\n\n請改用：\n・電腦：Chrome 或 Edge 瀏覽器\n・iPad／手機：點一下文字框，再按鍵盤上的 🎤 麥克風鍵說話');
+    ta.focus(); return;
+  }
+  if (rec) { const same = recTa === ta; stopRec(); if (same) return; }
+  const r = new SR();
+  r.lang = 'zh-TW'; r.continuous = true; r.interimResults = true;
+  const interimEl = ta.closest('.q, .para-edit-item').querySelector('.interim');
+  rec = r; recBtn = btn; recTa = ta;
+  btn.classList.add('on'); btn.querySelector('.l').textContent = '說完按我';
+  interimEl.textContent = '🎙️ 請開始說話…';
+  r.onresult = ev => {
+    let interim = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const res = ev.results[i];
+      if (res.isFinal) insertText(ta, res[0].transcript.replace(/\s+/g, ''));
+      else interim += res[0].transcript;
+    }
+    interimEl.textContent = interim ? '🎙️ ' + interim : '🎙️ 繼續說，或按「說完按我」';
+  };
+  r.onerror = ev => {
+    if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') alert('沒有麥克風權限。請在瀏覽器網址列旁邊允許使用麥克風，再試一次。');
+    else if (ev.error === 'no-speech') toast('沒有聽到聲音，再試一次');
+    else if (ev.error !== 'aborted') toast('語音輸入出了問題：' + ev.error);
+  };
+  r.onend = () => {
+    btn.classList.remove('on'); btn.querySelector('.l').textContent = '按我說話';
+    interimEl.textContent = '';
+    if (rec === r) { rec = null; recBtn = null; recTa = null; }
+  };
+  try { r.start(); } catch (e) { r.onend(); toast('請再按一次麥克風'); }
+}
+
+/* ---------- 插入文字 ---------- */
+let lastTa = null;
+function insertText(ta, text) {
+  const start = ta.selectionStart ?? ta.value.length, end = ta.selectionEnd ?? ta.value.length;
+  const usePos = document.activeElement === ta || ta._hadFocus;
+  const s = usePos ? start : ta.value.length, e = usePos ? end : ta.value.length;
+  ta.value = ta.value.slice(0, s) + text + ta.value.slice(e);
+  const pos = s + text.length;
+  ta.setSelectionRange(pos, pos);
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+/* ---------- 組合段落 ---------- */
+function endPunct(s) {
+  s = s.trim();
+  if (!s) return '';
+  return /[。！？」…～]$/.test(s) ? s : s.replace(/[，、；：,]$/, '') + '。';
+}
+function buildParas() { return PARA_STEPS.map(st => st.qs.map(q => endPunct(state.ans[q.k] || '')).join('')); }
+function essayText() { return (state.paras || buildParas()).map(p => p.trim()).filter(Boolean); }
+function countChars(arr) { return arr.join('').replace(/\s/g, '').length; }
+
+/* ---------- 畫面 ---------- */
+function renderNav() {
+  $('stepNav').innerHTML = STEPS.map((s, i) => {
+    const done = i < state.step || (s.qs && s.qs.some(q => (state.ans[q.k] || '').trim()));
+    return `<button data-go="${i}" class="${i === state.step ? 'current' : done ? 'done' : ''}">${s.nav}</button>`;
+  }).join('');
+  $('prevBtn').disabled = state.step === 0;
+  $('nextBtn').style.visibility = state.step === STEPS.length - 1 ? 'hidden' : 'visible';
+  $('nextBtn').textContent = state.step === STEPS.length - 2 ? '完成作文 ✅' : '下一步 ➡';
+}
+
+function qBlock(q, n) {
+  return `<div class="q">
+    <div class="q-head"><span class="num">${n}</span><span class="text">${esc(q.q)}</span>
+      <button class="icon-btn" data-speak="${esc(q.q + '。' + q.hint)}" aria-label="朗讀題目">🔊 唸給我聽</button></div>
+    <div class="q-hint">${esc(q.hint)}</div>
+    <div class="chips-label">點一下就能加入句子開頭：</div>
+    <div class="chips">${q.s.map(s => `<button class="chip" data-ins="${esc(s)}" data-target="${q.k}">${esc(s)}</button>`).join('')}</div>
+    <div class="answer">
+      <textarea id="ta-${q.k}" data-k="${q.k}" placeholder="可以用打字，也可以按右邊的麥克風用說的">${esc(state.ans[q.k] || '')}</textarea>
+      <button class="mic" data-mic="${q.k}" aria-label="語音輸入"><span class="m">🎤</span><span class="l">按我說話</span></button>
+    </div>
+    <p class="interim"></p>
+    <div class="punct">${['，', '。', '！', '？', '「', '」', '：'].map(p => `<button data-ins="${p}" data-target="${q.k}">${p}</button>`).join('')}
+      <button class="clr" data-undo="${q.k}">⌫ 刪一個字</button></div>
+  </div>`;
+}
+
+function render() {
+  stopRec();
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  const st = STEPS[state.step];
+  let h = '';
+  if (st.id === 'intro') {
+    h = `<section class="card">
+      <h2 class="step-title"><span class="emoji">📖</span>認識題目</h2>
+      <div class="topic-box"><p class="t">${TITLE}</p></div>
+      <p class="lead" style="margin-top:14px">每個人都哭過。有時候因為<b>難過</b>，有時候因為<b>委屈</b>，有時候因為<b>感動</b>，有時候是<b>開心</b>到哭。</p>
+      <p class="lead">我們要寫一次讓你印象很深的「哭」的經驗。跟著小幫手，一步一步回答問題，作文就完成了！</p>
+      <div class="tip">📝 這篇作文要有四段：
+        <ol class="simple"><li>🌱 開頭：什麼時候、在哪裡、發生什麼事</li><li>🚶 經過：事情怎麼發展</li><li>💧 流淚那一刻：表情、動作、說的話、心裡的感覺</li><li>🌈 結尾：為什麼哭、明白了什麼</li></ol>
+        記得：不要只寫「我哭了」，要寫出「<b>為什麼哭</b>」和「<b>這次流淚讓我明白了什麼</b>」。</div>
+      <button class="btn secondary" data-speak="作文題目，那次，我流下眼淚。每個人都哭過。有時候因為難過，有時候因為委屈，有時候因為感動，有時候是開心到哭。我們要寫一次讓你印象很深的哭的經驗。不要只寫我哭了，要寫出為什麼哭，和這次流淚讓我明白了什麼。">🔊 唸給我聽</button>
+      <label class="name">我的名字：<input id="nameInput" value="${esc(state.name)}" placeholder="寫上名字" autocomplete="off"></label>
+    </section>
+    <details class="teacher card"><summary>👩‍🏫 給老師／家長的說明</summary>
+      <p>・每個問題都可以打字，或按 🎤 用說的（電腦請用 Chrome／Edge；iPad 可用鍵盤上的麥克風鍵）。</p>
+      <p>・橘色按鈕是句子開頭鷹架，「好詞寶庫」提供情緒與動作詞語，「看範例」可依程度選擇是否開啟。</p>
+      <p>・內容會自動存在這台裝置的瀏覽器裡。換學生使用前，請到最後一步按「開始新的作文」。</p>
+      <p>・最後一步可修改全文，並以橫線紙或 20 字稿紙格式列印、存成 PDF，或下載 Word / 文字檔。</p>
+    </details>`;
+  } else if (st.id === 'type') {
+    const t = TYPES[state.type];
+    h = `<section class="card">
+      <h2 class="step-title"><span class="emoji">🤔</span>你是哪一種眼淚？</h2>
+      <p class="lead">想一想，你想寫的那一次，是哪一種眼淚？點一個。</p>
+      <div class="types">${Object.entries(TYPES).map(([k, v]) => `<button class="type" data-type="${k}" aria-pressed="${state.type === k}"><span class="e">${v.e}</span><b>${v.name}</b><small>${v.sub}</small></button>`).join('')}</div>
+    </section>
+    ${t ? `<section class="card">
+      <h2 class="step-title" style="font-size:1.3rem">${t.e} 是什麼事情讓你流下眼淚？</h2>
+      <div class="chips-label">可以點一個想法，或自己寫：</div>
+      <div class="chips event">${t.events.map(e => `<button class="chip" data-event="${esc(e)}">${esc(e)}</button>`).join('')}</div>
+      <div class="answer"><textarea id="eventInput" style="min-height:70px" placeholder="例如：比賽輸了">${esc(state.event)}</textarea></div>
+      <div class="tip">💡 選一件你<b>記得最清楚</b>的事，這樣比較好寫喔！</div>
+    </section>` : ''}`;
+  } else if (st.qs) {
+    const idx = PARA_STEPS.indexOf(st);
+    h = `<section class="card">
+      <h2 class="step-title"><span class="emoji">${st.emoji}</span>${st.title}</h2>
+      <p class="lead">${st.lead}</p>
+      ${state.event ? `<div class="tip">📌 我要寫的事：<b>${esc(state.event)}</b></div>` : ''}
+      ${st.qs.map((q, i) => qBlock(q, i + 1)).join('')}
+      ${st.bank ? `<div class="bank card" style="background:#fffaf0;margin-top:16px"><h2 class="step-title" style="font-size:1.2rem">💎 好詞寶庫 <small style="font-size:.85rem;font-weight:400;color:var(--muted)">（先點一下上面的格子，再點詞語）</small></h2>
+        ${WORD_BANK.map(g => `<h3>${g.h}</h3><div class="chips">${g.w.map(w => `<button class="chip" data-ins="${esc(w)}" data-target="_last">${esc(w)}</button>`).join('')}</div>`).join('')}</div>` : ''}
+      ${state.type ? `<details class="example"><summary>👀 看範例（${TYPES[state.type].name}）</summary><p>${esc(EXAMPLES[state.type][idx])}</p></details>` : ''}
+    </section>`;
+  } else if (st.id === 'final') {
+    if (!state.paras) state.paras = buildParas();
+    const empty = state.paras.every(p => !p.trim());
+    h = `<section class="card">
+      <h2 class="step-title"><span class="emoji">🎉</span>完成作文！</h2>
+      <p class="lead">小幫手把你的回答組合成一篇作文了。讀一讀，可以再修改。</p>
+      ${empty ? '<div class="tip">⚠️ 還沒有內容喔！請回到前面的步驟回答問題。</div>' : ''}
+      <div class="topic-box" style="padding:10px"><p class="t" style="font-size:1.6rem">${TITLE}</p><p style="margin:0">${esc(state.name || '')}</p></div>
+      <div class="para-edit">${state.paras.map((p, i) => `<div class="para-edit-item"><h3>${PARA_STEPS[i].emoji} 第${'一二三四'[i]}段　<button class="icon-btn" data-mic-para="${i}" style="font-size:.85rem">🎤 用說的加句子</button></h3>
+        <textarea data-para="${i}">${esc(p)}</textarea><p class="interim"></p></div>`).join('')}</div>
+      <p>全文共 <span class="count" id="charCount">${countChars(state.paras)}</span> 字</p>
+      <div class="actions">
+        <button class="btn secondary" id="readAll">🔊 唸整篇給我聽</button>
+        <button class="btn secondary" id="rebuild">🔄 重新從回答組合</button>
+      </div>
+    </section>
+    <section class="card">
+      <h2 class="step-title" style="font-size:1.3rem">✅ 自己檢查一下</h2>
+      <ul class="checklist">${['我有寫出什麼時候、在哪裡、發生什麼事', '我有按照順序寫出事情的經過', '我有寫出流淚時的表情或動作', '我有寫出說的話或心裡的想法', '我有寫出「為什麼哭」', '我有寫出「這次流淚讓我明白了什麼」']
+        .map((c, i) => `<li><label><input type="checkbox" data-check="${i}" ${state.checks[i] ? 'checked' : ''}>${c}</label></li>`).join('')}</ul>
+    </section>
+    <section class="card">
+      <h2 class="step-title" style="font-size:1.3rem">🖨️ 儲存與列印</h2>
+      <div class="actions">
+        <button class="btn ok" data-print="lined">🖨️ 列印（橫線紙）</button>
+        <button class="btn ok" data-print="grid">🖨️ 列印（稿紙格子）</button>
+        <button class="btn secondary" id="dlDoc">💾 下載 Word 檔</button>
+        <button class="btn secondary" id="dlTxt">💾 下載文字檔</button>
+        <button class="btn secondary" id="saveNow">📌 儲存</button>
+      </div>
+      <p style="font-size:.9rem;color:var(--muted)">想存成 PDF：按「列印」後，印表機選「另存為 PDF」。</p>
+      <div class="actions"><button class="btn warn" id="resetAll">🗑️ 開始新的作文（清除全部）</button></div>
+    </section>`;
+  }
+  $('main').innerHTML = h;
+  renderNav();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- 列印與下載 ---------- */
+function gridRows(text, first) {
+  // first: true = 段首空兩格
+  const chars = Array.from((first ? '　　' : '') + text);
+  const rows = [];
+  for (let i = 0; i < chars.length; i += 20) rows.push(chars.slice(i, i + 20));
+  if (rows.length) while (rows[rows.length - 1].length < 20) rows[rows.length - 1].push('');
+  return rows;
+}
+function doPrint(mode) {
+  const paras = essayText();
+  if (!paras.length) { toast('還沒有內容可以列印'); return; }
+  const date = new Date().toLocaleDateString('zh-TW');
+  const meta = `<div class="p-meta"><span>姓名：${esc(state.name || '＿＿＿＿＿＿')}</span><span>字數：${countChars(paras)} 字</span><span>日期：${date}</span></div>`;
+  let body;
+  if (mode === 'grid') {
+    const rows = [];
+    paras.forEach(p => rows.push(...gridRows(p, true)));
+    const minRows = Math.max(rows.length + 2, 20);
+    while (rows.length < minRows) rows.push(Array(20).fill(''));
+    body = `<div class="p-grid">${rows.flat().map(c => `<span>${esc(c)}</span>`).join('')}</div>`;
+  } else {
+    body = `<div class="p-lined">${paras.map(p => `<p>${esc(p)}</p>`).join('')}</div>`;
+  }
+  $('printArea').innerHTML = `<h1 class="p-title">${TITLE}</h1>${meta}${body}`;
+  setTimeout(() => window.print(), 50);
+}
+function download(name, content, type) {
+  const blob = new Blob([content], { type });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function fileBase() { return `${TITLE.replace(/，/g, '_')}_${state.name || '作文'}`; }
+function dlTxt() {
+  const paras = essayText();
+  download(fileBase() + '.txt', '﻿' + `${TITLE}\n姓名：${state.name}\n\n` + paras.map(p => '　　' + p).join('\n\n') + '\n', 'text/plain;charset=utf-8');
+}
+function dlDoc() {
+  const paras = essayText();
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${TITLE}</title>
+    <style>body{font-family:"標楷體","DFKai-SB",serif;font-size:16pt;line-height:2}h1{text-align:center;font-size:22pt}p{text-indent:2em;margin:0 0 6pt}</style></head>
+    <body><h1>${TITLE}</h1><p style="text-indent:0">姓名：${esc(state.name)}</p>${paras.map(p => `<p>${esc(p)}</p>`).join('')}</body></html>`;
+  download(fileBase() + '.doc', '﻿' + html, 'application/msword');
+}
+
+/* ---------- 事件 ---------- */
+function go(n) { state.step = Math.max(0, Math.min(STEPS.length - 1, n)); save(true); render(); }
+$('prevBtn').onclick = () => go(state.step - 1);
+$('nextBtn').onclick = () => {
+  if (state.step === 1 && !state.type) { toast('請先選一種眼淚 😊'); return; }
+  if (STEPS[state.step + 1].id === 'final') state.paras = null; // 進入完成頁時重新組合最新回答
+  go(state.step + 1);
+};
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.go !== undefined) {
+    const n = +b.dataset.go;
+    if (STEPS[n].id === 'final' && STEPS[state.step].id !== 'final') state.paras = null;
+    go(n);
+  }
+  else if (b.dataset.speak) speak(b.dataset.speak);
+  else if (b.dataset.type) { state.type = b.dataset.type; save(); render(); }
+  else if (b.dataset.event) { state.event = b.dataset.event; save(); const ta = $('eventInput'); if (ta) ta.value = state.event; }
+  else if (b.dataset.ins !== undefined) {
+    let ta = b.dataset.target === '_last' ? lastTa : $('ta-' + b.dataset.target);
+    if (!ta || !document.body.contains(ta)) ta = document.querySelector('main textarea[data-k]');
+    if (!ta) return;
+    insertText(ta, b.dataset.ins); ta.focus({ preventScroll: true });
+  }
+  else if (b.dataset.undo) {
+    const ta = $('ta-' + b.dataset.undo);
+    const pos = ta._hadFocus ? ta.selectionStart : ta.value.length;
+    if (pos > 0) { const chars = Array.from(ta.value.slice(0, pos)); chars.pop(); const before = chars.join(''); ta.value = before + ta.value.slice(pos); ta.setSelectionRange(before.length, before.length); ta.dispatchEvent(new Event('input', { bubbles: true })); }
+  }
+  else if (b.dataset.mic) startRec(b, $('ta-' + b.dataset.mic));
+  else if (b.dataset.micPara !== undefined) startRec(b, document.querySelector(`textarea[data-para="${b.dataset.micPara}"]`));
+  else if (b.dataset.print) doPrint(b.dataset.print);
+  else if (b.id === 'readAll') speak(TITLE + '。' + essayText().join(''));
+  else if (b.id === 'rebuild') { if (confirm('要用前面步驟的回答重新組合嗎？在這一頁改過的內容會不見。')) { state.paras = buildParas(); save(true); render(); } }
+  else if (b.id === 'dlTxt') dlTxt();
+  else if (b.id === 'dlDoc') dlDoc();
+  else if (b.id === 'saveNow') { save(true); toast('已儲存在這台裝置 ✅'); }
+  else if (b.id === 'resetAll') {
+    if (confirm('確定要清除全部內容，開始新的作文嗎？\n（建議先下載或列印）')) {
+      state = { step: 0, name: '', type: '', event: '', ans: {}, paras: null, checks: {} };
+      save(true); render(); toast('已清除，可以開始新的作文');
+    }
+  }
+});
+
+document.addEventListener('mousedown', e => { if (e.target.closest('.chip, .punct button')) e.preventDefault(); }); // 點詞語時保持游標位置
+
+document.addEventListener('focusin', e => { if (e.target.matches('textarea[data-k]')) { lastTa = e.target; e.target._hadFocus = true; } });
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.k) state.ans[t.dataset.k] = t.value;
+  else if (t.id === 'nameInput') state.name = t.value;
+  else if (t.id === 'eventInput') state.event = t.value;
+  else if (t.dataset.para !== undefined) { state.paras[+t.dataset.para] = t.value; const c = $('charCount'); if (c) c.textContent = countChars(state.paras); }
+  else return;
+  save();
+});
+document.addEventListener('change', e => { if (e.target.dataset.check !== undefined) { state.checks[e.target.dataset.check] = e.target.checked; save(); } });
+window.addEventListener('afterprint', () => { $('printArea').innerHTML = ''; });
+if ('speechSynthesis' in window) speechSynthesis.getVoices();
+
+render();
+})();
+</script>
+</body>
+</html>
