@@ -18,8 +18,6 @@
   --warm-soft: #fff1d9;
   --ok: #2e8b57;
   --ok-soft: #e2f4ea;
-  --help: #8a4fbf;
-  --help-soft: #f3eafb;
   --rec: #d6362b;
   --line: #e2d8c8;
   --display: "Huninn", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
@@ -32,114 +30,102 @@ body { background: var(--paper); color: var(--ink); font-family: var(--body); fo
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible, textarea:focus-visible, input:focus-visible { outline: 4px solid var(--warm); outline-offset: 2px; }
 
-header.top { background: var(--card); border-bottom: 4px solid var(--accent); padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
-header.top h1 { font-family: var(--display); font-size: 1.3rem; margin: 0; flex: 1 1 auto; }
-.save-state { font-size: .85rem; color: var(--muted); }
+header.top { background: var(--card); border-bottom: 4px solid var(--accent); padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+header.top h1 { font-family: var(--display); font-size: 1.25rem; margin: 0; flex: 1 1 auto; }
+.save-state { font-size: .8rem; color: var(--muted); }
+.speak-toggle { border: 2px solid var(--line); background: var(--card); border-radius: 999px; padding: 2px 12px; font-size: .85rem; }
+.speak-toggle[aria-pressed="true"] { border-color: var(--ok); background: var(--ok-soft); }
 
-nav.steps { display: flex; gap: 6px; padding: 12px 16px 0; max-width: 980px; margin: 0 auto; overflow-x: auto; }
-nav.steps button { flex: 1 0 auto; border: 2px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: .85rem; white-space: nowrap; }
+nav.steps { display: flex; gap: 6px; padding: 12px 16px 0; max-width: 1000px; margin: 0 auto; overflow-x: auto; }
+nav.steps button { flex: 1 0 auto; border: 2px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 10px; font-size: .8rem; white-space: nowrap; }
 nav.steps button.done { border-color: var(--ok); background: var(--ok-soft); }
 nav.steps button.current { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
 
-main { max-width: 980px; margin: 0 auto; padding: 16px 16px 120px; }
-.card { background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 20px; margin-bottom: 18px; }
-.step-title { font-family: var(--display); font-size: 1.6rem; margin: 0 0 6px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.step-title .emoji { font-size: 2.2rem; }
-.lead { font-size: 1.1rem; margin: 0 0 4px; }
+main { max-width: 1000px; margin: 0 auto; padding: 16px 16px 130px; }
+.card { background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 18px 20px; margin-bottom: 18px; }
+.step-title { font-family: var(--display); font-size: 1.55rem; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.step-title .emoji { font-size: 2.1rem; }
+.lead { font-size: 1.05rem; margin: 0 0 4px; color: var(--muted); }
 .tip { background: var(--warm-soft); border-left: 6px solid var(--warm); border-radius: 10px; padding: 10px 14px; margin: 12px 0; }
+.topic-box { border: 3px dashed var(--accent); border-radius: 16px; padding: 16px; text-align: center; background: var(--accent-soft); }
+.topic-box .t { font-family: var(--display); font-size: 2.1rem; margin: 0; }
 
-.topic-box { border: 3px dashed var(--accent); border-radius: 16px; padding: 18px; text-align: center; background: var(--accent-soft); }
-.topic-box .t { font-family: var(--display); font-size: 2.2rem; margin: 0; }
-ol.simple { padding-left: 1.4em; margin: 8px 0; }
-ol.simple li { margin: 6px 0; }
-
-label.name { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-weight: 700; margin-top: 14px; }
+label.name { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-weight: 700; }
 label.name input { font: inherit; padding: 8px 12px; border: 2px solid var(--line); border-radius: 10px; min-width: 0; flex: 1 1 200px; }
 
-.mode-switch { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 4px; }
-.mode-switch button { flex: 1 1 220px; border: 3px solid var(--line); background: var(--card); border-radius: 14px; padding: 10px; font-weight: 700; }
-.mode-switch button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
-
-.types { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
-.type { border: 3px solid var(--line); border-radius: 16px; background: var(--card); padding: 10px; text-align: center; }
-.type .e { font-size: 2.2rem; display: block; }
-.type b { font-size: 1.05rem; display: block; }
-.type small { color: var(--muted); display: block; font-size: .8rem; }
-.type[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px var(--accent) inset; }
-
-.q { border-top: 2px dashed var(--line); padding-top: 14px; margin-top: 14px; }
-.q.first { border-top: 0; margin-top: 4px; padding-top: 4px; }
-.q-head { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
-.q-head .num { background: var(--accent); color: #fff; border-radius: 50%; min-width: 34px; height: 34px; display: grid; place-items: center; font-weight: 700; }
-.q-head .text { flex: 1; font-size: 1.15rem; font-weight: 700; }
-.q-head .tag { font-size: .8rem; font-weight: 400; color: var(--muted); }
-.icon-btn { border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 4px 10px; font-size: 1rem; white-space: nowrap; }
-
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
-.chip { border: 2px solid var(--warm); background: var(--warm-soft); border-radius: 999px; padding: 4px 14px; font-size: 1rem; }
-.chip:active { transform: scale(.96); }
-
-.answer { display: flex; gap: 8px; align-items: stretch; }
-.answer textarea { flex: 1; font: inherit; font-size: 1.15rem; line-height: 1.8; min-height: 110px; padding: 10px 12px; border: 2px solid var(--line); border-radius: 12px; resize: vertical; background: #fffdf9; min-width: 0; }
-.q.free .answer textarea { min-height: 240px; }
-.mic { width: 78px; border: 3px solid var(--accent); background: var(--accent-soft); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: .85rem; font-weight: 700; padding: 6px 4px; }
-.mic .m { font-size: 2rem; line-height: 1; }
+/* 題目與選項 */
+.q { border-top: 2px dashed var(--line); padding-top: 14px; margin-top: 16px; }
+.q:first-of-type { border-top: 0; padding-top: 0; margin-top: 6px; }
+.q-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.q-head .text { font-size: 1.2rem; font-weight: 700; }
+.badge { font-size: .8rem; border-radius: 999px; padding: 1px 10px; font-weight: 700; }
+.badge.one { background: var(--accent-soft); color: var(--accent); }
+.badge.many { background: var(--warm-soft); color: #a8620a; }
+.badge.skip { background: #eee; color: var(--muted); }
+.icon-btn { border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 2px 10px; font-size: 1rem; }
+.opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.opts.long { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.opt { position: relative; border: 3px solid var(--line); background: var(--card); border-radius: 14px; padding: 10px 12px; text-align: left; display: flex; align-items: center; gap: 8px; min-height: 58px; }
+.opt .e { font-size: 1.7rem; line-height: 1; }
+.opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.opt[aria-pressed="true"]::after { content: "✔"; position: absolute; top: -10px; right: -8px; background: var(--accent); color: #fff; border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; font-size: .85rem; }
+.opt.other { border-style: dashed; color: var(--muted); }
+.opts.big .opt { flex-direction: column; text-align: center; justify-content: center; min-height: 110px; }
+.opts.big .opt .e { font-size: 2.4rem; }
+.opts.big .opt small { font-size: .8rem; color: var(--muted); font-weight: 400; }
+.other-row { display: flex; gap: 8px; margin-top: 10px; align-items: stretch; }
+.other-row input { flex: 1; min-width: 0; font: inherit; padding: 10px 12px; border: 3px solid var(--accent); border-radius: 12px; }
+.mic { border: 3px solid var(--accent); background: var(--accent-soft); border-radius: 12px; padding: 4px 12px; font-weight: 700; font-size: .9rem; white-space: nowrap; }
 .mic.on { border-color: var(--rec); background: #fde3e1; color: var(--rec); animation: pulse 1.2s infinite; }
 @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(214,54,43,.5); } 50% { box-shadow: 0 0 0 10px rgba(214,54,43,0); } }
-.interim { color: var(--muted); font-size: .95rem; min-height: 1.4em; margin: 4px 0 0; }
-.tools { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
-.tools .p { border: 2px solid var(--line); background: var(--card); border-radius: 10px; min-width: 44px; padding: 2px 10px; font-size: 1.1rem; }
-.tools .del { font-size: .85rem; color: var(--muted); border: 2px solid var(--line); background: var(--card); border-radius: 10px; padding: 4px 10px; }
-.sos { margin-left: auto; border: 3px solid var(--help); background: var(--help-soft); color: var(--help); border-radius: 999px; padding: 4px 16px; font-weight: 700; }
+.interim { color: var(--muted); font-size: .9rem; min-height: 1.2em; margin: 2px 0 0; }
 
-.help { background: var(--help-soft); border-radius: 12px; padding: 8px 14px; margin-top: 8px; border-left: 6px solid var(--help); }
-.help h4 { margin: 0; font-size: .95rem; color: var(--help); }
-.help ul { margin: 4px 0; padding-left: 1.3em; }
-.help .grp { font-size: .9rem; font-weight: 700; margin-top: 6px; }
+/* 即時預覽 */
+.preview { background: var(--ok-soft); border: 2px solid var(--ok); border-radius: 16px; padding: 14px 18px; }
+.preview h3 { margin: 0 0 6px; font-size: 1.05rem; color: var(--ok); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.preview p { margin: 4px 0; text-indent: 2em; font-size: 1.15rem; line-height: 1.9; }
+.preview .empty { text-indent: 0; color: var(--muted); font-size: 1rem; }
 
-details.more { margin-top: 18px; border: 2px dashed var(--accent); border-radius: 14px; padding: 8px 14px; background: #f8fbff; }
-details.more > summary { cursor: pointer; font-weight: 700; color: var(--accent); font-size: 1.1rem; }
-details.example { margin-top: 18px; background: var(--ok-soft); border-radius: 12px; padding: 10px 14px; }
-details.example summary { cursor: pointer; font-weight: 700; color: var(--ok); }
-details.example p { margin: 8px 0 0; text-indent: 2em; }
-.ex-pick { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-.ex-pick button { border: 2px solid var(--ok); background: #fff; border-radius: 999px; padding: 2px 12px; font-size: .9rem; }
-.ex-pick button[aria-pressed="true"] { background: var(--ok); color: #fff; }
-
+/* 完成頁 */
+.essay { background: #fffdf7; border: 2px solid var(--line); border-radius: 16px; padding: 18px 22px; }
+.essay h2 { text-align: center; font-family: var(--display); margin: 0; font-size: 1.7rem; }
+.essay .by { text-align: center; color: var(--muted); margin: 0 0 10px; }
+.essay p { text-indent: 2em; font-size: 1.2rem; line-height: 2; margin: 0 0 8px; }
+.big-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+.big-actions .btn { font-size: 1.3rem; padding: 18px; }
 .para-edit h3 { margin: 14px 0 6px; font-size: 1.05rem; color: var(--accent); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.para-edit textarea { width: 100%; font: inherit; font-size: 1.2rem; line-height: 2; min-height: 140px; padding: 10px 14px; border: 2px solid var(--line); border-radius: 12px; text-indent: 2em; background: #fffdf9; }
-.count { font-weight: 700; }
-.checklist { list-style: none; padding: 0; margin: 8px 0; }
-.checklist li { padding: 4px 0; }
-.checklist input { width: 22px; height: 22px; vertical-align: middle; margin-right: 8px; }
-.record { width: 100%; border-collapse: collapse; font-size: .9rem; }
-.record td, .record th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+.para-edit textarea { width: 100%; font: inherit; font-size: 1.15rem; line-height: 2; min-height: 130px; padding: 10px 14px; border: 2px solid var(--line); border-radius: 12px; text-indent: 2em; background: #fffdf9; }
+.punct { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.punct button { border: 2px solid var(--line); background: var(--card); border-radius: 10px; min-width: 42px; padding: 0 8px; font-size: 1.05rem; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.jump button { border: 2px solid var(--accent); background: var(--card); color: var(--accent); border-radius: 999px; padding: 2px 12px; font-size: .9rem; }
+.done-banner { text-align: center; font-family: var(--display); font-size: 1.8rem; color: var(--ok); margin: 0 0 10px; }
 
 .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 .btn { border: 0; border-radius: 14px; padding: 12px 20px; font-weight: 700; font-size: 1.05rem; background: var(--accent); color: #fff; }
 .btn.secondary { background: var(--card); color: var(--accent); border: 3px solid var(--accent); }
 .btn.ok { background: var(--ok); }
-.btn.warn { background: var(--card); color: var(--rec); border: 2px solid var(--rec); font-size: .9rem; padding: 8px 14px; }
+.btn.warn { background: var(--card); color: var(--rec); border: 2px solid var(--rec); font-size: .9rem; padding: 6px 12px; }
 
 footer.nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 3px solid var(--line); padding: 10px 16px; display: flex; justify-content: space-between; gap: 10px; z-index: 10; }
-footer.nav .btn { min-width: 130px; font-size: 1.15rem; }
+footer.nav .btn { min-width: 140px; font-size: 1.2rem; }
 footer.nav .btn[disabled] { opacity: .35; cursor: default; }
-
 .toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 20px; border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
 .toast.show { opacity: 1; }
-
 details.teacher { font-size: .9rem; color: var(--muted); }
-details.teacher summary { cursor: pointer; }
-
+details.teacher summary { cursor: pointer; font-weight: 700; }
+.sub-list { list-style: none; padding: 0; margin: 8px 0; }
+.sub-list li { border-bottom: 1px solid var(--line); padding: 8px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--ink); }
+.sub-list li b { flex: 1 1 200px; }
+.sub-list button { border: 2px solid var(--line); background: var(--card); border-radius: 10px; padding: 2px 10px; font-size: .85rem; }
 #printArea { display: none; }
 
 @media (max-width: 560px) {
   body { font-size: 18px; }
-  .mic { width: 64px; }
+  .opts { grid-template-columns: repeat(2, 1fr); }
+  .opts.long { grid-template-columns: 1fr; }
   footer.nav .btn { min-width: 0; flex: 1; }
-  .sos { margin-left: 0; }
 }
-
 @media print {
   @page { size: A4 portrait; margin: 14mm; }
   body { background: #fff; font-size: 14pt; }
@@ -158,6 +144,7 @@ details.teacher summary { cursor: pointer; }
 <body>
 <header class="top">
   <h1>✏️ 作文小幫手：那次，我流下眼淚</h1>
+  <button class="speak-toggle" id="speakToggle" aria-pressed="true">🔈 點選時唸出來</button>
   <span class="save-state" id="saveState">會自動儲存在這台裝置</span>
 </header>
 <nav class="steps" id="stepNav" aria-label="寫作步驟"></nav>
@@ -172,156 +159,273 @@ details.teacher summary { cursor: pointer; }
 <script>
 (() => {
 const TITLE = '那次，我流下眼淚';
-const STORE = 'essay-tears-v1';
+const STORE = 'essay-tears-v2';
+const SUBMIT_STORE = 'essay-tears-submitted';
 
-/* ================= 內容資料 ================= */
-const TYPES = {
-  sad:     { e: '😢', name: '難過的眼淚', sub: '失敗、失去、分開',
-             events: ['比賽輸了', '考試沒考好', '寵物生病或離開', '和好朋友吵架', '好朋友轉學'] },
-  wronged: { e: '😣', name: '委屈的眼淚', sub: '被誤會、被冤枉',
-             events: ['被同學誤會', '不是我做的卻被罵', '被別人笑', '東西被弄壞了', '說實話沒人相信'] },
-  moved:   { e: '🥹', name: '感動的眼淚', sub: '家人、朋友對我好',
-             events: ['生病時家人照顧我', '朋友幫助我', '收到生日驚喜', '阿公阿嬤來看我', '老師鼓勵我'] },
-  happy:   { e: '😭🎉', name: '開心的眼淚', sub: '努力很久終於成功',
-             events: ['學會騎腳踏車', '比賽得獎', '考試進步了', '終於學會游泳', '表演成功了'] },
-  mixed:   { e: '🌀', name: '好幾種心情', sub: '說不清楚，或心情一直變', events: [] }
-};
+/* ================================================================
+   選項資料：{P} 會換成學生選的人物（例如：媽媽）
+   ================================================================ */
+const TYPES = [
+  { v: 'sad', e: '😢', label: '難過的眼淚', sub: '失敗、失去、分開', fallbackP: '大家' },
+  { v: 'wronged', e: '😣', label: '委屈的眼淚', sub: '被誤會、被冤枉', fallbackP: '大家' },
+  { v: 'moved', e: '🥹', label: '感動的眼淚', sub: '家人、朋友對我好', fallbackP: '家人' },
+  { v: 'happy', e: '🥳', label: '開心的眼淚', sub: '努力很久終於成功', fallbackP: '大家' }
+];
 
-const EXAMPLES = {
+const EVENTS = {
   sad: [
-    '三年級的運動會，我和同學在操場上參加大隊接力。我們練習了一個多月，比賽前我又緊張又期待，很想幫班上拿到第一名。',
-    '比賽開始了，我拿到棒子用力往前跑。沒想到，我的腳一滑，整個人摔在跑道上。我看見其他班的同學一個個超過我，聽見大家「唉——」的聲音。我的心一下子從期待掉到了谷底。',
-    '那一刻，我的膝蓋好痛，眼眶也紅了。我趴在跑道上，緊緊咬著嘴唇，眼淚像斷了線的珍珠，一顆一顆掉下來。我小聲地說：「對不起……」心裡想：「都是我害大家輸了。」',
-    '我會哭，是因為我覺得對不起同學。後來，好朋友拍拍我的肩膀說：「沒關係，我們明年再一起努力！」我的心慢慢變得溫暖。這次流淚讓我明白了，失敗不可怕，只要不放棄就好。'
+    { v: '比賽輸了', e: '🏃', open: '參加一場很重要的比賽',
+      steps: ['比賽前，我們每天都很認真地練習。', '比賽開始了，我用盡全力去拚。', '沒想到，我在最重要的時候出了錯。', '最後，我們輸掉了比賽。'] },
+    { v: '考試沒考好', e: '📝', open: '準備一次很重要的考試',
+      steps: ['考試前，我每天都認真複習。', '考試的時候，我發現好多題目都不會寫。', '考卷發下來，分數比我想的低很多。', '我不敢把考卷拿給家人看。'] },
+    { v: '寵物生病或離開', e: '🐶', open: '照顧我最愛的寵物',
+      steps: ['我的寵物陪我度過了好多快樂的時光。', '有一天，牠突然生病了，一直沒有精神。', '我們帶牠去看醫生，可是牠還是越來越虛弱。', '最後，牠離開了我。'] },
+    { v: '和好朋友吵架', e: '💢', open: '一起玩',
+      steps: ['一開始，我們玩得很開心。', '後來，我們為了一件小事意見不一樣。', '我們越吵越大聲，誰也不讓誰。', '好朋友生氣地轉身走掉了。'] }
   ],
   wronged: [
-    '上個星期三，在教室裡，同學的鉛筆盒不見了。本來大家都開開心心地準備上美勞課。',
-    '一開始，大家都在找。接著，有一位同學指著我說：「是你拿的吧！」我看見全班都轉頭看我，聽見有人小聲地說話。我的心越跳越快。',
-    '那一刻，我的臉一下子變得好燙，喉嚨像被東西卡住，說不出話。我低著頭，眼淚在眼睛裡打轉。我心裡想：「明明不是我，為什麼大家都不相信我？」',
-    '我會哭，是因為我覺得好委屈。後來，鉛筆盒在置物櫃找到了，同學也跟我說對不起，我心裡的大石頭終於放下來了。這次流淚讓我明白了，不要隨便誤會別人。'
+    { v: '被同學誤會', e: '🙅', open: '上課',
+      steps: ['同學的東西突然不見了。', '有人說是我拿的。', '我一直解釋，可是大家都不相信我。', '大家都用奇怪的眼神看著我。'] },
+    { v: '不是我做的卻被罵', e: '😠', open: '做自己的事',
+      steps: ['突然，有東西被弄壞了。', '大人以為是我做的，大聲地罵我。', '我想解釋，可是沒有人聽我說。', '我只好一個人站在旁邊。'] },
+    { v: '被別人嘲笑', e: '🤭', open: '參加一個活動',
+      steps: ['我很認真地做好自己的事。', '沒想到，有人在旁邊笑我。', '越來越多人跟著一起笑。', '我覺得好丟臉，好想躲起來。'] },
+    { v: '說實話卻沒人相信', e: '🗣️', open: '說一件真的發生過的事',
+      steps: ['我把事情原原本本地說出來。', '可是大家都覺得我在說謊。', '我越說，大家越不相信。', '我覺得好無助。'] }
   ],
   moved: [
-    '去年冬天的晚上，我在家裡發高燒，媽媽一直陪在我身邊。那時候我全身不舒服，心情很差。',
-    '一開始，我全身發燙、頭好暈。接著，媽媽幫我量體溫、用毛巾幫我擦臉。我看見媽媽的眼睛紅紅的，她整個晚上都沒有睡覺。',
-    '第二天早上，我醒來看見媽媽趴在床邊睡著了。那一刻，我的鼻子酸酸的，眼淚忍不住流了下來。我輕輕握住媽媽的手，心想：「媽媽好辛苦，她好愛我。」',
-    '我會哭，是因為我被媽媽的愛感動了。後來，我抱著媽媽說：「謝謝妳。」心裡暖暖的。這次流淚讓我明白了，家人的愛是最溫暖的，我也要好好照顧媽媽。'
+    { v: '生病時家人照顧我', e: '🤒', open: '度過一個生病的夜晚',
+      steps: ['那天，我突然發高燒，全身都好不舒服。', '{P}一直守在我身邊，幫我量體溫、擦汗。', '整個晚上，{P}都沒有好好睡覺。', '第二天早上，我看見{P}累得趴在床邊睡著了。'] },
+    { v: '朋友幫助我', e: '🤝', open: '遇到一個大難題',
+      steps: ['我遇到一個自己解決不了的難題。', '我急得不知道該怎麼辦。', '這時候，{P}主動過來幫助我。', '{P}一直陪著我，直到問題解決。'] },
+    { v: '收到生日驚喜', e: '🎂', open: '過生日',
+      steps: ['那天，我以為大家都忘了我的生日。', '我一整天都悶悶不樂。', '突然，大家唱著生日快樂歌走了出來。', '{P}送給我一份特別準備的禮物。'] },
+    { v: '老師鼓勵我', e: '👩‍🏫', open: '上課',
+      steps: ['我一直覺得自己做不好，很沒有信心。', '有一次，我又做錯了，難過得想放棄。', '{P}走過來，蹲下來跟我說話。', '{P}告訴我，我已經進步很多了。'] }
   ],
   happy: [
-    '二年級的暑假，我在公園裡和爸爸一起練習騎腳踏車。一開始我很害怕，一直不敢踩。',
-    '我一直摔倒，膝蓋都破皮了。接著，爸爸在後面扶著我，一次又一次地陪我練習。我聽見爸爸說：「加油！你可以的！」我慢慢不那麼害怕了。',
-    '那天下午，我終於自己騎了好遠。那一刻，我開心得大叫，眼淚卻一直流下來。我用力揮手，大聲喊：「爸爸，我做到了！」',
-    '我會哭，是因為我努力了好久終於成功了。後來，爸爸給了我一個大大的擁抱。這次流淚讓我明白了，只要不放棄，就一定會成功。'
+    { v: '學會騎腳踏車', e: '🚲', open: '練習騎腳踏車',
+      steps: ['一開始，我一直摔倒，膝蓋都破皮了。', '{P}在後面扶著我，一次又一次地陪我練習。', '我一直告訴自己：「不要放棄！」', '有一天，我終於自己騎了好遠好遠。'] },
+    { v: '比賽得獎', e: '🏆', open: '參加一場比賽',
+      steps: ['比賽前，我花了很多時間練習。', '比賽的時候，我好緊張，可是我還是盡力表現。', '宣布名次的時候，我緊張得一直發抖。', '沒想到，我竟然聽見了自己的名字！'] },
+    { v: '考試進步了', e: '💯', open: '準備考試',
+      steps: ['以前，我的成績一直不太好。', '這次，我每天都認真複習，不會的就去問。', '考卷發下來，我的分數比以前進步好多。', '{P}還在大家面前稱讚我。'] },
+    { v: '表演成功了', e: '🎤', open: '準備一場表演',
+      steps: ['為了這場表演，我們練習了好久。', '上台前，我緊張得手心一直冒汗。', '表演的時候，我把練習的都表現出來了。', '表演結束時，台下響起了好大的掌聲。'] }
   ]
 };
+const GENERIC_STEPS = {
+  sad: ['一開始，事情看起來都很順利。', '沒想到，事情突然變糟了。', '我很努力，結果還是不如預期。', '最後，事情變得沒辦法挽回。'],
+  wronged: ['一開始，一切都很平常。', '突然，發生了一件我意想不到的事。', '大家都以為是我的錯。', '我想解釋，可是沒有人聽我說。'],
+  moved: ['那時候，我遇到了困難，心裡很不好受。', '這時候，{P}來到我的身邊。', '{P}為我做了好多好多事。', '我發現{P}一直默默地關心我。'],
+  happy: ['一開始，我怎麼樣都做不好。', '我沒有放棄，一次又一次地努力練習。', '{P}一直在旁邊為我加油。', '最後，我終於成功了！']
+};
+const SEE_HEAR = {
+  sad: ['我看見{P}失望的表情。', '我聽見大家「唉——」的嘆氣聲。', '我看見別人開心地歡呼，我卻笑不出來。', '四周好像突然變得好安靜。', '我聽見{P}輕輕地叫我的名字。'],
+  wronged: ['我看見大家都轉過頭來看著我。', '我聽見有人在小聲地說我的壞話。', '我看見{P}生氣地瞪著我。', '我聽見自己的心跳得好大聲。', '教室裡安靜得好可怕。'],
+  moved: ['我看見{P}的眼睛紅紅的，好像很累。', '我聽見{P}溫柔地叫我的名字。', '我看見{P}對我露出溫暖的笑容。', '我聽見大家為我加油的聲音。', '我看見{P}的手上拿著要送給我的東西。'],
+  happy: ['我聽見{P}大聲地為我加油。', '我看見大家都在為我拍手。', '我看見{P}笑得好開心。', '我聽見好大的歡呼聲。', '我看見自己的名字出現在前面。']
+};
+const SPEECH = {
+  sad: [{ t: '對不起，都是我不好……', me: 1 }, { t: '為什麼會這樣？', me: 1 }, { t: '我好想再試一次。', me: 1 }, { t: '沒關係，你已經很努力了。', me: 0 }, { t: '下次我們再一起加油！', me: 0 }],
+  wronged: [{ t: '不是我做的！', me: 1 }, { t: '為什麼大家都不相信我？', me: 1 }, { t: '請你們聽我說！', me: 1 }, { t: '對不起，是我們誤會你了。', me: 0 }, { t: '我相信你。', me: 0 }],
+  moved: [{ t: '謝謝你，我好愛你！', me: 1 }, { t: '你辛苦了。', me: 1 }, { t: '有你真好。', me: 1 }, { t: '傻孩子，不要哭。', me: 0 }, { t: '我會一直陪著你。', me: 0 }],
+  happy: [{ t: '我做到了！', me: 1 }, { t: '太棒了，我成功了！', me: 1 }, { t: '謝謝你一直陪我！', me: 1 }, { t: '你真的好厲害！', me: 0 }, { t: '我就知道你可以的！', me: 0 }]
+};
+const TONE = { sad: '哽咽地說', wronged: '激動地大聲說', moved: '小聲地說', happy: '大聲地喊' };
+const THINK = {
+  sad: ['如果再努力一點就好了。', '我是不是讓大家失望了？', '我好捨不得。'],
+  wronged: ['為什麼大家都不相信我？', '明明不是我，為什麼要怪我？', '我好希望有人能懂我。'],
+  moved: ['原來{P}這麼愛我。', '我一定要好好謝謝{P}。', '有{P}在身邊，真幸福。'],
+  happy: ['我真的做到了！', '原來努力是有用的！', '之前的辛苦都值得了！']
+};
+const WHY = {
+  sad: ['我那麼努力，卻還是失敗了', '我覺得對不起大家', '我失去了很重要的東西', '我好捨不得'],
+  wronged: ['我明明沒有做錯事，卻被冤枉了', '我說的話沒有人相信', '被別人誤會的感覺好難受', '我覺得自己被欺負了'],
+  moved: ['我感受到{P}對我滿滿的愛', '{P}為我付出了好多好多', '我沒想到大家這麼關心我', '我心裡好溫暖'],
+  happy: ['我努力了好久，終於成功了', '我實在太開心、太驕傲了', '我終於做到以前做不到的事', '大家都為我高興']
+};
+const LATER = {
+  sad: ['{P}走過來安慰我', '我擦乾眼淚，告訴自己下次再加油', '我慢慢地接受了這件事', '我和{P}一起想辦法'],
+  wronged: ['事情終於真相大白了', '{P}跟我說了對不起', '老師幫我把事情問清楚了', '我勇敢地把心裡的話說了出來'],
+  moved: ['我緊緊地抱住{P}，跟{P}說謝謝', '我決定也要好好照顧{P}', '我把這份感動一直放在心裡'],
+  happy: ['{P}給了我一個大大的擁抱', '大家都為我拍手', '我開心地跟大家分享這個好消息']
+};
+const LEARN = {
+  sad: ['失敗並不可怕，只要不放棄就好', '要珍惜身邊的人和東西', '盡力了就不用後悔'],
+  wronged: ['不能隨便誤會別人', '被誤會的時候，要勇敢說出真相', '要相信別人，也要用心聽別人說話'],
+  moved: ['家人的愛是最溫暖的', '朋友的幫助非常珍貴', '要把感謝說出來'],
+  happy: ['只要努力，就一定會有收穫', '堅持到底，就能做到以前做不到的事', '有人陪伴，就更有勇氣']
+};
+const LEARN_COMMON = ['流眼淚不是軟弱，而是把心裡的感覺說出來', '每一次的眼淚，都讓我長大了一點'];
 
-const BANK = [
-  { h: '👀 表情（眼睛和臉）', w: ['眼眶紅了', '眼淚在眼睛裡打轉', '淚水像斷了線的珍珠，一顆一顆掉下來', '眼前變得模糊', '眼淚忍不住流了下來', '鼻子酸酸的', '臉一下子變得好燙', '嘴巴扁扁的', '又哭又笑'] },
-  { h: '🙌 動作', w: ['肩膀一直發抖', '低著頭不說話', '緊緊咬著嘴唇', '用手擦眼淚', '撲進媽媽的懷裡', '蹲在地上', '轉過身去', '緊緊握住拳頭', '跳了起來'] },
-  { h: '🗣️ 說話的樣子', w: ['哽咽地說', '小聲地說', '大聲地喊', '結結巴巴地說', '用顫抖的聲音說', '溫柔地說'] },
-  { h: '💗 心裡的感覺', w: ['難過', '委屈', '感動', '開心', '後悔', '溫暖', '驕傲', '害怕', '生氣', '心好像被針刺了一下', '心裡暖暖的', '心裡像有一顆大石頭', '心跳得好快'] },
-  { h: '🔄 心情的變化', w: ['本來很期待，後來', '從緊張變成難過', '原本很生氣，後來慢慢平靜下來', '難過慢慢變成了溫暖', '破涕為笑', '心裡輕鬆多了', '心情像坐雲霄飛車'] }
+/* ================================================================
+   題目定義（pages → questions）
+   ================================================================ */
+const T = () => state.sel.type?.[0] || '';
+const typeObj = () => TYPES.find(t => t.v === T());
+const evObj = () => (EVENTS[T()] || []).find(e => e.v === state.sel.event?.[0]);
+const list = arr => (arr || []).map(v => typeof v === 'string' ? { v } : v);
+
+const Q = {
+  type: { q: '你想寫哪一種眼淚？', mode: 'one', req: 1, big: 1, opts: () => TYPES },
+  event: { q: '是什麼事情讓你流下眼淚？', mode: 'one', req: 1, other: '自己寫是什麼事', opts: () => EVENTS[T()] || [] },
+  time: { q: '這件事是什麼時候發生的？', mode: 'one', req: 1, other: '自己寫時間',
+    opts: () => [{ v: '去年暑假', e: '☀️' }, { v: '今年寒假', e: '❄️' }, { v: '上個學期', e: '📚' }, { v: '三年級的時候', e: '🎒' }, { v: '有一天放學後', e: '🏫' }, { v: '上個週末', e: '📅' }, { v: '我生日那天', e: '🎂' }, { v: '運動會那天', e: '🏅' }, { v: '一個下雨天', e: '🌧️' }] },
+  place: { q: '在哪裡發生的？', mode: 'one', req: 1, other: '自己寫地點',
+    opts: () => [{ v: '學校的操場上', e: '🏟️' }, { v: '教室裡', e: '🏫' }, { v: '家裡', e: '🏠' }, { v: '公園裡', e: '🌳' }, { v: '醫院裡', e: '🏥' }, { v: '比賽會場', e: '🏆' }, { v: '阿公阿嬤家', e: '👴' }, { v: '游泳池', e: '🏊' }] },
+  who: { q: '當時有誰在？', mode: 'many', other: '自己寫人物',
+    opts: () => [{ v: '媽媽', e: '👩' }, { v: '爸爸', e: '👨' }, { v: '阿公', e: '👴' }, { v: '阿嬤', e: '👵' }, { v: '哥哥', e: '👦' }, { v: '姊姊', e: '👧' }, { v: '弟弟', e: '🧒' }, { v: '妹妹', e: '👶' }, { v: '好朋友', e: '🧑‍🤝‍🧑' }, { v: '同學', e: '👫' }, { v: '老師', e: '👩‍🏫' }, { v: '教練', e: '🧑‍💼' }, { v: '只有我自己', e: '🙋' }] },
+  before: { q: '事情發生以前，你的心情怎麼樣？', mode: 'one',
+    opts: () => [{ v: '充滿期待', e: '🤩' }, { v: '有一點緊張', e: '😬' }, { v: '很開心', e: '😄' }, { v: '和平常一樣', e: '🙂' }, { v: '有一點害怕', e: '😨' }, { v: '不太舒服', e: '🤒' }] },
+  steps: { q: '事情是怎麼發生的？', mode: 'many', req: 1, long: 1, other: '自己加一句', hint: '照順序選，可以選很多句',
+    opts: () => list(evObj() ? evObj().steps : GENERIC_STEPS[T()]) },
+  see: { q: '那時候，你看見、聽見了什麼？', mode: 'many', long: 1, other: '自己加一句', opts: () => list(SEE_HEAR[T()]) },
+  face: { q: '流眼淚的時候，你的臉和眼睛是什麼樣子？（表情）', mode: 'many', req: 1, long: 1,
+    opts: () => [{ v: '我的眼眶一下子紅了', e: '🥺' }, { v: '眼淚在我的眼睛裡打轉', e: '💧' }, { v: '淚水像斷了線的珍珠，一顆一顆掉下來', e: '💦' }, { v: '我的鼻子酸酸的', e: '👃' }, { v: '我的臉變得好燙', e: '🔥' }, { v: '眼前變得模模糊糊的', e: '🌫️' }, { v: '我又哭又笑', e: '😂' }] },
+  act: { q: '你的身體做了什麼動作？（動作）', mode: 'many', long: 1,
+    opts: () => [{ v: '低著頭', e: '😞' }, { v: '緊緊咬著嘴唇', e: '😣' }, { v: '用手擦眼淚', e: '✋' }, { v: '撲進{P}的懷裡', e: '🤗', needP: 1 }, { v: '蹲在地上', e: '🧎' }, { v: '開心得跳了起來', e: '🙌' }, { v: '緊緊握住拳頭', e: '✊' }, { v: '肩膀一直發抖', e: '😖' }, { v: '轉過身去', e: '🔄' }] },
+  say: { q: '有人說了什麼話？（語言）', mode: 'many', long: 1, other: '自己寫我說的話',
+    opts: () => (SPEECH[T()] || []).map(s => ({ v: s.t, e: s.me ? '🙋 我說' : '🗣️ {P}說', me: s.me })) },
+  feel: { q: '你心裡有什麼感覺？（心理）', mode: 'many', req: 1,
+    opts: () => [{ v: '難過', e: '😢' }, { v: '委屈', e: '😣' }, { v: '感動', e: '🥹' }, { v: '開心', e: '😄' }, { v: '後悔', e: '😔' }, { v: '生氣', e: '😠' }, { v: '溫暖', e: '🤗' }, { v: '驕傲', e: '😎' }, { v: '害怕', e: '😨' }, { v: '失望', e: '😞' }, { v: '捨不得', e: '🥺' }, { v: '緊張', e: '😰' }] },
+  like: { q: '你的心好像什麼？', mode: 'one', long: 1,
+    opts: () => [{ v: '好像被針刺了一下', e: '📌' }, { v: '好像壓著一顆大石頭', e: '🪨' }, { v: '暖暖的，好像被太陽包圍', e: '☀️' }, { v: '怦怦地跳得好快', e: '💓' }, { v: '空空的，好像少了什麼', e: '🕳️' }, { v: '好像要飛起來了', e: '🎈' }] },
+  think: { q: '你心裡在想什麼？', mode: 'one', long: 1, other: '自己寫心裡的話', opts: () => list(THINK[T()]).map(o => ({ ...o, e: '💭' })) },
+  why: { q: '你為什麼會流下眼淚？', mode: 'one', req: 1, long: 1, other: '自己寫原因', opts: () => list(WHY[T()]) },
+  later: { q: '後來怎麼樣了？', mode: 'one', long: 1, other: '自己寫結果', opts: () => list(LATER[T()]) },
+  after: { q: '哭完以後，你的心情變得怎樣？', mode: 'one',
+    opts: () => [{ v: '輕鬆多了', e: '😌', s: '覺得輕鬆多了' }, { v: '慢慢平靜下來', e: '🍃', s: '的心慢慢平靜下來' }, { v: '心裡暖暖的', e: '🤗', s: '的心裡暖暖的' }, { v: '還有一點難過，但是好多了', e: '🌤️', s: '雖然還有一點難過，但是好多了' }, { v: '充滿了力量', e: '💪', s: '覺得全身充滿了力量' }] },
+  learn: { q: '這次流淚讓你明白了什麼？', mode: 'many', req: 1, long: 1, other: '自己寫明白的事', opts: () => list([...(LEARN[T()] || []), ...LEARN_COMMON]).map(o => ({ ...o, e: '💡' })) },
+  future: { q: '以後你想怎麼做？', mode: 'one', long: 1, other: '自己寫',
+    opts: () => [{ v: '以後我要更努力，不輕易放棄', e: '💪' }, { v: '以後我要好好珍惜身邊的人', e: '❤️' }, { v: '以後我要先把事情問清楚，不隨便誤會別人', e: '🔍' }, { v: '以後我要好好謝謝{P}，也要學著照顧別人', e: '🙏' }, { v: '以後遇到困難，我會勇敢面對', e: '🦁' }] }
+};
+Object.entries(Q).forEach(([k, q]) => { q.id = k; });
+
+const PAGES = [
+  { id: 'start', nav: '1 開始', emoji: '👋', title: '開始寫作文', qs: ['type'], paras: [] },
+  { id: 'event', nav: '2 事', emoji: '🤔', title: '發生了什麼事？', qs: ['event'], paras: [0] },
+  { id: 'tpw', nav: '3 時地人', emoji: '🗺️', title: '時間、地點、人物', qs: ['time', 'place', 'who'], paras: [0] },
+  { id: 'steps', nav: '4 經過', emoji: '🚶', title: '事情的經過', qs: ['before', 'steps'], paras: [0, 1] },
+  { id: 'see', nav: '5 看見聽見', emoji: '👀', title: '看見了什麼？聽見了什麼？', qs: ['see'], paras: [1] },
+  { id: 'moment', nav: '6 流淚那一刻', emoji: '💧', title: '流下眼淚的那一刻', qs: ['face', 'act'], paras: [2] },
+  { id: 'inner', nav: '7 說的話和心情', emoji: '💗', title: '說的話和心裡的感覺', qs: ['say', 'feel', 'like', 'think'], paras: [2] },
+  { id: 'why', nav: '8 原因和結果', emoji: '🌧️', title: '為什麼哭？後來呢？', qs: ['why', 'later', 'after'], paras: [3] },
+  { id: 'learn', nav: '9 明白了什麼', emoji: '🌈', title: '這次流淚讓我明白了…', qs: ['learn', 'future'], paras: [3] },
+  { id: 'final', nav: '10 完成', emoji: '🎉', title: '完成作文' }
 ];
 
-/* 每題：core 必寫題、more 擴充題；think=想一想（第1層提示）、s=句子開頭（第2層）、bank=好詞（第3層） */
-const STEPS = [
-  { id: 'intro', nav: '1 認識題目' },
-  { id: 'event', nav: '2 想一件事', emoji: '🤔', title: '想一件讓你流下眼淚的事',
-    lead: '先自己想一想：哪一次哭，你到現在還記得很清楚？用寫的或用說的都可以。',
-    core: [
-      { k: 'event', q: '是什麼事情讓你流下眼淚？', think: ['你什麼時候哭過？是在家裡、學校，還是其他地方？', '哪一次哭，你到現在還記得很清楚？', '可以是難過、委屈、感動，也可以是開心的眼淚喔！'],
-        eventIdeas: true }
-    ] },
-  { id: 'p1', nav: '3 開頭', emoji: '🌱', title: '第一段：開頭（起因）',
-    lead: '告訴讀者：這件事在什麼時候、什麼地方、和誰、發生了什麼事。',
-    points: ['什麼時候、在哪裡、和誰在一起', '發生了什麼事', '事情發生前，你的心情'],
-    core: [
-      { k: 'p1a', q: '什麼時候？在哪裡？有誰在？', think: ['那時候你幾年級？是放假、上課，還是特別的日子？', '你在家裡、學校，還是其他地方？', '旁邊有誰陪著你？'],
-        s: ['去年暑假，', '三年級的時候，', '有一天放學後，', '我和媽媽', '我和好朋友', '在學校的操場上', '在家裡'] },
-      { k: 'p1b', q: '發生了什麼事？', think: ['用一句話說說看，那天發生了什麼事？', '為什麼這件事你到現在還記得？'],
-        s: ['那天，', '我們正在', '我要參加', '突然，'] }
-    ],
-    more: [
-      { k: 'p1c', q: '事情發生之前，你的心情怎麼樣？', tag: '心情變化的起點', think: ['那時候你是開心、期待、緊張，還是普通？', '你心裡在想什麼？'],
-        s: ['那時候，我心裡', '我很期待', '我有一點緊張，因為'], bank: [3] }
-    ],
-    order: ['p1a', 'p1b', 'p1c'] },
-  { id: 'p2', nav: '4 經過', emoji: '🚶', title: '第二段：事情的經過',
-    lead: '按照順序說：先發生什麼，再發生什麼。也說說你看見、聽見了什麼。',
-    points: ['事情怎麼發展（一開始、接著、沒想到……）', '看見什麼、聽見什麼', '有人說了什麼話', '心情開始有什麼變化'],
-    core: [
-      { k: 'p2a', q: '事情是怎麼發展的？', think: ['先發生了什麼事？', '接下來呢？有沒有意想不到的事？'],
-        s: ['一開始，', '接著，', '然後，', '沒想到，', '過了一會兒，'] },
-      { k: 'p2b', q: '你看見了什麼？聽見了什麼？', think: ['閉上眼睛想一想，當時眼前是什麼畫面？', '有什麼聲音？有人在說話、在笑，還是在哭？'],
-        s: ['我看見', '我聽見', '四周', '大家都'] }
-    ],
-    more: [
-      { k: 'p2c', q: '有人說了什麼話嗎？', tag: '語言', think: ['誰說了話？他說了什麼？', '他說話的時候是什麼樣子？'],
-        s: ['他對我說：「', '媽媽說：「', '老師大聲地說：「'], bank: [2] },
-      { k: 'p2d', q: '這時候，你的心情開始有什麼變化？', tag: '心情變化', think: ['和剛開始比，你的心情有沒有不一樣？', '是越來越難過、越來越緊張，還是越來越開心？'],
-        s: ['我的心開始', '我越來越', '本來我很'], bank: [4] }
-    ],
-    order: ['p2a', 'p2c', 'p2b', 'p2d'] },
-  { id: 'p3', nav: '5 流淚那一刻', emoji: '💧', title: '第三段：流下眼淚的那一刻',
-    lead: '這段最重要！像放慢動作一樣，仔細寫出你的表情、動作、說的話和心裡的想法。',
-    points: ['臉和眼睛的表情', '身體的動作', '說了什麼話', '那一刻看見、聽見什麼', '心裡的想法和感覺'],
-    core: [
-      { k: 'p3a', q: '流淚的時候，你的眼睛和臉是什麼樣子？', tag: '表情', think: ['眼淚是慢慢流下來，還是一下子掉下來？', '你的鼻子、嘴巴、臉有什麼感覺？'],
-        s: ['那一刻，', '我的眼眶', '我忍不住'], bank: [0] },
-      { k: 'p3b', q: '你心裡在想什麼？是什麼感覺？', tag: '心理', think: ['那時候你心裡最想說的一句話是什麼？', '你覺得難過、委屈、感動，還是開心？為什麼？'],
-        s: ['我心想：「', '我的心裡覺得', '我好像'], bank: [3] }
-    ],
-    more: [
-      { k: 'p3c', q: '你的身體做了什麼動作？', tag: '動作', think: ['你的手、頭、身體在做什麼？', '你有沒有跑走、抱住誰、蹲下來？'],
-        s: ['我緊緊', '我低著頭', '我轉過身'], bank: [1] },
-      { k: 'p3d', q: '你說了什麼話？或別人對你說了什麼？', tag: '語言', think: ['你哭的時候有說話嗎？說了什麼？', '旁邊的人有對你說什麼嗎？'],
-        s: ['我哽咽地說：「', '我小聲地說：「', '媽媽抱著我說：「'], bank: [2] },
-      { k: 'p3e', q: '那一刻，你看見、聽見了什麼？', tag: '畫面', think: ['你身邊的人在做什麼？', '那時候很安靜，還是很吵？'],
-        s: ['我看見', '我聽見', '這時候，'] }
-    ],
-    order: ['p3a', 'p3c', 'p3d', 'p3e', 'p3b'] },
-  { id: 'p4', nav: '6 結尾', emoji: '🌈', title: '第四段：結尾（體會）',
-    lead: '寫出你為什麼哭，還有這次經驗讓你明白了什麼、有什麼改變。',
-    points: ['為什麼哭（真正的原因）', '後來怎麼了、哭完以後的心情', '這次流淚讓我明白了什麼、有什麼改變'],
-    core: [
-      { k: 'p4a', q: '你為什麼會哭？', think: ['是因為失敗、被誤會、被感動，還是太開心？', '不要只寫「我哭了」，寫出真正的原因。'],
-        s: ['我會哭，是因為', '我流下眼淚，是因為'], bank: [3] },
-      { k: 'p4b', q: '這次流淚讓你明白了什麼？你有什麼改變？', think: ['你學到了什麼？', '如果再遇到一樣的事，你會怎麼做？', '你對誰有了新的想法？'],
-        s: ['這次流淚讓我明白了', '我學會了', '從此以後，我', '我以後要'] }
-    ],
-    more: [
-      { k: 'p4c', q: '後來怎麼樣了？哭完以後，你的心情變得怎樣？', tag: '心情變化', think: ['事情最後的結果是什麼？', '哭完以後，你覺得輕鬆、平靜、溫暖，還是更難過？'],
-        s: ['後來，', '哭完以後，我', '最後，'], bank: [4] }
-    ],
-    order: ['p4a', 'p4c', 'p4b'] },
-  { id: 'final', nav: '7 完成作文' }
-];
-const PARA_STEPS = STEPS.filter(s => s.order);
-const ALL_Q = {};
-STEPS.forEach(st => [...(st.core || []), ...(st.more || [])].forEach(q => { ALL_Q[q.k] = q; }));
-const HELP_NAMES = ['自己完成', '💭 想一想', '✏️ 句子開頭', '💎 好詞'];
-
-/* ================= 狀態與儲存 ================= */
-const blank = () => ({ step: 0, name: '', type: '', ans: {}, mode: {}, help: {}, exOpened: {}, moreOpen: {}, exType: '', paras: null, parasSrc: '', checks: {} });
+/* ================= 狀態 ================= */
+const blank = () => ({ page: 0, name: '', sel: {}, other: {}, view: 'preview', custom: null, customSrc: '', submittedAt: '' });
 let state = blank();
+let speakOn = true;
 try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s && typeof s === 'object') state = Object.assign(state, s); } catch (e) {}
-if (state.event && !state.ans.event) state.ans.event = state.event; // 舊版資料
+try { speakOn = localStorage.getItem('essay-speak') !== 'off'; } catch (e) {}
 let saveTimer = null;
 function save(now) {
   clearTimeout(saveTimer);
   const go = () => {
-    try { localStorage.setItem(STORE, JSON.stringify(state)); $('saveState').textContent = '✅ 已自動儲存 ' + new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }); }
-    catch (e) { $('saveState').textContent = '⚠️ 這台裝置無法自動儲存，請記得下載'; }
+    try { localStorage.setItem(STORE, JSON.stringify(state)); $('saveState').textContent = '✅ 已自動儲存'; }
+    catch (e) { $('saveState').textContent = '⚠️ 無法自動儲存，請記得下載'; }
   };
-  now ? go() : (saveTimer = setTimeout(go, 400));
+  now ? go() : (saveTimer = setTimeout(go, 300));
 }
-
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2400); }
+function getSubs() { try { return JSON.parse(localStorage.getItem(SUBMIT_STORE) || '[]'); } catch (e) { return []; } }
+function setSubs(a) { try { localStorage.setItem(SUBMIT_STORE, JSON.stringify(a)); } catch (e) {} }
+
+/* ================= 文句產生與潤飾 ================= */
+function clean(s) { return String(s || '').trim().replace(/\s+/g, '').replace(/[，。！？、,.!?；;]+$/, ''); }
+function joinList(a) { return a.length <= 1 ? (a[0] || '') : a.length === 2 ? a[0] + '和' + a[1] : a.slice(0, -1).join('、') + '和' + a[a.length - 1]; }
+function end(s) { s = s.trim(); return !s ? '' : /[。！？」…]$/.test(s) ? s : s.replace(/[，、；：,]$/, '') + '。'; }
+// 取得某題的有效選擇（排除已不存在的選項），自己寫的內容放最後
+function vals(id) {
+  const q = Q[id];
+  const valid = q.opts().map(o => o.v);
+  const out = (state.sel[id] || []).filter(v => valid.includes(v));
+  if ((state.sel[id] || []).includes('__other') && clean(state.other[id])) out.push({ other: clean(state.other[id]) });
+  return out;
+}
+function one(id) { return vals(id)[0]; }
+function persons() {
+  return vals('who').map(v => typeof v === 'object' ? v.other : v).filter(v => v !== '只有我自己');
+}
+function P() { const p = persons(); return p.length === 1 ? p[0] : p.length ? p[0] : (typeObj()?.fallbackP || '大家'); }
+function R(s) { return String(s).replace(/\{P\}/g, P()); }
+function txt(v) { return typeof v === 'object' ? v.other : R(v); }
+
+function genParas() {
+  const t = T();
+  const paras = ['', '', '', ''];
+  // 第一段：時間、地點、人物、事件、事前心情
+  {
+    const time = one('time'), place = one('place'), ev = one('event'), ps = persons();
+    let s = '';
+    if (time) s += txt(time) + '，';
+    s += ps.length ? '我和' + joinList(ps) : '我';
+    if (place) s += '在' + txt(place);
+    const eo = evObj();
+    if (eo) s += eo.open + '。';
+    else if (ev) s += '，發生了一件讓我難忘的事：' + txt(ev) + '。';
+    else s = (time || place || ps.length) ? s + '。' : '';
+    const b = one('before');
+    if (b) s += `那時候，我的心裡${txt(b)}。`;
+    if (s) s += '沒想到，這件事竟然讓我流下了眼淚。';
+    paras[0] = s;
+  }
+  // 第二段：經過 + 看見聽見
+  paras[1] = [...vals('steps'), ...vals('see')].map(v => end(txt(v))).join('');
+  // 第三段：表情、動作、語言、心理
+  {
+    let s = '';
+    const face = vals('face').map(txt);
+    if (face.length) s += '那一刻，' + face.join('，') + '。';
+    const act = vals('act').map(txt);
+    if (act.length) s += (face.length ? '' : '那一刻，') + '我' + act.join('，') + '。';
+    vals('say').forEach(v => {
+      if (typeof v === 'object') s += `我說：「${end(v.other)}」`;
+      else {
+        const o = Q.say.opts().find(o => o.v === v);
+        s += o && o.me ? `我${TONE[t] || '說'}：「${R(v)}」` : `${P()}對我說：「${R(v)}」`;
+      }
+    });
+    const feel = vals('feel').map(txt);
+    if (feel.length) {
+      let f = feel.length === 1 ? '我的心裡好' + feel[0] : '我的心裡又' + feel.join('又');
+      if (one('like')) f += '，' + txt(one('like'));
+      s += f + '。';
+    } else if (one('like')) s += '我的心' + txt(one('like')) + '。';
+    const th = one('think');
+    if (th) s += `我心想：「${end(txt(th))}」`;
+    paras[2] = s;
+  }
+  // 第四段：原因、結果、心情變化、體會、以後
+  {
+    let s = '';
+    const why = one('why');
+    if (why) s += `我會流下眼淚，是因為${txt(why)}。`;
+    const later = one('later');
+    if (later) s += `後來，${txt(later)}。`;
+    const after = one('after');
+    if (after) s += `哭完以後，我${Q.after.opts().find(o => o.v === after)?.s || txt(after)}。`;
+    const learn = vals('learn').map(txt);
+    if (learn.length === 1) s += `這次流淚讓我明白了：${learn[0]}。`;
+    else if (learn.length > 1) s += `這次流淚讓我明白了：${learn.slice(0, -1).join('；')}；也明白了${learn[learn.length - 1]}。`;
+    const fu = one('future');
+    if (fu) s += end(txt(fu));
+    if (s) s += '那一次流下的眼淚，我永遠都不會忘記。';
+    paras[3] = s;
+  }
+  return paras;
+}
+function finalParas() { return (state.custom || genParas()).map(p => p.trim()).filter(Boolean); }
+function countChars(a) { return a.join('').replace(/\s/g, '').length; }
 
 /* ================= 朗讀 ================= */
 function speak(text) {
-  if (!('speechSynthesis' in window)) { toast('這個瀏覽器不能朗讀'); return; }
+  if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'zh-TW'; u.rate = 0.85;
@@ -333,381 +437,296 @@ function speak(text) {
 
 /* ================= 語音輸入 ================= */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null, recTa = null;
+let rec = null, recEl = null;
 function stopRec() { if (rec) { try { rec.stop(); } catch (e) {} } }
-function startRec(btn, ta) {
-  if (!SR) {
-    alert('這個瀏覽器不支援網頁語音輸入。\n\n請改用：\n・電腦：Chrome 或 Edge 瀏覽器\n・iPad／手機：點一下文字框，再按鍵盤上的 🎤 麥克風鍵說話');
-    ta.focus(); return;
-  }
-  if (rec) { const same = recTa === ta; stopRec(); if (same) return; }
+function startRec(btn, el, interimEl) {
+  if (!SR) { alert('這個瀏覽器不支援網頁語音輸入。\n\n・電腦：請用 Chrome 或 Edge\n・iPad／手機：點一下輸入框，再按鍵盤上的 🎤 麥克風鍵'); el.focus(); return; }
+  if (rec) { const same = recEl === el; stopRec(); if (same) return; }
   const r = new SR();
   r.lang = 'zh-TW'; r.continuous = true; r.interimResults = true;
-  const interimEl = ta.closest('[data-box]').querySelector('.interim');
-  const label = btn.querySelector('.l') || btn;
-  const orig = label.textContent;
-  rec = r; recTa = ta;
-  btn.classList.add('on'); label.textContent = '說完按我';
-  interimEl.textContent = '🎙️ 請開始說話…';
+  rec = r; recEl = el;
+  const orig = btn.textContent;
+  btn.classList.add('on'); btn.textContent = '⏹ 說完按我';
+  if (interimEl) interimEl.textContent = '🎙️ 請開始說話…';
   r.onresult = ev => {
     let interim = '';
     for (let i = ev.resultIndex; i < ev.results.length; i++) {
       const res = ev.results[i];
-      if (res.isFinal) insertText(ta, res[0].transcript.replace(/\s+/g, ''));
+      if (res.isFinal) insertText(el, res[0].transcript.replace(/\s+/g, ''));
       else interim += res[0].transcript;
     }
-    interimEl.textContent = interim ? '🎙️ ' + interim : '🎙️ 繼續說，或按「說完按我」';
+    if (interimEl) interimEl.textContent = interim ? '🎙️ ' + interim : '';
   };
   r.onerror = ev => {
-    if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') alert('沒有麥克風權限。請在瀏覽器網址列旁邊允許使用麥克風，再試一次。');
+    if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') alert('沒有麥克風權限。請在瀏覽器網址列旁邊允許使用麥克風。');
     else if (ev.error === 'no-speech') toast('沒有聽到聲音，再試一次');
     else if (ev.error !== 'aborted') toast('語音輸入出了問題：' + ev.error);
   };
-  r.onend = () => {
-    btn.classList.remove('on'); label.textContent = orig === '說完按我' ? '按我說話' : orig;
-    interimEl.textContent = '';
-    if (rec === r) { rec = null; recTa = null; }
-  };
-  try { r.start(); } catch (e) { r.onend(); toast('請再按一次麥克風'); }
+  r.onend = () => { btn.classList.remove('on'); btn.textContent = orig; if (interimEl) interimEl.textContent = ''; if (rec === r) { rec = null; recEl = null; } };
+  try { r.start(); } catch (e) { r.onend(); }
 }
-
-/* ================= 插入文字 ================= */
-let lastTa = null;
-function insertText(ta, text) {
-  const useCursor = document.activeElement === ta || ta._hadFocus;
-  const s = useCursor ? ta.selectionStart : ta.value.length, e = useCursor ? ta.selectionEnd : ta.value.length;
-  ta.value = ta.value.slice(0, s) + text + ta.value.slice(e);
-  const pos = s + text.length;
-  ta.setSelectionRange(pos, pos);
-  ta.dispatchEvent(new Event('input', { bubbles: true }));
-}
-
-/* ================= 組合段落 ================= */
-function endPunct(s) {
-  s = (s || '').trim();
-  if (!s) return '';
-  return /[。！？」…～]$/.test(s) ? s : s.replace(/[，、；：,]$/, '') + '。';
-}
-function guidedText(st) { return st.order.map(k => endPunct(state.ans[k])).join(''); }
-function paraText(st) { return state.mode[st.id] === 'free' ? (state.ans['free_' + st.id] || '').trim() : guidedText(st); }
-function buildParas() { return PARA_STEPS.map(paraText); }
-function essayText() { return (state.paras || buildParas()).map(p => p.trim()).filter(Boolean); }
-function countChars(arr) { return arr.join('').replace(/\s/g, '').length; }
-function stepHasText(st) {
-  if (st.id === 'intro') return !!state.name;
-  if (st.order) return !!paraText(st);
-  if (st.core) return st.core.some(q => (state.ans[q.k] || '').trim());
-  return false;
-}
-
-/* ================= 畫面元件 ================= */
-function helpHtml(q) {
-  const lv = state.help[q.k] || 0;
-  let h = '';
-  if (lv >= 1) h += `<div class="help"><h4>💭 想一想</h4><ul>${q.think.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`;
-  if (lv >= 2) {
-    if (q.eventIdeas) {
-      h += `<div class="help"><h4>💡 別人的點子（可以參考，也可以寫不一樣的）</h4>${Object.values(TYPES).filter(t => t.events.length).map(t =>
-        `<div class="grp">${t.e} ${t.name}</div><div class="chips">${t.events.map(w => `<button class="chip" data-ins="${esc(w)}" data-target="${q.k}">${esc(w)}</button>`).join('')}</div>`).join('')}</div>`;
-    } else {
-      h += `<div class="help"><h4>✏️ 句子開頭（點一下加入，再接著寫）</h4><div class="chips">${q.s.map(s => `<button class="chip" data-ins="${esc(s)}" data-target="${q.k}">${esc(s)}</button>`).join('')}</div></div>`;
-    }
-  }
-  if (lv >= 3 && q.bank) {
-    h += `<div class="help"><h4>💎 好詞寶庫（點一下加入）</h4>${q.bank.map(i => `<div class="grp">${BANK[i].h}</div><div class="chips">${BANK[i].w.map(w => `<button class="chip" data-ins="${esc(w)}" data-target="${q.k}">${esc(w)}</button>`).join('')}</div>`).join('')}</div>`;
-  }
-  return h;
-}
-function maxHelp(q) { return q.bank ? 3 : 2; }
-function sosLabel(q) {
-  const lv = state.help[q.k] || 0;
-  if (lv >= maxHelp(q)) return '';
-  return ['🆘 我卡住了', '🆘 還需要幫忙', '🆘 給我一些好詞'][lv];
-}
-
-function qHtml(q, n, opts = {}) {
-  const sos = sosLabel(q);
-  return `<div class="q${opts.first ? ' first' : ''}${opts.free ? ' free' : ''}" data-box="${q.k}" data-n="${n}">
-    <div class="q-head"><span class="num">${n}</span><span class="text">${esc(q.q)}${q.tag ? ` <span class="tag">（${esc(q.tag)}）</span>` : ''}</span>
-      <button class="icon-btn" data-speak="${esc(q.q)}" aria-label="朗讀題目">🔊</button></div>
-    <div class="answer">
-      <textarea id="ta-${q.k}" data-k="${q.k}" placeholder="${opts.free ? '用自己的話寫這一段。可以打字，也可以按麥克風用說的。' : '先試著自己寫寫看。可以打字，也可以按右邊的麥克風用說的。'}">${esc(state.ans[q.k] || '')}</textarea>
-      <button class="mic" data-mic="${q.k}" aria-label="語音輸入"><span class="m">🎤</span><span class="l">按我說話</span></button>
-    </div>
-    <p class="interim"></p>
-    <div class="tools">${['，', '。', '！', '？', '「', '」', '：'].map(p => `<button class="p" data-ins="${p}" data-target="${q.k}">${p}</button>`).join('')}
-      <button class="del" data-undo="${q.k}">⌫ 刪一個字</button>
-      ${sos ? `<button class="sos" data-sos="${q.k}">${sos}</button>` : ''}</div>
-    ${helpHtml(q)}
-  </div>`;
-}
-function rerenderQ(k) {
-  const box = document.querySelector(`[data-box="${k}"]`);
-  if (!box) return;
-  const q = ALL_Q[k] || freeQ(STEPS[state.step]);
-  const tmp = document.createElement('div');
-  tmp.innerHTML = qHtml(q, box.dataset.n, { first: box.classList.contains('first'), free: box.classList.contains('free') });
-  box.replaceWith(tmp.firstElementChild);
-}
-function freeQ(st) {
-  const qs = [...st.core, ...(st.more || [])];
-  const bank = [...new Set(qs.flatMap(q => q.bank || []))];
-  return { k: 'free_' + st.id, q: '用自己的話寫這一段', think: st.points.map(p => '這段可以寫：' + p), s: [...new Set(qs.flatMap(q => q.s))], bank: bank.length ? bank : null };
-}
-function exampleHtml(st, idx) {
-  const t = state.exType || (EXAMPLES[state.type] ? state.type : '');
-  return `<details class="example" data-ex="${st.id}"><summary>📖 還是想不出來？看看別人怎麼寫</summary>
-    <div class="ex-pick">${Object.keys(EXAMPLES).map(k => `<button data-extype="${k}" aria-pressed="${k === t}">${TYPES[k].e} ${TYPES[k].name}</button>`).join('')}</div>
-    ${t ? `<p>${esc(EXAMPLES[t][idx])}</p>` : '<p style="text-indent:0">選一種眼淚看看範例。</p>'}
-    <p style="text-indent:0;font-size:.9rem;color:var(--muted)">⭐ 範例只是參考，請寫<b>你自己</b>的故事喔！</p></details>`;
+function insertText(el, text) {
+  const useCursor = document.activeElement === el || el._hadFocus;
+  const s = useCursor ? el.selectionStart : el.value.length, e = useCursor ? el.selectionEnd : el.value.length;
+  el.value = el.value.slice(0, s) + text + el.value.slice(e);
+  el.setSelectionRange(s + text.length, s + text.length);
+  el.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 /* ================= 畫面 ================= */
+function qHtml(id) {
+  const q = Q[id];
+  let opts = q.opts();
+  if (!persons().length) opts = opts.filter(o => !o.needP);
+  const sel = state.sel[id] || [];
+  const badge = q.mode === 'one' ? '<span class="badge one">選一個</span>' : '<span class="badge many">可以選很多個</span>';
+  const skip = q.req ? '' : '<span class="badge skip">可以跳過</span>';
+  const otherOn = sel.includes('__other');
+  return `<div class="q" data-qbox="${id}">
+    <div class="q-head"><span class="text">${esc(q.q)}</span>${badge}${skip}
+      <button class="icon-btn" data-speak="${esc(q.q)}" aria-label="朗讀題目">🔊</button></div>
+    ${q.hint ? `<div class="lead" style="margin-top:-4px">${esc(q.hint)}</div>` : ''}
+    <div class="opts${q.long ? ' long' : ''}${q.big ? ' big' : ''}">
+      ${opts.map(o => `<button class="opt" data-q="${id}" data-v="${esc(o.v)}" aria-pressed="${sel.includes(o.v)}">${o.e ? `<span class="e"${Array.from(o.e).length > 2 ? ' style="font-size:1rem;white-space:nowrap"' : ''}>${esc(R(o.e))}</span>` : ''}<span>${esc(R(o.v))}${o.sub ? `<br><small>${esc(o.sub)}</small>` : ''}</span></button>`).join('')}
+      ${q.other ? `<button class="opt other" data-q="${id}" data-v="__other" aria-pressed="${otherOn}"><span class="e">✏️</span><span>${esc(q.other)}</span></button>` : ''}
+    </div>
+    ${q.other && otherOn ? `<div class="other-row"><input data-other="${id}" value="${esc(state.other[id] || '')}" placeholder="用打的，或按麥克風用說的"><button class="mic" data-mic-other="${id}">🎤 用說的</button></div><p class="interim" data-interim="${id}"></p>` : ''}
+  </div>`;
+}
+function previewHtml(pg) {
+  if (!pg.paras || !pg.paras.length) return '';
+  const paras = genParas();
+  const shown = pg.paras.map(i => paras[i]).filter(Boolean);
+  return `<section class="preview" id="preview"><h3>📝 小幫手幫你寫成句子了 <button class="icon-btn" data-speak-preview="1">🔊 唸給我聽</button></h3>
+    ${shown.length ? shown.map(p => `<p>${esc(p)}</p>`).join('') : '<p class="empty">點選上面的選項，句子就會出現在這裡。</p>'}</section>`;
+}
+function updatePreview() {
+  const el = $('preview');
+  if (!el) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = previewHtml(PAGES[state.page]);
+  el.replaceWith(tmp.firstElementChild);
+}
+function pageDone(i) {
+  const pg = PAGES[i];
+  if (!pg.qs) return !!state.submittedAt;
+  return pg.qs.every(id => !Q[id].req || vals(id).length);
+}
 function renderNav() {
-  $('stepNav').innerHTML = STEPS.map((s, i) =>
-    `<button data-go="${i}" class="${i === state.step ? 'current' : stepHasText(s) ? 'done' : ''}">${s.nav}</button>`).join('');
-  $('prevBtn').disabled = state.step === 0;
-  $('nextBtn').style.visibility = state.step === STEPS.length - 1 ? 'hidden' : 'visible';
-  $('nextBtn').textContent = state.step === STEPS.length - 2 ? '完成作文 ✅' : '下一步 ➡';
+  $('stepNav').innerHTML = PAGES.map((p, i) => `<button data-go="${i}" class="${i === state.page ? 'current' : (p.qs ? p.qs.some(id => vals(id).length) && pageDone(i) : state.submittedAt) ? 'done' : ''}">${p.nav}</button>`).join('');
+  $('prevBtn').disabled = state.page === 0;
+  const last = state.page === PAGES.length - 1;
+  $('nextBtn').style.visibility = last ? 'hidden' : 'visible';
+  $('nextBtn').textContent = state.page === PAGES.length - 2 ? '看我的作文 ✅' : '下一步 ➡';
 }
 
-function render() {
+function render(keepScroll) {
   stopRec();
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
-  const st = STEPS[state.step];
+  const y = window.scrollY;
+  const pg = PAGES[state.page];
   let h = '';
-  if (st.id === 'intro') {
+  if (pg.id === 'start') {
     h = `<section class="card">
-      <h2 class="step-title"><span class="emoji">📖</span>認識題目</h2>
       <div class="topic-box"><p class="t">${TITLE}</p></div>
-      <p class="lead" style="margin-top:14px">每個人都哭過。有時候因為<b>難過</b>，有時候因為<b>委屈</b>，有時候因為<b>感動</b>，有時候是<b>開心</b>到哭。</p>
-      <p class="lead">請寫一次讓你印象很深的「流淚」經驗。</p>
-      <div class="tip">📝 這篇作文有四段：
-        <ol class="simple"><li>🌱 開頭：什麼時候、在哪裡、發生什麼事</li><li>🚶 經過：事情怎麼發展</li><li>💧 流淚那一刻：表情、動作、說的話、心裡的想法</li><li>🌈 結尾：為什麼哭、明白了什麼</li></ol>
-        記得：不要只寫「我哭了」，要寫出「<b>為什麼哭</b>」、「<b>心情怎麼變化</b>」和「<b>這次流淚讓我明白了什麼</b>」。</div>
-      <div class="tip" style="background:var(--help-soft);border-color:var(--help)">💪 <b>先試著自己寫！</b>卡住的時候，再按紫色的 <b>🆘 我卡住了</b>，小幫手會一點一點幫你。<br>
-        每一段都可以選「一題一題回答」或「我想自己寫這一段」。</div>
-      <button class="btn secondary" data-speak="作文題目，那次，我流下眼淚。請寫一次讓你印象很深的流淚經驗。不要只寫我哭了，要寫出為什麼哭、心情怎麼變化，和這次流淚讓我明白了什麼。先試著自己寫，卡住的時候，再按紫色的我卡住了按鈕。">🔊 唸給我聽</button>
-      <label class="name">我的名字：<input id="nameInput" value="${esc(state.name)}" placeholder="寫上名字" autocomplete="off"></label>
+      <p style="margin:12px 0 4px">每個人都哭過。這次我們要寫一次讓你<b>印象很深的流淚經驗</b>。</p>
+      <p style="margin:0 0 12px">你只要<b>一題一題點選答案</b>，小幫手就會幫你把句子寫好，最後變成一篇作文！</p>
+      <button class="btn secondary" data-speak="作文題目，那次，我流下眼淚。每個人都哭過。這次我們要寫一次讓你印象很深的流淚經驗。你只要一題一題點選答案，小幫手就會幫你把句子寫好。">🔊 唸給我聽</button>
+      <label class="name" style="margin-top:14px">✍️ 我的名字：<input id="nameInput" value="${esc(state.name)}" placeholder="寫上名字" autocomplete="off"></label>
     </section>
-    <details class="teacher card"><summary>👩‍🏫 給老師／家長的說明</summary>
-      <p>・<b>先獨立、後協助</b>：題目一開始只有問題和空白格。學生按「🆘 我卡住了」才逐層出現提示：① 💭 想一想（引導問題）→ ② ✏️ 句子開頭 → ③ 💎 好詞寶庫。範例收在每段最下方。</p>
-      <p>・<b>擴充而非限制</b>：每段只有 2 題必寫，「➕ 我還想寫更多」裡有表情、動作、語言、心理、心情變化等擴充題；每段也可以切換成「我想自己寫這一段」自由創作。最後一頁可以修改全文、加段落。</p>
-      <p>・語音輸入：電腦請用 Chrome／Edge；iPad 可用鍵盤上的麥克風鍵。</p>
-      <p>・最後一頁有「提示使用紀錄」，可以看出哪些題目是學生獨立完成、哪些用了哪一層提示，方便記錄 IEP 的協助程度。</p>
-      <p>・內容自動存在這台裝置的瀏覽器。換學生前，請先下載或列印，再按「開始新的作文」。</p>
-    </details>`;
-  } else if (st.id === 'event') {
+    <section class="card">${qHtml('type')}</section>
+    ${teacherHtml()}`;
+  } else if (pg.qs) {
+    const ev = one('event');
     h = `<section class="card">
-      <h2 class="step-title"><span class="emoji">${st.emoji}</span>${st.title}</h2>
-      <p class="lead">${st.lead}</p>
-      ${qHtml(st.core[0], 1, { first: true })}
-      <div class="q"><div class="q-head"><span class="num">2</span><span class="text">這是哪一種眼淚？<span class="tag">（可以不選）</span></span></div>
-      <div class="types">${Object.entries(TYPES).map(([k, v]) => `<button class="type" data-type="${k}" aria-pressed="${state.type === k}"><span class="e">${v.e}</span><b>${v.name}</b><small>${v.sub}</small></button>`).join('')}</div></div>
-      <div class="tip">💡 選一件你<b>記得最清楚</b>的事，比較好寫喔！</div>
-    </section>`;
-  } else if (st.order) {
-    const idx = PARA_STEPS.indexOf(st);
-    const free = state.mode[st.id] === 'free';
-    const ev = (state.ans.event || '').trim();
-    let body;
-    if (free) {
-      body = `<div class="tip">✍️ 這段可以寫：${st.points.map(p => `「${esc(p)}」`).join('、')}。<br>不用全部都寫，也可以寫更多你想寫的！</div>
-        ${qHtml(freeQ(st), '✍️', { first: true, free: true })}`;
-    } else {
-      let n = 0;
-      body = st.core.map((q, i) => qHtml(q, ++n, { first: i === 0 })).join('') +
-        (st.more ? `<details class="more" data-more="${st.id}" ${state.moreOpen[st.id] ? 'open' : ''}><summary>➕ 我還想寫更多（可以不寫）</summary>
-          ${st.more.map((q, i) => qHtml(q, ++n, { first: i === 0 })).join('')}</details>` : '');
-    }
-    h = `<section class="card">
-      <h2 class="step-title"><span class="emoji">${st.emoji}</span>${st.title}</h2>
-      <p class="lead">${st.lead} <button class="icon-btn" data-speak="${esc(st.title + '。' + st.lead)}">🔊</button></p>
-      ${ev ? `<div class="tip">📌 我要寫的事：<b>${esc(ev)}</b></div>` : ''}
-      <div class="mode-switch">
-        <button data-mode="guided" aria-pressed="${!free}">🧩 一題一題回答</button>
-        <button data-mode="free" aria-pressed="${free}">✍️ 我想自己寫這一段</button>
-      </div>
-      ${body}
-      ${exampleHtml(st, idx)}
-    </section>`;
-  } else if (st.id === 'final') {
-    const fresh = buildParas();
-    if (!state.paras) { state.paras = fresh; state.parasSrc = JSON.stringify(fresh); }
-    else if (JSON.stringify(fresh) !== state.parasSrc) {
-      const editedHere = JSON.stringify(state.paras) !== state.parasSrc;
-      if (!editedHere || confirm('前面步驟的內容改過了，要更新這篇作文嗎？\n按「取消」會保留你在這一頁改過的內容。')) {
-        state.paras = fresh; toast('作文已經更新');
-      }
-      state.parasSrc = JSON.stringify(fresh);
-    }
-    const empty = state.paras.every(p => !p.trim());
-    h = `<section class="card">
-      <h2 class="step-title"><span class="emoji">🎉</span>完成作文！</h2>
-      <p class="lead">小幫手把你寫的內容組合成一篇作文了。讀一讀，想怎麼改都可以：加句子、換詞語、調整順序都沒問題！</p>
-      ${empty ? '<div class="tip">⚠️ 還沒有內容喔！請回到前面的步驟寫寫看。</div>' : ''}
-      <div class="topic-box" style="padding:10px"><p class="t" style="font-size:1.6rem">${TITLE}</p><p style="margin:0">${esc(state.name || '')}</p></div>
-      <div class="para-edit">${state.paras.map((p, i) => `<div class="para-edit-item" data-box="para${i}"><h3>${PARA_STEPS[i] ? PARA_STEPS[i].emoji : '✨'} 第${'一二三四五六七八九十'[i] || i + 1}段
-        <button class="icon-btn" data-mic-para="${i}" style="font-size:.85rem"><span class="l">🎤 用說的加句子</span></button></h3>
-        <textarea data-para="${i}">${esc(p)}</textarea><p class="interim"></p></div>`).join('')}</div>
-      <p>全文共 <span class="count" id="charCount">${countChars(state.paras)}</span> 字</p>
-      <div class="actions">
-        <button class="btn secondary" id="readAll">🔊 唸整篇給我聽</button>
-        <button class="btn secondary" id="addPara">➕ 加一段</button>
-        <button class="btn secondary" id="rebuild">🔄 重新從前面的回答組合</button>
-      </div>
+      <h2 class="step-title"><span class="emoji">${pg.emoji}</span>${pg.title}</h2>
+      ${T() ? `<p class="lead">${typeObj().e} ${typeObj().label}${ev ? '・' + esc(txt(ev)) : ''}</p>` : ''}
+      ${pg.qs.map(qHtml).join('')}
     </section>
-    <section class="card">
-      <h2 class="step-title" style="font-size:1.3rem">✅ 自己檢查一下</h2>
-      <ul class="checklist">${['我有寫出什麼時候、在哪裡、發生什麼事', '我有按照順序寫出事情的經過', '我有寫出流淚時的表情或動作', '我有寫出說的話或心裡的想法', '我有寫出心情的變化（之前→流淚時→之後）', '我有寫出「為什麼哭」', '我有寫出「這次流淚讓我明白了什麼」']
-        .map((c, i) => `<li><label><input type="checkbox" data-check="${i}" ${state.checks[i] ? 'checked' : ''}>${c}</label></li>`).join('')}</ul>
-      <p style="font-size:.9rem;color:var(--muted)">還沒寫到的，可以點上面的步驟回去補，或直接在這頁加上去。</p>
-    </section>
-    <section class="card">
-      <h2 class="step-title" style="font-size:1.3rem">🖨️ 儲存與列印</h2>
-      <div class="actions">
-        <button class="btn ok" data-print="lined">🖨️ 列印（橫線紙）</button>
-        <button class="btn ok" data-print="grid">🖨️ 列印（稿紙格子）</button>
-        <button class="btn secondary" id="dlDoc">💾 下載 Word 檔</button>
-        <button class="btn secondary" id="dlTxt">💾 下載文字檔</button>
-        <button class="btn secondary" id="saveNow">📌 儲存</button>
-      </div>
-      <p style="font-size:.9rem;color:var(--muted)">想存成 PDF：按「列印」後，印表機選「另存為 PDF」。</p>
-      <div class="actions"><button class="btn warn" id="resetAll">🗑️ 開始新的作文（清除全部）</button></div>
-    </section>
-    <details class="teacher card"><summary>👩‍🏫 提示使用紀錄（給老師）</summary>${recordHtml()}</details>`;
+    ${previewHtml(pg)}`;
+  } else {
+    h = finalHtml();
   }
   $('main').innerHTML = h;
   renderNav();
-  window.scrollTo(0, 0);
+  window.scrollTo(0, keepScroll ? y : 0);
 }
 
-function recordRows() {
-  const rows = [];
-  STEPS.filter(s => s.core).forEach(st => {
-    const free = state.mode[st.id] === 'free';
-    const qs = free ? [freeQ(st)] : [...st.core, ...(st.more || [])];
-    const items = qs.filter(q => (state.ans[q.k] || '').trim() || state.help[q.k])
-      .map(q => `${free ? '自由寫作' : q.q.replace(/[？?].*$/, '？')}：${HELP_NAMES[state.help[q.k] || 0]}${(state.ans[q.k] || '').trim() ? '' : '（未作答）'}`);
-    const moreUsed = !free && (st.more || []).filter(q => (state.ans[q.k] || '').trim()).length;
-    rows.push({ step: st.nav.replace(/^\d\s/, ''), mode: st.order ? (free ? '✍️ 自己寫' : '🧩 逐題') : '', items, more: moreUsed, ex: !!state.exOpened[st.id] });
-  });
-  return rows;
+function essayBox(paras) {
+  return `<div class="essay"><h2>${TITLE}</h2><p class="by">${esc(state.name || '')}</p>${paras.map(p => `<p>${esc(p)}</p>`).join('') || '<p style="text-indent:0">還沒有內容，請回到前面點選答案。</p>'}</div>`;
 }
-function recordHtml() {
-  return `<table class="record"><tr><th>段落</th><th>方式</th><th>各題提示層級</th><th>擴充題</th><th>看範例</th></tr>${recordRows().map(r =>
-    `<tr><td>${r.step}</td><td>${r.mode}</td><td>${r.items.map(esc).join('<br>') || '—'}</td><td>${r.more ? r.more + ' 題' : '—'}</td><td>${r.ex ? '有' : '—'}</td></tr>`).join('')}</table>
-    <p>提示層級：自己完成 → 💭 想一想 → ✏️ 句子開頭 → 💎 好詞</p>`;
+function finalHtml() {
+  const gen = genParas();
+  const paras = finalParas();
+  const stale = state.custom && JSON.stringify(gen) !== state.customSrc;
+  const missing = PAGES.filter(p => p.qs && !pageDone(PAGES.indexOf(p)));
+  if (state.view === 'done') {
+    return `<section class="card">
+      <p class="done-banner">🎉 作文送出了！你好棒！</p>
+      ${essayBox(paras)}
+      <p>全文共 <b>${countChars(paras)}</b> 字　・　送出時間：${esc(state.submittedAt)}</p>
+      <div class="actions">
+        <button class="btn ok" data-print="lined">🖨️ 列印（橫線紙）</button>
+        <button class="btn ok" data-print="grid">🖨️ 列印（稿紙格子）</button>
+        <button class="btn secondary" data-dl="doc">💾 下載 Word 檔</button>
+        <button class="btn secondary" data-dl="txt">💾 下載文字檔</button>
+      </div>
+      <p style="font-size:.9rem;color:var(--muted)">想存成 PDF：按「列印」後，印表機選「另存為 PDF」。</p>
+      <div class="actions">
+        <button class="btn secondary" data-view="edit">✏️ 我還想再修改</button>
+        <button class="btn warn" id="newEssay">🆕 寫一篇新的作文</button>
+      </div>
+    </section>`;
+  }
+  if (state.view === 'edit') {
+    const cur = state.custom || gen;
+    return `<section class="card">
+      <h2 class="step-title"><span class="emoji">✏️</span>修改我的作文</h2>
+      <div class="tip"><b>方法一：回去改選項</b>（小幫手會重新幫你寫句子）
+        <div class="jump">${PAGES.filter(p => p.qs).map(p => `<button data-go="${PAGES.indexOf(p)}">${p.emoji} ${p.title}</button>`).join('')}</div>
+        <b>方法二：直接改下面的文字</b>（可以打字，也可以用說的）</div>
+      <div class="para-edit">${cur.map((p, i) => `<div><h3>第${'一二三四五六'[i] || i + 1}段 <button class="mic" data-mic-para="${i}">🎤 用說的加句子</button></h3>
+        <textarea data-para="${i}">${esc(p)}</textarea><p class="interim" data-interim="para${i}"></p>
+        <div class="punct">${['，', '。', '！', '？', '「', '」', '：'].map(c => `<button data-punct="${c}" data-para-t="${i}">${c}</button>`).join('')}</div></div>`).join('')}</div>
+      <div class="big-actions">
+        <button class="btn ok" data-view="preview">✅ 改好了</button>
+        ${state.custom ? '<button class="btn secondary" id="restore">↩️ 還原成小幫手寫的</button>' : ''}
+      </div>
+    </section>`;
+  }
+  return `<section class="card">
+    <h2 class="step-title"><span class="emoji">🎉</span>你的作文完成了！</h2>
+    ${missing.length ? `<div class="tip">⚠️ 還有地方沒選：${missing.map(p => `<button class="icon-btn" data-go="${PAGES.indexOf(p)}">${p.emoji} ${p.title}</button>`).join(' ')}</div>` : ''}
+    ${stale ? `<div class="tip">🔄 你改過前面的選項，但這篇作文是你之前改過的文字。<div class="actions"><button class="btn secondary" id="useGen">用新的選項重新產生</button><button class="btn secondary" id="keepCustom">保留我改的文字</button></div></div>` : ''}
+    ${essayBox(paras)}
+    <p>全文共 <b>${countChars(paras)}</b> 字　<button class="icon-btn" id="readAll">🔊 唸整篇給我聽</button></p>
+    <p class="lead">讀一讀，你想要修改，還是送出呢？</p>
+    <div class="big-actions">
+      <button class="btn secondary" data-view="edit">✏️ 我要修改</button>
+      <button class="btn ok" id="submit">📮 送出作文</button>
+    </div>
+  </section>`;
+}
+function teacherHtml() {
+  const subs = getSubs();
+  return `<details class="teacher card"><summary>👩‍🏫 給老師：使用說明與已送出的作文（${subs.length} 篇）</summary>
+    <p>・學生依序點選：類型 → 事件 → 時間、地點、人物 → 經過 → 看見聽見 → 表情、動作 → 語言、心理 → 原因、結果、心情變化 → 體會。每題都標示「選一個／可以選很多個／可以跳過」。</p>
+    <p>・每頁下方會即時顯示小幫手組好的句子。選項依「眼淚類型」和「事件」變化，系統會自動加上連接詞、標點，並把人物帶進句子裡。</p>
+    <p>・想寫的不在選項裡，可以按「✏️ 自己寫」用打字或語音補充。最後可以選擇修改（回去改選項或直接改文字）或送出。</p>
+    <p>・語音：電腦請用 Chrome／Edge；iPad 可用鍵盤上的麥克風鍵。右上角可以關閉「點選時唸出來」。</p>
+    <p>・送出的作文會存在<b>這台裝置</b>的瀏覽器中，可在下面列印或下載。</p>
+    ${subs.length ? `<ul class="sub-list">${subs.map((s, i) => `<li><b>${esc(s.name || '（未寫名字）')}　${esc(s.at)}　${countChars(s.paras)} 字</b>
+      <button data-sub-print="${i}">🖨️ 列印</button><button data-sub-dl="${i}">💾 Word</button><button data-sub-del="${i}">🗑️ 刪除</button></li>`).join('')}</ul>` : '<p>目前還沒有送出的作文。</p>'}
+  </details>`;
 }
 
 /* ================= 列印與下載 ================= */
-function gridRows(text) {
-  const chars = Array.from('　　' + text);
-  const rows = [];
-  for (let i = 0; i < chars.length; i += 20) rows.push(chars.slice(i, i + 20));
-  if (rows.length) while (rows[rows.length - 1].length < 20) rows[rows.length - 1].push('');
-  return rows;
-}
-function doPrint(mode) {
-  const paras = essayText();
+function doPrint(mode, paras, name) {
   if (!paras.length) { toast('還沒有內容可以列印'); return; }
-  const date = new Date().toLocaleDateString('zh-TW');
-  const meta = `<div class="p-meta"><span>姓名：${esc(state.name || '＿＿＿＿＿＿')}</span><span>字數：${countChars(paras)} 字</span><span>日期：${date}</span></div>`;
+  const meta = `<div class="p-meta"><span>姓名：${esc(name || '＿＿＿＿＿＿')}</span><span>字數：${countChars(paras)} 字</span><span>日期：${new Date().toLocaleDateString('zh-TW')}</span></div>`;
   let body;
   if (mode === 'grid') {
     const rows = [];
-    paras.forEach(p => rows.push(...gridRows(p)));
-    const minRows = Math.max(rows.length + 2, 20);
-    while (rows.length < minRows) rows.push(Array(20).fill(''));
+    paras.forEach(p => { const ch = Array.from('　　' + p); for (let i = 0; i < ch.length; i += 20) { const r = ch.slice(i, i + 20); while (r.length < 20) r.push(''); rows.push(r); } });
+    const minRows = Math.max(rows.length + 2, 20); while (rows.length < minRows) rows.push(Array(20).fill(''));
     body = `<div class="p-grid">${rows.flat().map(c => `<span>${esc(c)}</span>`).join('')}</div>`;
-  } else {
-    body = `<div class="p-lined">${paras.map(p => `<p>${esc(p)}</p>`).join('')}</div>`;
-  }
+  } else body = `<div class="p-lined">${paras.map(p => `<p>${esc(p)}</p>`).join('')}</div>`;
   $('printArea').innerHTML = `<h1 class="p-title">${TITLE}</h1>${meta}${body}`;
   setTimeout(() => window.print(), 50);
 }
 function download(name, content, type) {
-  const blob = new Blob([content], { type });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = name;
+  a.href = URL.createObjectURL(new Blob([content], { type })); a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
-function fileBase() { return `${TITLE.replace(/，/g, '_')}_${state.name || '作文'}`; }
-function dlTxt() {
-  const paras = essayText();
-  download(fileBase() + '.txt', '﻿' + `${TITLE}\n姓名：${state.name}\n\n` + paras.map(p => '　　' + p).join('\n\n') + '\n', 'text/plain;charset=utf-8');
-}
-function dlDoc() {
-  const paras = essayText();
-  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${TITLE}</title>
+function dl(kind, paras, name) {
+  const base = `${TITLE.replace(/，/g, '_')}_${name || '作文'}`;
+  if (kind === 'txt') download(base + '.txt', '﻿' + `${TITLE}\n姓名：${name}\n\n` + paras.map(p => '　　' + p).join('\n\n') + '\n', 'text/plain;charset=utf-8');
+  else download(base + '.doc', '﻿' + `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${TITLE}</title>
     <style>body{font-family:"標楷體","DFKai-SB",serif;font-size:16pt;line-height:2}h1{text-align:center;font-size:22pt}p{text-indent:2em;margin:0 0 6pt}</style></head>
-    <body><h1>${TITLE}</h1><p style="text-indent:0">姓名：${esc(state.name)}</p>${paras.map(p => `<p>${esc(p)}</p>`).join('')}</body></html>`;
-  download(fileBase() + '.doc', '﻿' + html, 'application/msword');
+    <body><h1>${TITLE}</h1><p style="text-indent:0">姓名：${esc(name)}</p>${paras.map(p => `<p>${esc(p)}</p>`).join('')}</body></html>`, 'application/msword');
 }
 
 /* ================= 事件 ================= */
-function go(n) { state.step = Math.max(0, Math.min(STEPS.length - 1, n)); save(true); render(); }
-$('prevBtn').onclick = () => go(state.step - 1);
-$('nextBtn').onclick = () => go(state.step + 1);
+function go(n) {
+  state.page = Math.max(0, Math.min(PAGES.length - 1, n));
+  if (PAGES[state.page].id === 'final' && state.view !== 'done') state.view = 'preview';
+  save(true); render();
+}
+$('prevBtn').onclick = () => go(state.page - 1);
+$('nextBtn').onclick = () => {
+  const pg = PAGES[state.page];
+  const need = (pg.qs || []).find(id => Q[id].req && !vals(id).length);
+  if (need) { toast('請先回答：' + Q[need].q.replace(/（.*）/, '')); speak('請先回答：' + Q[need].q.replace(/（.*）/, '')); document.querySelector(`[data-qbox="${need}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  go(state.page + 1);
+};
+$('speakToggle').onclick = () => {
+  speakOn = !speakOn; $('speakToggle').setAttribute('aria-pressed', speakOn);
+  try { localStorage.setItem('essay-speak', speakOn ? 'on' : 'off'); } catch (e) {}
+};
+$('speakToggle').setAttribute('aria-pressed', speakOn);
 
 document.addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b) return;
   const d = b.dataset;
-  if (d.go !== undefined) go(+d.go);
+  if (d.go !== undefined) { if (state.view === 'edit' && PAGES[+d.go].qs) state.view = 'preview'; go(+d.go); }
   else if (d.speak) speak(d.speak);
-  else if (d.type) { state.type = state.type === d.type ? '' : d.type; save(); document.querySelectorAll('.type').forEach(t => t.setAttribute('aria-pressed', t.dataset.type === state.type)); }
-  else if (d.sos) { state.help[d.sos] = (state.help[d.sos] || 0) + 1; save(); rerenderQ(d.sos); const q = ALL_Q[d.sos]; if (q && state.help[d.sos] === 1) speak('想一想。' + q.think.join('')); }
-  else if (d.mode) {
-    const st = STEPS[state.step];
-    if (d.mode === 'free' && !(state.ans['free_' + st.id] || '').trim()) state.ans['free_' + st.id] = guidedText(st);
-    state.mode[st.id] = d.mode; save(); stopRec();
-    const y = window.scrollY; render(); window.scrollTo(0, y);
+  else if (d.speakPreview) { const pg = PAGES[state.page]; speak(pg.paras.map(i => genParas()[i]).join('')); }
+  else if (d.q) {
+    const q = Q[d.q], v = d.v;
+    let sel = state.sel[d.q] || [];
+    const on = sel.includes(v);
+    if (q.mode === 'one') sel = on ? [] : [v];
+    else {
+      sel = on ? sel.filter(x => x !== v) : [...sel, v];
+      if (d.q === 'who' && !on) sel = v === '只有我自己' ? [v] : sel.filter(x => x !== '只有我自己');
+    }
+    state.sel[d.q] = sel;
+    if (!on && speakOn && v !== '__other') speak(R(v));
+    save(); render(true);
+    if (v === '__other' && !on) { const inp = document.querySelector(`[data-other="${d.q}"]`); inp && inp.focus(); }
   }
-  else if (d.extype) { state.exType = d.extype; save(); const det = b.closest('details'); const tmp = document.createElement('div'); tmp.innerHTML = exampleHtml(STEPS[state.step], PARA_STEPS.indexOf(STEPS[state.step])); tmp.firstElementChild.open = true; det.replaceWith(tmp.firstElementChild); }
-  else if (d.ins !== undefined) {
-    const ta = $('ta-' + d.target);
-    if (!ta) return;
-    insertText(ta, d.ins); ta.focus({ preventScroll: true });
+  else if (d.micOther) startRec(b, document.querySelector(`[data-other="${d.micOther}"]`), document.querySelector(`[data-interim="${d.micOther}"]`));
+  else if (d.micPara !== undefined) startRec(b, document.querySelector(`textarea[data-para="${d.micPara}"]`), document.querySelector(`[data-interim="para${d.micPara}"]`));
+  else if (d.punct) { const ta = document.querySelector(`textarea[data-para="${d.paraT}"]`); insertText(ta, d.punct); ta.focus({ preventScroll: true }); }
+  else if (d.view) {
+    if (d.view === 'edit' && !state.custom) { state.custom = genParas(); state.customSrc = JSON.stringify(genParas()); }
+    if (d.view === 'edit' && state.submittedAt) state.submittedAt = '';
+    state.view = d.view; save(true); render();
   }
-  else if (d.undo) {
-    const ta = $('ta-' + d.undo);
-    const pos = ta._hadFocus ? ta.selectionStart : ta.value.length;
-    if (pos > 0) { const chars = Array.from(ta.value.slice(0, pos)); chars.pop(); const before = chars.join(''); ta.value = before + ta.value.slice(pos); ta.setSelectionRange(before.length, before.length); ta.dispatchEvent(new Event('input', { bubbles: true })); }
+  else if (b.id === 'restore') { if (confirm('要還原成小幫手寫的句子嗎？你改過的文字會不見。')) { state.custom = null; state.view = 'preview'; save(true); render(); } }
+  else if (b.id === 'useGen') { state.custom = null; save(true); render(true); }
+  else if (b.id === 'keepCustom') { state.customSrc = JSON.stringify(genParas()); save(true); render(true); }
+  else if (b.id === 'readAll') speak(TITLE + '。' + finalParas().join(''));
+  else if (b.id === 'submit') {
+    const paras = finalParas();
+    if (!paras.length) { toast('還沒有內容喔'); return; }
+    if (!confirm('確定要送出作文嗎？')) return;
+    state.submittedAt = new Date().toLocaleString('zh-TW', { dateStyle: 'short', timeStyle: 'short' });
+    state.view = 'done';
+    const subs = getSubs(); subs.unshift({ name: state.name, at: state.submittedAt, paras }); setSubs(subs);
+    save(true); render(); speak('作文送出了！你好棒！');
   }
-  else if (d.mic) startRec(b, $('ta-' + d.mic));
-  else if (d.micPara !== undefined) startRec(b, document.querySelector(`textarea[data-para="${d.micPara}"]`));
-  else if (d.print) doPrint(d.print);
-  else if (b.id === 'readAll') speak(TITLE + '。' + essayText().join(''));
-  else if (b.id === 'addPara') { state.paras.push(''); save(); const y = window.scrollY; render(); window.scrollTo(0, y); const tas = document.querySelectorAll('textarea[data-para]'); tas[tas.length - 1].focus(); }
-  else if (b.id === 'rebuild') { if (confirm('要用前面步驟的內容重新組合嗎？在這一頁改過的內容會不見。')) { state.paras = null; save(true); render(); } }
-  else if (b.id === 'dlTxt') dlTxt();
-  else if (b.id === 'dlDoc') dlDoc();
-  else if (b.id === 'saveNow') { save(true); toast('已儲存在這台裝置 ✅'); }
-  else if (b.id === 'resetAll') {
-    if (confirm('確定要清除全部內容，開始新的作文嗎？\n（建議先下載或列印）')) { state = blank(); save(true); render(); toast('已清除，可以開始新的作文'); }
-  }
+  else if (d.print) doPrint(d.print, finalParas(), state.name);
+  else if (d.dl) dl(d.dl, finalParas(), state.name);
+  else if (b.id === 'newEssay') { if (confirm('要開始寫一篇新的作文嗎？（已送出的作文老師還看得到）')) { state = blank(); save(true); render(); } }
+  else if (d.subPrint !== undefined) { const s = getSubs()[+d.subPrint]; doPrint('lined', s.paras, s.name); }
+  else if (d.subDl !== undefined) { const s = getSubs()[+d.subDl]; dl('doc', s.paras, s.name); }
+  else if (d.subDel !== undefined) { if (confirm('確定刪除這篇已送出的作文？')) { const a = getSubs(); a.splice(+d.subDel, 1); setSubs(a); render(true); const det = document.querySelector('details.teacher'); if (det) det.open = true; } }
 });
-document.addEventListener('mousedown', e => { if (e.target.closest('.chip, .tools .p')) e.preventDefault(); }); // 點詞語時保留游標位置
-document.addEventListener('toggle', e => {
-  const t = e.target;
-  if (t.dataset && t.dataset.more) { state.moreOpen[t.dataset.more] = t.open; save(); }
-  if (t.dataset && t.dataset.ex && t.open) { state.exOpened[t.dataset.ex] = true; save(); }
-}, true);
-document.addEventListener('focusin', e => { if (e.target.matches('textarea')) { lastTa = e.target; e.target._hadFocus = true; } });
+document.addEventListener('mousedown', e => { if (e.target.closest('.punct button')) e.preventDefault(); });
+document.addEventListener('focusin', e => { if (e.target.matches('textarea, input')) e.target._hadFocus = true; });
 document.addEventListener('input', e => {
   const t = e.target;
-  if (t.dataset.k) state.ans[t.dataset.k] = t.value;
-  else if (t.id === 'nameInput') state.name = t.value;
-  else if (t.dataset.para !== undefined) { state.paras[+t.dataset.para] = t.value; const c = $('charCount'); if (c) c.textContent = countChars(state.paras); }
+  if (t.id === 'nameInput') state.name = t.value;
+  else if (t.dataset.other) { state.other[t.dataset.other] = t.value; updatePreview(); }
+  else if (t.dataset.para !== undefined) { state.custom[+t.dataset.para] = t.value; }
   else return;
   save();
 });
-document.addEventListener('change', e => { if (e.target.dataset.check !== undefined) { state.checks[e.target.dataset.check] = e.target.checked; save(); } });
 window.addEventListener('afterprint', () => { $('printArea').innerHTML = ''; });
 if ('speechSynthesis' in window) speechSynthesis.getVoices();
-
 render();
 })();
 </script>
