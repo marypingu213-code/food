@@ -6,7 +6,7 @@
 <title>戶外教學小遊戲</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@500;700;900&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="xlsx.full.min.js"></script>
 <style>
 :root {
   --paper: #f6f8f2;
@@ -115,7 +115,7 @@ th { background: #eef2ea; position: sticky; top: 0; }
 .car { position: relative; background: #f4f1e8; border: 3px solid #6e7a80; border-radius: 6px; min-height: 230px; padding: 8px; overflow: hidden; }
 .car-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
 .slot { border: 2px dashed #c4c9cc; border-radius: 8px; min-height: 42px; display: flex; align-items: center; justify-content: center; font-size: .75rem; color: #9aa; }
-.slot .stu { min-width: 0; width: 100%; font-size: .85rem; }
+.slot .stu { min-width: 0; width: 100%; font-size: .85rem; color: var(--ink); }
 .door { position: absolute; top: 0; bottom: 0; width: 50%; background: linear-gradient(90deg, #a8b3b8, #cfd6d9 60%, #a8b3b8); transition: transform .6s ease; z-index: 3; border: 1px solid #7d898e; }
 .door.l { left: 0; transform: translateX(-101%); }
 .door.r { right: 0; transform: translateX(101%); }
@@ -169,7 +169,7 @@ th { background: #eef2ea; position: sticky; top: 0; }
       <button class="btn yellow" id="btn-sample">載入範例名單</button>
       <button class="btn ghost" id="btn-clear">清除名單</button>
     </div>
-    <p class="muted">第一列請放欄位名稱。建議欄位：<b>姓名、年級、班級、座號、性別</b>，也可以加上任何你想用的欄位（例如：生日月份、暈車、身高、社團、血型、居住里別…），遊戲會自動把它們變成可以用的規則。</p>
+    <p class="muted">第一列請放欄位名稱。只有「編號、班級、姓名」也可以：班級寫 101、202 會自動算出年級，班級寫「教師」會自動標成老師。建議欄位：<b>姓名、年級、班級、座號、性別</b>，也可以加上任何你想用的欄位（例如：生日月份、暈車、身高、社團、血型、居住里別…），遊戲會自動把它們變成可以用的規則。</p>
   </div>
   <div class="box">
     <h3>方法二：從 Excel 複製整個表格貼上</h3>
@@ -205,7 +205,7 @@ th { background: #eef2ea; position: sticky; top: 0; }
       <label class="chk"><input type="checkbox" id="bus-hide"> 神秘規則（讓學生猜）</label>
       <label class="chk"><input type="checkbox" id="bus-exc"> 允許例外配對</label>
     </div>
-    <p class="muted" style="margin:6px 0 0">「前排優先」：例如有「暈車」欄位，填「是」的同學會被排在前面。</p>
+    <p class="muted" style="margin:6px 0 0">「前排優先」：例如有「暈車」欄位，填「是」的同學會被排在前面；選「身分」則老師坐前排。</p>
   </div>
 
   <div class="rule-card" id="bus-rule"></div>
@@ -352,13 +352,48 @@ function loadTable(arr) {
   // 重複欄位名稱加編號
   const seen = {}; headers = headers.map(h => { seen[h] = (seen[h] || 0) + 1; return seen[h] > 1 ? h + seen[h] : h; });
   const rows = arr.slice(1).map((r, i) => { const o = { _id: i }; headers.forEach((h, j) => o[h] = r[j] ?? ''); return o; });
+  const added = deriveFields(headers, rows);
   R.headers = headers; R.rows = rows;
   R.nameCol = headers.find(h => NAME_KEYS.includes(h)) || headers.find(h => /名/.test(h)) || headers[0];
-  R.colorCol = headers.find(h => h === '班級') || headers.find(h => h === '性別') || '';
+  // 卡片顏色：挑「大多數人都有同組伙伴」的欄位（班級每班只有一人時改用年級）
+  const colorCands = [classCol(), gradeCol(), genderCol()].filter(Boolean).filter(h => { const n = distinct(h).length; return n >= 2 && n <= PALETTE.length; });
+  R.colorCol = colorCands.find(h => groupedFrac(h) >= 0.6) || colorCands[0] || '';
   afterRosterChange();
-  toast(`已匯入 ${rows.length} 位同學`, 'ok');
+  toast(`已匯入 ${rows.length} 人` + (added.length ? `，並從「班級」自動推算出「${added.join('」「')}」欄位` : ''), 'ok');
   return true;
 }
+
+const isTeacherWord = v => /教師|老師|導師|校長|主任|teacher/i.test(String(v));
+const CN_NUM = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+/* 從班級欄位自動推出「身分」與「年級」（例如 101 → 1 年級；教師 → 身分＝教師） */
+function deriveFields(headers, rows) {
+  const added = [];
+  const c = headers.find(h => /^(班級|班別|班)$/.test(h)) || headers.find(h => /班/.test(h));
+  if (!c) return added;
+  if (!headers.some(h => /身分|身份|職稱|角色/.test(h)) && rows.some(r => isTeacherWord(r[c]))) {
+    headers.push('身分'); added.push('身分');
+    rows.forEach(r => r['身分'] = isTeacherWord(r[c]) ? '教師' : '學生');
+  }
+  if (!headers.some(h => /年級/.test(h))) {
+    const gradeOf = v => {
+      v = String(v).trim();
+      if (/^\d{3,4}$/.test(v)) return v.slice(0, v.length - 2);
+      const m = v.match(/^(\d+|[一二三四五六七八九])\s*年/);
+      if (m) return String(CN_NUM[m[1]] || m[1]);
+      return '';
+    };
+    const codes = rows.map(r => r[c]).filter(v => v !== '' && !isTeacherWord(v));
+    if (codes.length && codes.every(v => gradeOf(v) !== '')) {
+      headers.push('年級'); added.push('年級');
+      rows.forEach(r => r['年級'] = isTeacherWord(r[c]) ? '教師' : gradeOf(r[c]));
+    }
+  }
+  return added;
+}
+const roleCol = () => R.headers.find(h => /身分|身份|職稱|角色/.test(h));
+const isTeacher = stu => { const rc = roleCol(); return rc ? isTeacherWord(stu[rc]) : (classCol() ? isTeacherWord(stu[classCol()]) : false); };
+/* 前排優先：身分欄位只算老師，其他欄位填「是」之類就算 */
+function priOf(stu, f) { if (!f) return false; return f === roleCol() ? isTeacherWord(stu[f]) : truthy(stu[f]); }
 
 function afterRosterChange() {
   store.set('roster', { headers: R.headers, rows: R.rows, nameCol: R.nameCol, colorCol: R.colorCol });
@@ -377,7 +412,7 @@ const genderCol = () => findCol(/性別/) || findCol(/^(gender|sex)$/i);
 function val(stu, f) {
   const v = stu[f] ?? '';
   const g = gradeCol();
-  if (f === classCol() && g && g !== f && v && !/年/.test(v)) return `${stu[g]}年${v}班`;
+  if (f === classCol() && g && g !== f && /^\d{1,2}$/.test(v) && /^\d+$/.test(stu[g])) return `${stu[g]}年${v}班`;
   return v;
 }
 function isNumericField(f) {
@@ -420,6 +455,7 @@ function genderIcon(stu) {
   const v = stu[g]; return /男|boy|^m$/i.test(v) ? '👦' : /女|girl|^f$/i.test(v) ? '👧' : '';
 }
 function subInfo(stu) {
+  if (isTeacher(stu)) return '🧑‍🏫 教師';
   const parts = [];
   const c = classCol(); const g = gradeCol();
   if (c) parts.push(val(stu, c)); else if (g) parts.push(stu[g] + '年級');
@@ -510,23 +546,31 @@ $$('[data-go]').forEach(b => b.onclick = () => showTab(b.dataset.go));
 
 /* ================= 規則編輯器（兩個遊戲共用） ================= */
 const BUS_TYPES = {
-  same: { label: '同', text: f => `同${f}的兩個人坐一起` },
-  diff: { label: '不同', text: f => `不同${f}的兩個人坐一起` },
+  same: { label: '同', text: f => f === roleCol() ? '老師和老師坐、學生和學生坐' : `同${f}的兩個人坐一起` },
+  diff: { label: '不同', text: f => f === roleCol() ? '老師要和學生坐一起' : `不同${f}的兩個人坐一起` },
   order: { label: '依順序', text: f => `依${f}由小到大，相鄰的兩人坐一起` },
   random: { label: '隨機', text: () => '完全隨機配對' }
 };
 const EL_TYPES = {
-  same: { label: '同', text: f => `同一批的人${f}要相同` },
-  mix: { label: '混合', text: f => `每一批都要有不同${f}的人` },
+  same: { label: '同', text: f => f === roleCol() ? '老師一批、學生一批，分開搭' : `同一批的人${f}要相同` },
+  mix: { label: '混合', text: f => f === roleCol() ? '每一批都要有老師帶隊' : `每一批都要有不同${f}的人` },
   order: { label: '依順序', text: f => `依${f}由小到大，一批一批搭` },
   random: { label: '隨機', text: () => '隨機分批，坐滿就走' }
 };
 function fieldsFor(type) { return type === 'order' ? orderFields() : type === 'random' ? [] : categoryFields(); }
+/* 有多少比例的人，能找到同一組的伙伴 */
+function groupedFrac(f) {
+  const cnt = {}; R.rows.forEach(r => { const v = val(r, f); cnt[v] = (cnt[v] || 0) + 1; });
+  return R.rows.filter(r => cnt[val(r, f)] >= 2).length / R.rows.length;
+}
 function defaultRules(types) {
   const f = categoryFields();
-  const pref = [classCol(), genderCol()].filter(x => x && f.includes(x));
+  const rc = roleCol();
+  if (types === EL_TYPES && rc && f.includes(rc)) return [{ type: 'mix', field: rc }];
+  const pref = [classCol(), gradeCol(), genderCol(), ...f].filter(x => x && f.includes(x) && x !== rc);
+  const good = pref.find(x => groupedFrac(x) >= 0.8);
+  if (good) return [{ type: 'same', field: good }];
   if (pref.length) return [{ type: 'same', field: pref[0] }];
-  if (f.length) return [{ type: 'same', field: f[0] }];
   return [{ type: 'random', field: '' }];
 }
 function randomRules(types) {
@@ -669,7 +713,7 @@ function autoPairs(list, rules) {
   const solo = pairs.filter(p => p.b === null); const rest2 = pairs.filter(p => p.b !== null);
   return [...rest2, ...solo];
 }
-function isPri(p) { return BUS.pri && (truthy(byId(p.a)[BUS.pri]) || (p.b !== null && truthy(byId(p.b)[BUS.pri]))); }
+function isPri(p) { return BUS.pri && (priOf(byId(p.a), BUS.pri) || (p.b !== null && priOf(byId(p.b), BUS.pri))); }
 function arrangeIntoBuses(pairs) {
   const per = Math.max(1, Math.floor(BUS.cap / 2));
   const buses = [];
@@ -693,7 +737,7 @@ function renderBus() {
   const seated = seatedIds();
   const pool = R.rows.filter(r => !seated.has(r._id));
   $('#bus-left').textContent = `（${pool.length} 人）`;
-  $('#bus-pool').innerHTML = pool.length ? pool.map(s => stuCard(s, (BUS.sel === s._id ? 'sel ' : '') + (BUS.pri && truthy(s[BUS.pri]) ? 'pri' : ''))).join('') : '<span class="muted">🎉 全部都上車了！</span>';
+  $('#bus-pool').innerHTML = pool.length ? pool.map(s => stuCard(s, (BUS.sel === s._id ? 'sel ' : '') + (priOf(s, BUS.pri) ? 'pri' : ''))).join('') : '<span class="muted">🎉 全部都上車了！</span>';
   $('#bus-solo').disabled = BUS.sel === null;
 
   const per = Math.floor(BUS.cap / 2);
@@ -961,7 +1005,7 @@ $('#el-csv').onclick = () => {
 function fieldsChanged() {
   BUS.rules.splice(0); EL.rules.splice(0);
   if (BUS.pri && !R.headers.includes(BUS.pri)) BUS.pri = '';
-  if (!BUS.pri) BUS.pri = R.headers.find(h => /暈車/.test(h)) || '';
+  if (!BUS.pri) BUS.pri = R.headers.find(h => /暈車/.test(h)) || roleCol() || '';
 }
 
 /* ================= 啟動 ================= */
