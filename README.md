@@ -7,14 +7,6 @@
 
 打開 `index.html` 就能使用，不需要安裝。
 
-## 圓的周長與面積（`circle-math/`）
-
-國小高年級數學練習：打開 `circle-math/index.html` 即可使用。
-
-- **自動出題／自行出題**：自行出題會算出答案，並提醒數字是否除不盡；可複製「題目代碼」給學生匯入。
-- **四格地圖提示**：每一題都用固定位置的四格（左上直徑、右上周長、左下半徑、右下面積），箭頭上寫算式，學生沿著箭頭一格一格填；這題用不到的格子會遮住。基本題另附針對題型的提醒（例如給直徑求面積要先 ÷2）。
-- **圓周率計算器**：輸入數字自動算 ×3.14、÷3.14、□×□、□×□×3.14，並拆成 ×3、×0.1、×0.04 給學生看。
-
 ## 其他專案
 
 原本放在這裡的教學工具已經各自搬到獨立專案：
@@ -24,4 +16,5 @@
 | 寶石鑑定室～西拉雅國家風景區官田遊客中心 | https://marypingu213-code.github.io/siraya-nsa-trip/ |
 | 校外教學數學遊戲（遊覽車座位、電梯分批） | https://marypingu213-code.github.io/classroom-trip-math-game/ |
 | 作文小幫手：那次，我流下眼淚 | https://marypingu213-code.github.io/essay-tears/ |
+| 圓的周長與面積 | https://marypingu213-code.github.io/diamond-math/circle/ |
 | 快樂語詞遊樂園 | https://github.com/marypingu213-code/happy-ch |
