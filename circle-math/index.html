@@ -107,29 +107,36 @@ header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-
 .callout.warn{background:var(--bad-soft)}
 .callout.warn strong{color:var(--bad)}
 
-/* visual path */
-.path{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;row-gap:12px}
-.node{flex:1 1 120px;min-width:110px;border:2px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;background:var(--paper)}
+/* visual path: fixed 2x2 map — 直徑 top-left, 周長 top-right, 半徑 bottom-left, 面積 bottom-right */
+.map{display:grid;grid-template-columns:minmax(0,1fr) minmax(84px,160px) minmax(0,1fr);grid-template-rows:auto minmax(76px,auto) auto;
+  grid-template-areas:"tl top tr" "left mid no" "bl bottom br";gap:8px;align-items:stretch;max-width:640px;margin:0 auto}
+.map .tl{grid-area:tl}.map .tr{grid-area:tr}.map .bl{grid-area:bl}.map .br{grid-area:br}
+.map .a-top{grid-area:top}.map .a-left{grid-area:left}.map .a-bottom{grid-area:bottom}.map .no{grid-area:no}
+.node{min-width:0;border:2px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;text-align:center;background:var(--paper)}
 .node .nl{font-weight:900;font-size:1rem}
 .node.k-r{border-color:var(--r)}.node.k-r .nl{color:var(--r)}
 .node.k-d{border-color:var(--d)}.node.k-d .nl{color:var(--d)}
 .node.k-c{border-color:var(--c)}.node.k-c .nl{color:var(--c)}
 .node.k-a{border-color:var(--a)}.node.k-a .nl{color:var(--a)}
-.node.k-s{border-color:var(--muted)}
 .node.given{background:var(--accent-soft)}
 .node .nv{font-family:var(--num);font-size:1.15rem;font-weight:600}
-.node input{width:100%;text-align:center;font-family:var(--num);font-size:1.05rem;padding:6px}
-.node input.ok{border-color:var(--ok);background:var(--ok-soft)}
-.node input.bad{border-color:var(--bad);background:var(--bad-soft)}
+.node input,.arw input{width:100%;min-width:0;text-align:center;font-family:var(--num);font-size:1.05rem;padding:6px}
+.node input.ok,.arw input.ok{border-color:var(--ok);background:var(--ok-soft)}
+.node input.bad,.arw input.bad{border-color:var(--bad);background:var(--bad-soft)}
 .node .ask{font-size:.75rem;font-weight:700;color:var(--muted)}
-.op{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-weight:700;font-size:.9rem;padding:0 2px}
-.op .arrow{font-size:1.4rem;line-height:1;color:var(--accent)}
-.op .ot{font-family:var(--num);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:1px 8px;white-space:nowrap}
-@media (max-width:640px){
-  .path{flex-direction:column;align-items:stretch}
-  .op{flex-direction:row;gap:8px}
-  .op .arrow{transform:rotate(90deg)}
-}
+.arw{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;min-width:0}
+.arw.v{flex-direction:row;gap:4px;justify-content:flex-start;justify-self:center}
+.arw.v .ex{white-space:nowrap}
+.map .node:not(.given){align-self:center}.map .node.given{align-self:center}
+.arw .glyph{font-size:1.8rem;line-height:1;color:var(--accent);font-weight:700}
+.arw .ot{max-width:100%;font-family:var(--num);font-weight:600;color:var(--ink);background:var(--bg);border:1.5px solid var(--accent);border-radius:8px;padding:2px 8px}
+.arw .ex{font-family:var(--num);font-size:.8rem;color:var(--muted);min-height:1.2em;overflow-wrap:anywhere}
+.arw .ex.known{color:var(--accent);font-weight:600}
+.arw .v-txt{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.arw .sub{display:flex;flex-direction:column;gap:3px;align-items:center;border:1.5px dashed var(--muted);border-radius:10px;padding:6px;width:100%}
+.arw .sub .nl{font-size:.8rem;font-weight:700;color:var(--muted)}
+.map .no{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:.78rem;font-weight:700;text-align:center;border-left:2px dashed var(--line);margin-left:50%;padding-left:8px;justify-self:start}
+@media (max-width:480px){.arw .ex{font-size:.72rem}.map{grid-template-columns:minmax(0,1fr) minmax(64px,auto) minmax(0,1fr);gap:6px}.arw .ot{padding:2px 4px;font-size:.85rem}.node{padding:8px 6px}}
 .path-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
 .squares{margin-top:12px;overflow-x:auto}
 .squares table{border-collapse:collapse;font-family:var(--num);font-size:.85rem}
@@ -583,44 +590,42 @@ function renderHint(p){
   renderPath(p);
 }
 
-function pathNodes(p){
+function pathModel(p){
   const v = p.v;
-  if (p.type === 'C2A') return [
-    {k:'c', label:'周長', val:v.C, given:true},
-    {op:'÷ 3.14', why:'周長 ÷ 3.14 = 直徑'},
-    {k:'d', label:'直徑', val:v.d},
-    {op:'÷ 2', why:'直徑的一半是半徑'},
-    {k:'r', label:'半徑', val:v.r},
-    {op:'半徑×半徑×3.14', why:'面積公式'},
-    {k:'a', label:'面積', val:v.A, final:true},
-  ];
-  return [
-    {k:'a', label:'面積', val:v.A, given:true},
-    {op:'÷ 3.14', why:'面積 ÷ 3.14 = 半徑 × 半徑'},
-    {k:'s', label:'半徑×半徑', val:v.s},
-    {op:'哪個數×自己？', why:'查下面的平方表'},
-    {k:'r', label:'半徑', val:v.r},
-    {op:'× 2', why:'半徑 × 2 = 直徑'},
-    {k:'d', label:'直徑', val:v.d},
-    {op:'× 3.14', why:'直徑 × 3.14 = 周長'},
-    {k:'c', label:'周長', val:v.C, final:true},
-  ];
+  const B = {
+    d:{k:'d', label:'直徑', val:v.d, pos:'tl'}, c:{k:'c', label:'周長', val:v.C, pos:'tr'},
+    r:{k:'r', label:'半徑', val:v.r, pos:'bl'}, a:{k:'a', label:'面積', val:v.A, pos:'br'}
+  };
+  if (p.type === 'C2A'){
+    B.c.given = true; B.d.step = 1; B.r.step = 2; B.a.step = 3; B.a.final = true;
+    return {B, total:3, arrows:{
+      top:{glyph:'←', op:'÷ 3.14', from:'c', ex:x => `${x} ÷ 3.14`},
+      left:{glyph:'↓', op:'÷ 2', from:'d', ex:x => `${x} ÷ 2`},
+      bottom:{glyph:'→', op:'× 半徑 × 3.14', from:'r', ex:x => `${x} × ${x} × 3.14`}
+    }};
+  }
+  B.a.given = true; B.r.step = 2; B.d.step = 3; B.c.step = 4; B.c.final = true;
+  return {B, total:4, arrows:{
+    bottom:{glyph:'←', op:'÷ 3.14', from:'a', ex:x => `${x} ÷ 3.14`, sub:{label:'半徑×半徑', val:v.s, step:1}, op2:'哪個數 × 自己？'},
+    left:{glyph:'↑', op:'× 2', from:'r', ex:x => `${x} × 2`},
+    top:{glyph:'→', op:'× 3.14', from:'d', ex:x => `${x} × 3.14`}
+  }};
 }
 function renderPath(p){
-  const box = $('#hint'), nodes = pathNodes(p);
+  const box = $('#hint'), M = pathModel(p);
   const typed = {};
-  box.querySelectorAll('.node input').forEach(i => typed[i.dataset.step] = i.value);
-  let n = 0;
-  const html = nodes.map((nd, i) => {
-    if (nd.op) return `<div class="op" title="${esc(nd.why)}"><span class="arrow">→</span><span class="ot">${esc(nd.op)}</span></div>`;
-    if (nd.given) return `<div class="node k-${nd.k} given"><span class="nl">${nd.label}</span><span class="nv">${f(nd.val)}</span><span class="ask">題目給的</span></div>`;
-    n++;
-    const show = n <= revealed;
-    return `<div class="node k-${nd.k}"><span class="nl">${nd.label}</span>
-      <input class="field" data-exp="${nd.val}" data-step="${n}" inputmode="decimal" aria-label="${nd.label}" placeholder="?" value="${show ? f(nd.val) : esc(typed[n] || '')}">
-      <span class="ask">${nd.final ? '答案' : '第 ' + n + ' 步'}</span></div>`;
-  }).join('');
-  const total = n;
+  box.querySelectorAll('input[data-step]').forEach(i => typed[i.dataset.step] = i.value);
+  const inp = (val, step, label) => `<input class="field" size="4" data-exp="${val}" data-step="${step}" inputmode="decimal" aria-label="${label}" placeholder="?" value="${step <= revealed ? f(val) : esc(typed[step] || '')}">`;
+  const node = nd => nd.given
+    ? `<div class="node k-${nd.k} given ${nd.pos}" data-key="${nd.k}"><span class="nl">${nd.label}</span><span class="nv">${f(nd.val)}</span><span class="ask">題目給的</span></div>`
+    : `<div class="node k-${nd.k} ${nd.pos}" data-key="${nd.k}"><span class="nl">${nd.label}</span>${inp(nd.val, nd.step, nd.label)}<span class="ask">${nd.final ? '答案' : '第 ' + nd.step + ' 步'}</span></div>`;
+  const arrow = (name, a) => {
+    const vert = name === 'left';
+    const txt = `<span class="ot">${esc(a.op)}</span><span class="ex" data-ex="${name}"></span>`;
+    if (vert) return `<div class="arw v a-${name}"><span class="glyph">${a.glyph}</span><span class="v-txt">${txt}</span></div>`;
+    const sub = a.sub ? `<div class="sub"><span class="nl">${a.sub.label}</span>${inp(a.sub.val, a.sub.step, a.sub.label)}<span class="nl">第 ${a.sub.step} 步</span></div><span class="ot">${esc(a.op2)}</span>` : '';
+    return `<div class="arw a-${name}"><span class="glyph">${a.glyph}</span>${txt}${sub}</div>`;
+  };
   const sq = p.type === 'A2C' ? (() => {
     const max = Math.max(20, Math.ceil(p.v.r));
     let h = '<tr><th>半徑</th>', b = '<tr><th>半徑×半徑</th>';
@@ -630,25 +635,43 @@ function renderPath(p){
   box.innerHTML = `
     <div class="hint-title"><h2>視覺路徑</h2><span class="chip path">${TYPES[p.type].label}</span></div>
     <p style="margin:0 0 12px;color:var(--muted)">${p.type === 'C2A'
-      ? '周長和面積不能直接互換，要先走到「半徑」。每一格填好會變綠色。'
-      : '面積和周長不能直接互換，要先找出「半徑」。每一格填好會變綠色。'}</p>
-    <div class="path">${html}</div>
+      ? '從右上的「周長」出發，沿著箭頭繞到右下的「面積」。每一格填對會變綠色。'
+      : '從右下的「面積」出發，沿著箭頭繞到右上的「周長」。每一格填對會變綠色。'}</p>
+    <div class="map">
+      ${Object.values(M.B).map(node).join('')}
+      ${Object.entries(M.arrows).map(([k, a]) => arrow(k, a)).join('')}
+      <div class="no">周長和面積<br>不能直接換</div>
+    </div>
     ${sq}
     <div class="path-tools">
-      <button class="btn sm ghost" id="reveal" ${revealed >= total ? 'disabled' : ''}>給我下一步</button>
+      <button class="btn sm ghost" id="reveal" ${revealed >= M.total ? 'disabled' : ''}>給我下一步</button>
       <span style="color:var(--muted);font-size:.85rem">右邊的計算器可以幫你算 ÷ 3.14 和 × 3.14</span>
     </div>`;
-  box.querySelectorAll('.node input').forEach(inp => {
+  // which values are known: given, or the student's box is correct
+  const known = key => {
+    const nd = M.B[key];
+    if (nd.given) return nd.val;
+    const i = box.querySelector(`.node[data-key="${key}"] input`);
+    return i && i.classList.contains('ok') ? nd.val : null;
+  };
+  const updateEx = () => {
+    Object.entries(M.arrows).forEach(([name, a]) => {
+      const el = box.querySelector(`[data-ex="${name}"]`), x = known(a.from);
+      el.textContent = x === null ? '' : a.ex(f(x)) + ' = ?';
+      el.classList.toggle('known', x !== null);
+    });
+  };
+  box.querySelectorAll('input[data-step]').forEach(i => {
     const mark = () => {
-      const x = parseNum(inp.value);
-      inp.classList.remove('ok', 'bad');
-      if (inp.value.trim() === '') return;
-      inp.classList.add(near(x, +inp.dataset.exp) ? 'ok' : 'bad');
+      const x = parseNum(i.value);
+      i.classList.remove('ok', 'bad');
+      if (i.value.trim() !== '') i.classList.add(near(x, +i.dataset.exp) ? 'ok' : 'bad');
     };
     mark();
-    inp.addEventListener('input', mark);
-    inp.addEventListener('focus', () => lastInput = inp);
+    i.addEventListener('input', () => { mark(); updateEx(); });
+    i.addEventListener('focus', () => lastInput = i);
   });
+  updateEx();
   $('#reveal').onclick = () => { revealed++; renderPath(p); };
 }
 
