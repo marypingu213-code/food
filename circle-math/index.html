@@ -153,7 +153,11 @@ aside.calc{position:sticky;top:max(16px,env(safe-area-inset-top,0px));}
 .modes button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
 .calc-in{display:flex;align-items:center;gap:8px;font-family:var(--num);font-size:1.2rem;font-weight:600}
 .calc-in input{flex:1;min-width:0;font-family:var(--num);font-size:1.4rem;padding:8px 10px}
-.calc-in .opx{white-space:nowrap;color:var(--muted)}
+.calc-in .opx{white-space:nowrap;color:var(--muted);display:flex;align-items:center;gap:8px}
+.calc-in input{flex:1 1 0}
+.calc-in .opx.wide{flex:1.25 1 0;min-width:0}
+.calc-in .opx.wide.withpi{flex:2 1 0}
+.calc-in .mirror{flex:1;min-width:0;font-size:1.4rem;padding:8px 10px;border:2px dashed var(--line);border-radius:10px;background:var(--bg);color:var(--ink);overflow:hidden;text-overflow:ellipsis}
 .result{margin:12px 0 4px;padding:12px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
 .result .eq{color:var(--muted);font-size:.85rem;font-family:var(--num);overflow-wrap:anywhere}
 .result .big{font-family:var(--num);font-size:2rem;font-weight:600;line-height:1.2;overflow-wrap:anywhere;color:var(--accent)}
@@ -657,14 +661,20 @@ function renderSolution(p){
 
 /* ---------- calculator ---------- */
 let mode = 'mul', hist = store.get('circle.hist', []);
-const OPS = {mul:'× 3.14', div:'÷ 3.14', sq:'× 自己', sqpi:'× 自己 × 3.14'};
+const OPS = {mul:'× 3.14', div:'÷ 3.14', sq:'× □', sqpi:'× □ × 3.14'};
+const exprOf = (m, n) => m === 'mul' ? `${f(n)} × 3.14` : m === 'div' ? `${f(n)} ÷ 3.14` : m === 'sq' ? `${f(n)} × ${f(n)}` : `${f(n)} × ${f(n)} × 3.14`;
 function decomp(n){
   const a = R4(n * 3), b = R4(n * 0.1), c = R4(n * 0.04);
   return [[`${f(n)} × 3`, a], [`${f(n)} × 0.1`, b], [`${f(n)} × 0.04`, c]];
 }
 function calc(){
   const n = parseNum($('#calc-in').value);
-  $('#calc-op').textContent = OPS[mode];
+  const opEl = $('#calc-op'), sqMode = mode === 'sq' || mode === 'sqpi';
+  opEl.classList.toggle('wide', sqMode);
+  opEl.classList.toggle('withpi', mode === 'sqpi');
+  opEl.innerHTML = sqMode
+    ? `<span>×</span><span class="mirror" aria-label="自動帶入同一個數">${isNaN(n) ? '' : esc(f(n))}</span>${mode === 'sqpi' ? '<span>× 3.14</span>' : ''}`
+    : OPS[mode];
   const out = $('#calc-out'), eq = $('#calc-eq'), st = $('#calc-steps');
   if (isNaN(n)){ out.textContent = '—'; eq.textContent = '請輸入數字'; st.innerHTML = ''; return null; }
   let res, rows = [];
@@ -693,7 +703,7 @@ function calc(){
   return {n, res};
 }
 function renderHist(){
-  $('#calc-hist').innerHTML = hist.map((h, i) => `<li><button data-h="${i}">${f(h.n)} ${OPS[h.mode]} → ${f(h.res)}</button></li>`).join('');
+  $('#calc-hist').innerHTML = hist.map((h, i) => `<li><button data-h="${i}">${exprOf(h.mode, h.n)} → ${f(h.res)}</button></li>`).join('');
 }
 function saveHist(){
   const r = calc(); if (!r) return;
