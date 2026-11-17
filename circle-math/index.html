@@ -119,28 +119,14 @@ header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-
 .node input.bad,.arw input.bad{border-color:var(--bad);background:var(--bad-soft)}
 .node .ask{font-size:.75rem;font-weight:700;color:var(--muted)}
 .arw{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;min-width:0}
-.arw.v{justify-self:center}
+.arw.v{flex-direction:row;gap:4px;justify-content:flex-start;justify-self:center}
 .arw.v .ex{white-space:nowrap}
-.dirs{display:flex;flex-direction:column;gap:4px;align-items:center}
-.arw.v .dirs{flex-direction:row;gap:12px;align-items:flex-start}
-.dir{display:flex;align-items:center;gap:6px}
-.dir .ot{white-space:nowrap}
-.arw.v .dir{flex-direction:column;gap:2px}
-.dir.idle{opacity:.38}
-.dir.idle .glyph{color:var(--muted);font-size:1.3rem}
-.dir.idle .ot{border-style:dashed;border-color:var(--muted);font-weight:500}
-.dir.on .ot{background:var(--accent-soft);border-width:2px}
-.dir.done .glyph{color:var(--ok)}
-.dir.done .ot{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
-@media (prefers-reduced-motion:no-preference){
-  .dir.on:not(.done){animation:slowblink 2.4s ease-in-out infinite}
-  @keyframes slowblink{0%,100%{opacity:1}50%{opacity:.2}}
-}
 .map .node:not(.given){align-self:center}.map .node.given{align-self:center}
 .arw .glyph{font-size:1.8rem;line-height:1;color:var(--accent);font-weight:700}
 .arw .ot{max-width:100%;font-family:var(--num);font-weight:600;color:var(--ink);background:var(--bg);border:1.5px solid var(--accent);border-radius:8px;padding:2px 8px}
 .arw .ex{font-family:var(--num);font-size:.8rem;color:var(--muted);min-height:1.2em;overflow-wrap:anywhere}
 .arw .ex.known{color:var(--accent);font-weight:600}
+.arw .v-txt{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
 .arw .sub{display:flex;flex-direction:column;gap:3px;align-items:center;border:1.5px dashed var(--muted);border-radius:10px;padding:6px;width:100%}
 .arw .sub .nl{font-size:.8rem;font-weight:700;color:var(--muted)}
 .map .no{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:.78rem;font-weight:700;text-align:center;border-left:2px dashed var(--line);margin-left:50%;padding-left:8px;justify-self:start}
@@ -574,22 +560,20 @@ function pathModel(p){
   };
   Object.keys(B).forEach(k => { if (!route.includes(k)) B[k].off = true; });
   B[route[0]].given = true;
-  const EDGES = {
-    top:[{key:'d>c', glyph:'→', op:'× 3.14', ex:x => `${x} × 3.14`}, {key:'c>d', glyph:'←', op:'÷ 3.14', ex:x => `${x} ÷ 3.14`}],
-    left:[{key:'d>r', glyph:'↓', op:'÷ 2', ex:x => `${x} ÷ 2`}, {key:'r>d', glyph:'↑', op:'× 2', ex:x => `${x} × 2`}],
-    bottom:[{key:'r>a', glyph:'→', op:'× 半徑 × 3.14', ex:x => `${x} × ${x} × 3.14`}, {key:'a>r', glyph:'←', op:'÷ 3.14', ex:x => `${x} ÷ 3.14`, op2:'哪個數 × 自己？'}],
+  const EDGE = {
+    'c>d':['top', {glyph:'←', op:'÷ 3.14', ex:x => `${x} ÷ 3.14`}],
+    'd>c':['top', {glyph:'→', op:'× 3.14', ex:x => `${x} × 3.14`}],
+    'd>r':['left', {glyph:'↓', op:'÷ 2', ex:x => `${x} ÷ 2`}],
+    'r>d':['left', {glyph:'↑', op:'× 2', ex:x => `${x} × 2`}],
+    'r>a':['bottom', {glyph:'→', op:'× 半徑 × 3.14', ex:x => `${x} × ${x} × 3.14`}],
+    'a>r':['bottom', {glyph:'←', op:'÷ 3.14', ex:x => `${x} ÷ 3.14`, op2:'哪個數 × 自己？'}],
   };
-  const used = {};
-  for (let i = 1; i < route.length; i++) used[route[i-1] + '>' + route[i]] = true;
   const arrows = {};
-  Object.entries(EDGES).forEach(([name, dirs]) => {
-    const act = dirs.find(d => used[d.key]);
-    arrows[name] = {dirs, active: act ? act.key : null, from: act ? act.key[0] : null, to: act ? act.key[2] : null, ex: act && act.ex, op2: act && act.op2};
-  });
   let step = 0;
   for (let i = 1; i < route.length; i++){
-    const key = route[i-1] + '>' + route[i];
-    if (key === 'a>r') arrows.bottom.sub = {label:'半徑×半徑', val:v.s, step:++step};
+    const [name, a] = EDGE[route[i-1] + '>' + route[i]];
+    arrows[name] = Object.assign({from:route[i-1]}, a);
+    if (a.op2) arrows[name].sub = {label:'半徑×半徑', val:v.s, step:++step};
     B[route[i]].step = ++step;
   }
   B[route[route.length - 1]].final = true;
@@ -606,13 +590,11 @@ function renderPath(p){
     ? `<div class="node k-${nd.k} given ${nd.pos}" data-key="${nd.k}"><span class="nl">${nd.label}</span><span class="nv">${f(nd.val)}</span><span class="ask">題目給的</span></div>`
     : `<div class="node k-${nd.k} ${nd.pos}" data-key="${nd.k}"><span class="nl">${nd.label}</span>${inp(nd.val, nd.step, nd.label)}<span class="ask">${nd.final ? '答案' : '第 ' + nd.step + ' 步'}</span></div>`;
   const arrow = (name, a) => {
-    const dirs = a.dirs.map(d => {
-      const on = d.key === a.active;
-      return `<div class="dir ${on ? 'on' : 'idle'}" ${on ? `data-to="${d.key[2]}"` : 'aria-hidden="true"'}><span class="glyph">${d.glyph}</span><span class="ot">${esc(on || !d.idleOp ? d.op : d.idleOp)}</span></div>`;
-    }).join('');
-    const ex = a.active ? `<span class="ex" data-ex="${name}"></span>` : '';
+    const vert = name === 'left';
+    const txt = `<span class="ot">${esc(a.op)}</span><span class="ex" data-ex="${name}"></span>`;
+    if (vert) return `<div class="arw v a-${name}"><span class="glyph">${a.glyph}</span><span class="v-txt">${txt}</span></div>`;
     const sub = a.sub ? `<div class="sub"><span class="nl">${a.sub.label}</span>${inp(a.sub.val, a.sub.step, a.sub.label)}<span class="nl">第 ${a.sub.step} 步</span></div><span class="ot">${esc(a.op2)}</span>` : '';
-    return `<div class="arw ${name === 'left' ? 'v' : ''} a-${name}"><div class="dirs">${dirs}</div>${ex}${sub}</div>`;
+    return `<div class="arw a-${name}"><span class="glyph">${a.glyph}</span>${txt}${sub}</div>`;
   };
   const sq = p.type === 'A2C' ? (() => {
     const max = Math.max(20, Math.ceil(p.v.r));
@@ -622,7 +604,7 @@ function renderPath(p){
   })() : '';
   box.innerHTML = `
     <div class="hint-title"><h2>${t.path ? '視覺路徑' : '提示板'}</h2><span class="chip ${t.path ? 'path' : ''}">${t.label}</span></div>
-    <p style="margin:0 0 12px;color:var(--muted)">每條線都有來回兩個方向，算法剛好相反。從「${NAME[t.give]}」出發，跟著<strong>閃爍的箭頭</strong>走到「${NAME[t.ask]}」，每一格填對會變綠色。</p>
+    <p style="margin:0 0 12px;color:var(--muted)">從「${NAME[t.give]}」出發，沿著箭頭走到「${NAME[t.ask]}」。每一格填對會變綠色。</p>
     <div class="map">
       ${Object.values(M.B).map(node).join('')}
       ${Object.entries(M.arrows).map(([k, a]) => arrow(k, a)).join('')}
@@ -644,11 +626,9 @@ function renderPath(p){
   };
   const updateEx = () => {
     Object.entries(M.arrows).forEach(([name, a]) => {
-      if (!a.active) return;
       const el = box.querySelector(`[data-ex="${name}"]`), x = known(a.from);
       el.textContent = x === null ? '' : a.ex(f(x)) + ' = ?';
       el.classList.toggle('known', x !== null);
-      box.querySelector(`.a-${name} .dir.on`).classList.toggle('done', known(a.to) !== null);
     });
   };
   box.querySelectorAll('input[data-step]').forEach(i => {
