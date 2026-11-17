@@ -94,14 +94,6 @@ header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-
 /* hint board */
 .hint-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px}
 .hint-title h2{margin:0;font-size:1.1rem}
-.board{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:center}
-@media (max-width:560px){.board{grid-template-columns:minmax(0,1fr)}.board svg{max-width:220px;margin:0 auto}}
-.board svg{width:100%;height:auto;display:block}
-.rules{display:flex;flex-direction:column;gap:8px;min-width:0}
-.rule{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:500;opacity:.55}
-.rule.on{opacity:1;border-color:var(--accent);background:var(--accent-soft)}
-.rule.rel{opacity:1;display:flex;flex-wrap:wrap;gap:4px 16px}
-.rule .lbl{font-size:.75rem;letter-spacing:.08em;color:var(--muted);display:block;font-weight:700}
 .callout{border-radius:10px;padding:10px 12px;background:var(--r-soft);font-weight:500}
 .callout strong{color:var(--r)}
 .callout.warn{background:var(--bad-soft)}
@@ -119,6 +111,8 @@ header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-
 .node.k-c{border-color:var(--c)}.node.k-c .nl{color:var(--c)}
 .node.k-a{border-color:var(--a)}.node.k-a .nl{color:var(--a)}
 .node.given{background:var(--accent-soft)}
+.node.off{border-style:dashed;border-color:var(--line);background:repeating-linear-gradient(135deg,var(--bg) 0 8px,var(--paper) 8px 16px);opacity:.75}
+.node.off .nl{color:var(--muted)}
 .node .nv{font-family:var(--num);font-size:1.15rem;font-weight:600}
 .node input,.arw input{width:100%;min-width:0;text-align:center;font-family:var(--num);font-size:1.05rem;padding:6px}
 .node input.ok,.arw input.ok{border-color:var(--ok);background:var(--ok-soft)}
@@ -538,27 +532,6 @@ function check(){
 }
 
 /* ---------- hint board / visual path ---------- */
-function circleSVG(p){
-  const t = TYPES[p.type], v = p.v;
-  const showA = t.give === 'A' || t.ask === 'A', showC = t.give === 'C' || t.ask === 'C';
-  const u = p.unit;
-  const lab = (k) => {
-    if (t.give === k) return `${NAME[k]} ${f(p.given)}`;
-    if (t.ask === k) return `${NAME[k]} ?`;
-    return NAME[k];
-  };
-  const rx = 110 + 80 * Math.cos(-0.9), ry = 110 + 80 * Math.sin(-0.9);
-  return `<svg viewBox="0 0 220 236" role="img" aria-label="圓的示意圖：半徑、直徑、周長、面積">
-    <circle cx="110" cy="110" r="80" fill="${showA ? 'var(--a-soft)' : 'transparent'}" stroke="${showC ? 'var(--c)' : 'var(--muted)'}" stroke-width="${showC ? 5 : 2}"/>
-    <line x1="30" y1="110" x2="190" y2="110" stroke="var(--d)" stroke-width="4"/>
-    <line x1="110" y1="110" x2="${rx.toFixed(1)}" y2="${ry.toFixed(1)}" stroke="var(--r)" stroke-width="4"/>
-    <circle cx="110" cy="110" r="4" fill="var(--ink)"/>
-    <text x="110" y="132" text-anchor="middle" font-size="13" font-weight="700" fill="var(--d)">${lab('d')}</text>
-    <text x="${(110 + rx) / 2 - 6}" y="${(110 + ry) / 2 - 6}" text-anchor="end" font-size="13" font-weight="700" fill="var(--r)">${lab('r')}</text>
-    ${showA ? `<text x="110" y="168" text-anchor="middle" font-size="13" font-weight="700" fill="var(--a)">${lab('A')}</text>` : ''}
-    ${showC ? `<text x="110" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="var(--c)">${lab('C')}（外圍一圈）</text>` : ''}
-  </svg>`;
-}
 const TIPS = {
   r2C:['', '題目給「<strong>半徑</strong>」，周長公式要用「直徑」：先把半徑 × 2 變成直徑，再 × 3.14。'],
   d2C:['', '題目直接給「<strong>直徑</strong>」，直接 × 3.14 就是周長。'],
@@ -568,55 +541,52 @@ const TIPS = {
   C2r:['warn', '<strong>兩步驟：</strong>周長 ÷ 3.14 先得到「直徑」，再 ÷ 2 才是半徑。'],
 };
 function renderHint(p){
-  const box = $('#hint'), t = TYPES[p.type];
+  const box = $('#hint');
   box.hidden = !hintOpen;
-  if (!hintOpen) return;
-  if (!t.path){
-    const tip = TIPS[p.type];
-    const onC = t.give === 'C' || t.ask === 'C', onA = t.ask === 'A';
-    box.innerHTML = `
-      <div class="hint-title"><h2>提示板</h2></div>
-      <div class="board">
-        ${circleSVG(p)}
-        <div class="rules">
-          <div class="rule rel"><span><span class="kd">直徑</span> = <span class="kr">半徑</span> × 2</span><span><span class="kr">半徑</span> = <span class="kd">直徑</span> ÷ 2</span></div>
-          <div class="rule ${onC ? 'on' : ''}"><span class="lbl">周長公式</span><span class="kc">周長</span> = <span class="kd">直徑</span> × 3.14 = <span class="kr">半徑</span> × 2 × 3.14</div>
-          <div class="rule ${onA ? 'on' : ''}"><span class="lbl">面積公式</span><span class="ka">面積</span> = <span class="kr">半徑</span> × <span class="kr">半徑</span> × 3.14</div>
-          <div class="callout ${tip[0]}">${tip[1]}</div>
-        </div>
-      </div>`;
-    return;
-  }
-  renderPath(p);
+  if (hintOpen) renderPath(p);
 }
 
+/* Fixed 2x2 map. Each type walks a route through it; corners off the route are covered. */
+const ROUTES = {
+  r2C:['r','d','c'], d2C:['d','c'], r2A:['r','a'], d2A:['d','r','a'],
+  C2d:['c','d'], C2r:['c','d','r'], C2A:['c','d','r','a'], A2C:['a','r','d','c']
+};
+const POS = {d:'tl', c:'tr', r:'bl', a:'br'};
 function pathModel(p){
-  const v = p.v;
+  const v = p.v, route = ROUTES[p.type];
   const B = {
     d:{k:'d', label:'直徑', val:v.d, pos:'tl'}, c:{k:'c', label:'周長', val:v.C, pos:'tr'},
     r:{k:'r', label:'半徑', val:v.r, pos:'bl'}, a:{k:'a', label:'面積', val:v.A, pos:'br'}
   };
-  if (p.type === 'C2A'){
-    B.c.given = true; B.d.step = 1; B.r.step = 2; B.a.step = 3; B.a.final = true;
-    return {B, total:3, arrows:{
-      top:{glyph:'←', op:'÷ 3.14', from:'c', ex:x => `${x} ÷ 3.14`},
-      left:{glyph:'↓', op:'÷ 2', from:'d', ex:x => `${x} ÷ 2`},
-      bottom:{glyph:'→', op:'× 半徑 × 3.14', from:'r', ex:x => `${x} × ${x} × 3.14`}
-    }};
+  Object.keys(B).forEach(k => { if (!route.includes(k)) B[k].off = true; });
+  B[route[0]].given = true;
+  const EDGE = {
+    'c>d':['top', {glyph:'←', op:'÷ 3.14', ex:x => `${x} ÷ 3.14`}],
+    'd>c':['top', {glyph:'→', op:'× 3.14', ex:x => `${x} × 3.14`}],
+    'd>r':['left', {glyph:'↓', op:'÷ 2', ex:x => `${x} ÷ 2`}],
+    'r>d':['left', {glyph:'↑', op:'× 2', ex:x => `${x} × 2`}],
+    'r>a':['bottom', {glyph:'→', op:'× 半徑 × 3.14', ex:x => `${x} × ${x} × 3.14`}],
+    'a>r':['bottom', {glyph:'←', op:'÷ 3.14', ex:x => `${x} ÷ 3.14`, op2:'哪個數 × 自己？'}],
+  };
+  const arrows = {};
+  let step = 0;
+  for (let i = 1; i < route.length; i++){
+    const [name, a] = EDGE[route[i-1] + '>' + route[i]];
+    arrows[name] = Object.assign({from:route[i-1]}, a);
+    if (a.op2) arrows[name].sub = {label:'半徑×半徑', val:v.s, step:++step};
+    B[route[i]].step = ++step;
   }
-  B.a.given = true; B.r.step = 2; B.d.step = 3; B.c.step = 4; B.c.final = true;
-  return {B, total:4, arrows:{
-    bottom:{glyph:'←', op:'÷ 3.14', from:'a', ex:x => `${x} ÷ 3.14`, sub:{label:'半徑×半徑', val:v.s, step:1}, op2:'哪個數 × 自己？'},
-    left:{glyph:'↑', op:'× 2', from:'r', ex:x => `${x} × 2`},
-    top:{glyph:'→', op:'× 3.14', from:'d', ex:x => `${x} × 3.14`}
-  }};
+  B[route[route.length - 1]].final = true;
+  return {B, arrows, total:step, route};
 }
 function renderPath(p){
-  const box = $('#hint'), M = pathModel(p);
+  const box = $('#hint'), M = pathModel(p), t = TYPES[p.type];
   const typed = {};
   box.querySelectorAll('input[data-step]').forEach(i => typed[i.dataset.step] = i.value);
   const inp = (val, step, label) => `<input class="field" size="4" data-exp="${val}" data-step="${step}" inputmode="decimal" aria-label="${label}" placeholder="?" value="${step <= revealed ? f(val) : esc(typed[step] || '')}">`;
-  const node = nd => nd.given
+  const node = nd => nd.off
+    ? `<div class="node off ${nd.pos}" aria-hidden="true"><span class="nl">${nd.label}</span><span class="ask">這題用不到</span></div>`
+    : nd.given
     ? `<div class="node k-${nd.k} given ${nd.pos}" data-key="${nd.k}"><span class="nl">${nd.label}</span><span class="nv">${f(nd.val)}</span><span class="ask">題目給的</span></div>`
     : `<div class="node k-${nd.k} ${nd.pos}" data-key="${nd.k}"><span class="nl">${nd.label}</span>${inp(nd.val, nd.step, nd.label)}<span class="ask">${nd.final ? '答案' : '第 ' + nd.step + ' 步'}</span></div>`;
   const arrow = (name, a) => {
@@ -633,16 +603,15 @@ function renderPath(p){
     return `<div class="squares"><table><tbody>${h}</tr>${b}</tr></tbody></table></div>`;
   })() : '';
   box.innerHTML = `
-    <div class="hint-title"><h2>視覺路徑</h2><span class="chip path">${TYPES[p.type].label}</span></div>
-    <p style="margin:0 0 12px;color:var(--muted)">${p.type === 'C2A'
-      ? '從右上的「周長」出發，沿著箭頭繞到右下的「面積」。每一格填對會變綠色。'
-      : '從右下的「面積」出發，沿著箭頭繞到右上的「周長」。每一格填對會變綠色。'}</p>
+    <div class="hint-title"><h2>${t.path ? '視覺路徑' : '提示板'}</h2><span class="chip ${t.path ? 'path' : ''}">${t.label}</span></div>
+    <p style="margin:0 0 12px;color:var(--muted)">從「${NAME[t.give]}」出發，沿著箭頭走到「${NAME[t.ask]}」。每一格填對會變綠色。</p>
     <div class="map">
       ${Object.values(M.B).map(node).join('')}
       ${Object.entries(M.arrows).map(([k, a]) => arrow(k, a)).join('')}
-      <div class="no">周長和面積<br>不能直接換</div>
+      ${M.route.includes('c') && M.route.includes('a') ? '<div class="no">周長和面積<br>不能直接換</div>' : ''}
     </div>
     ${sq}
+    ${TIPS[p.type] ? `<div class="callout ${TIPS[p.type][0]}" style="margin-top:12px">${TIPS[p.type][1]}</div>` : ''}
     <div class="path-tools">
       <button class="btn sm ghost" id="reveal" ${revealed >= M.total ? 'disabled' : ''}>給我下一步</button>
       <span style="color:var(--muted);font-size:.85rem">右邊的計算器可以幫你算 ÷ 3.14 和 × 3.14</span>
@@ -651,6 +620,7 @@ function renderPath(p){
   const known = key => {
     const nd = M.B[key];
     if (nd.given) return nd.val;
+    if (nd.off) return null;
     const i = box.querySelector(`.node[data-key="${key}"] input`);
     return i && i.classList.contains('ok') ? nd.val : null;
   };
